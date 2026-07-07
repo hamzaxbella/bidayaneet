@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Hospitality Training Hub logo</title>
+  <rect width="256" height="256" rx="48" fill="#eaf7ff"/>
+  <path d="M54 88h148a16 16 0 0 1 16 16v78H38v-78a16 16 0 0 1 16-16Z" fill="#ffffff" stroke="#1976a3" stroke-width="10"/>
+  <path d="M70 116h34v66H70zM112 116h34v66h-34zM154 116h34v66h-34z" fill="#d9edf7"/>
+  <path d="M92 76c8-18 22-28 36-28s28 10 36 28" fill="none" stroke="#f5a623" stroke-width="12" stroke-linecap="round"/>
+  <path d="M36 192h184" stroke="#1976a3" stroke-width="12" stroke-linecap="round"/>
+  <path d="M96 210h64" stroke="#f5a623" stroke-width="12" stroke-linecap="round"/>
+</svg>

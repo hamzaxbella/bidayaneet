@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Micro-actions logo</title>
+  <rect width="256" height="256" rx="48" fill="#e0f7f5"/>
+  <path d="M128 36 148 92l60 2-48 36 16 58-48-34-50 34 18-58-48-36 60-2 20-56Z" fill="#00b8a9"/>
+  <circle cx="128" cy="128" r="42" fill="#ffffff"/>
+  <path d="M116 149h-16l20-56h36l-20 35h22l-42 58 10-37Z" fill="#f5a623"/>
+  <path d="M54 196h148" stroke="#1a2b3c" stroke-width="12" stroke-linecap="round" opacity=".16"/>
+</svg>
