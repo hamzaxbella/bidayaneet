@@ -1,8 +1,8 @@
-import Sidebar from '@/components/Sidebar';
+import WorkspaceShell from "@/components/workspace/WorkspaceShell";
 
 export const metadata = {
-  title: 'BidayaNeet - Super Admin Dashboard',
-  description: 'Regional monitoring and management platform for NEET youth integration in Souss-Massa',
+  title: "BidayaNeet · Administration",
+  description: "Regional youth integration workspace for Souss-Massa",
 };
 
 export default function AdminLayout({
@@ -10,12 +10,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar />
-      <main style={{ flex: 1, minWidth: 0, overflowX: 'hidden' }}>
-        {children}
-      </main>
-    </div>
-  );
+  return <WorkspaceShell role="admin">{children}</WorkspaceShell>;
 }

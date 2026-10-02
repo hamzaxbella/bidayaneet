@@ -1,37 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BidayaNeet
 
-## Getting Started
+A Next.js interface for youth integration, field mediation, regional administration, and program partners in Souss-Massa.
 
-First, run the development server:
+## Run locally
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the workspace directly by URL:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Youth: `http://localhost:3000/neet`
+- Mediator: `http://localhost:3000/mediator`
+- Regional admin: `http://localhost:3000/`
+- Partner: `http://localhost:3000/partner`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+There is no dashboard switcher on the logo. Each role has an auth entry at `/auth/<role>/sign-in`, with registration/access-request, forgot-password, and reset-password screens.
 
-## Learn More
+## Integration status
 
-To learn more about Next.js, take a look at the following resources:
+The frontend uses labeled demonstration data. The authentication provider was deferred; no real sessions, server-side role enforcement, application submissions, messages, uploads, or account creation are implemented. Local interactions demonstrate the intended flows without sending data to anyone.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Google Maps
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The complete self-hosted coverage overview works without external services. To enable the optional Google Maps view, set this public, referrer-restricted browser key in `.env.local` before starting or building:
 
-## Deploy on Vercel
+```dotenv
+NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY=your_restricted_maps_embed_key
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Enable the Maps Embed API and restrict the key to your app's domains. Both maps use the shared component with `region=ma` and full-country/Souss-Massa views. No OpenStreetMap or Leaflet resources are loaded.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# bidayaneet
+## Validate
+
+```bash
+npm run lint
+npx playwright install chromium
+npm run test:e2e
+```
+
+The browser suite builds the production app and tests desktop and mobile behavior. To run the production app separately:
+
+```bash
+npm run build
+npm run start
+```
+
+See [the UI refactor notes](docs/ui-refactor.md) for routes, design decisions, map provenance, and the backend integration boundary. The imagegen reference, prompt, and screenshots are saved in `output/design/`. DM Sans is self-hosted under `public/fonts/` with its OFL license; its source is the [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl/dmsans).
+
+When production publishing is requested, validate, commit, and push through the configured GitHub delivery pipeline. Do not bypass that pipeline with a hosting-provider deployment.
