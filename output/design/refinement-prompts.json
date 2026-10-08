@@ -1,0 +1,77 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "id": "story-salma",
+      "prompt": "Use case: photorealistic-natural\nAsset type: portrait 9:16 inspirational short story cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A confident Moroccan woman in her early twenties with curly dark hair, casual cream shirt, in a bright creative coding studio in Agadir, looking toward camera, laptop and softly blurred workbench behind her. Candid editorial portrait, waist-up, face within upper-middle area, rich natural skin texture, warm daylight, teal details and sunlit cream architecture. Quiet darker space in bottom quarter for interface text.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Vertical portrait orientation; preserve room below the face for a gradient and story title."
+    },
+    {
+      "id": "story-omar",
+      "prompt": "Use case: photorealistic-natural\nAsset type: portrait 9:16 inspirational short story cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A young Moroccan male artisan entrepreneur in his mid twenties in a contemporary small ceramics workshop in Taroudant, warm terracotta shelves and plants, holding one handmade clay piece naturally, relaxed confident expression toward camera. Editorial medium portrait, authentic materials, afternoon side light, subject in upper middle and quieter bottom quarter for interface text.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Vertical portrait orientation; preserve room below the face for a gradient and story title."
+    },
+    {
+      "id": "story-fatima",
+      "prompt": "Use case: photorealistic-natural\nAsset type: portrait 9:16 inspirational short story cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A Moroccan woman in her early twenties wearing a soft rose headscarf and simple navy blouse in a welcoming modern community office in Inezgane. She is speaking with gentle confidence toward camera, papers and a leafy courtyard behind her softly out of focus. Editorial waist-up portrait, natural skin texture, warm diffuse daylight, quiet dark bottom quarter for interface text.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Vertical portrait orientation; preserve room below the face for a gradient and story title."
+    },
+    {
+      "id": "story-youssef",
+      "prompt": "Use case: photorealistic-natural\nAsset type: portrait 9:16 inspirational short story cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A young Moroccan maintenance technician in his mid twenties wearing clean forest-green workwear in a practical modern training workshop in Tiznit. Standing confidently near a neat tool wall, natural smile toward camera. Candid waist-up portrait, real cotton fabric, believable hands, soft industrial daylight, muted blue and warm brass accents, quieter lower quarter for interface text.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Vertical portrait orientation; preserve room below the face for a gradient and story title."
+    },
+    {
+      "id": "story-amina",
+      "prompt": "Use case: photorealistic-natural\nAsset type: portrait 9:16 story cover and mediator avatar for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A Moroccan woman in her late twenties with shoulder-length dark hair wearing an understated teal jacket over a cream blouse, in a sunlit youth guidance centre opening to a planted courtyard. Calm welcoming expression toward camera, documentary editorial portrait, natural texture, thoughtful composition, waist-up, face in upper-middle, soft botanical background.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Vertical portrait orientation; preserve room below the face for a gradient and story title."
+    },
+    {
+      "id": "story-khalid",
+      "prompt": "Use case: photorealistic-natural\nAsset type: portrait 9:16 young person's story cover and avatar for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A Moroccan young man in his early twenties with short dark wavy hair wearing a casual off-white overshirt over a muted teal t-shirt, on a sunlit Agadir terrace with contemporary cream architecture and palms softly behind him. Warm authentic smile toward camera, waist-up editorial portrait, skin texture and real fabric, generous quiet lower area.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Vertical portrait orientation; preserve room below the face for a gradient and story title."
+    },
+    {
+      "id": "opp-web-dev",
+      "prompt": "Use case: photorealistic-natural\nAsset type: landscape 3:2 web training opportunity cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: Three Moroccan young adults of varied gender collaborating naturally around a laptop in a contemporary coding classroom in Agadir. Sunlit pale walls, teal chair accents, realistic hands and laptop, documentary editorial photography, medium-wide candid framing, authentic everyday dress, focus on learning together.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "opp-marketing",
+      "prompt": "Use case: photorealistic-natural\nAsset type: landscape 3:2 digital marketing opportunity cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: Two Moroccan young adults working on a creative project in a bright Casablanca studio, one using a tablet and the other arranging photographic prints on a table. Casual warm-neutral clothing, realistic hands, candid natural interaction, polished editorial photography, daylight and terracotta accents, medium-wide framing.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "opp-retail",
+      "prompt": "Use case: photorealistic-natural\nAsset type: landscape 3:2 customer service opportunity cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A young Moroccan customer-service professional in a neat teal work shirt assisting a woman in a bright welcoming contemporary retail store in Agadir. Friendly authentic interaction, clean shelving with unbranded items, natural daylight, cinematic but realistic editorial photography, medium-wide framing.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "opp-entrepreneur",
+      "prompt": "Use case: photorealistic-natural\nAsset type: landscape 3:2 entrepreneurship opportunity cover for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A young Moroccan female entrepreneur and a male mentor discussing an early business plan in a small sunlit courtyard cafe, open notebook and tablet on a table, locally crafted textures, cream and rust palette with green foliage. Genuine candid collaboration, editorial lifestyle photography, medium-wide framing.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "assistant-bot",
+      "prompt": "Use case: stylized-concept\nAsset type: square assistant illustration for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A friendly compact teal and ivory personal guidance robot, expressive two small dark eyes, subtle warm orange light, seated next to one small leafy plant. Soft sculptural ceramic finish, refined 3D illustration, warm off-white background, gentle daylight shadows, centered composition, approachable and calm.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "mountain-progress",
+      "prompt": "Use case: illustration-story\nAsset type: landscape 3:2 progress illustration for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A Moroccan young adult with a teal backpack walking a winding sunlit path toward a gentle Atlas mountain summit, native greenery, warm clay earth and layered sage-blue mountains. Sophisticated soft editorial gouache illustration, hopeful daylight, restrained teal, cream and apricot palette, wide peaceful composition with open sky.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "action-cv",
+      "prompt": "Use case: illustration-story\nAsset type: landscape 3:2 CV workshop background for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: Close editorial illustration of a young adult's desk with an open notebook, a simple resume sheet represented only by non-legible graphic lines, laptop, teal pen, and a little plant. Warm cream paper, pale sage and soft apricot, sophisticated textured gouache, wide composition with quiet darker lower area for UI overlays.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "action-interview",
+      "prompt": "Use case: illustration-story\nAsset type: landscape 3:2 interview coaching background for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: Two Moroccan young adults in a friendly practice interview in a sunny cream room, seated across a small round table, relaxed encouraging body language, teal and terracotta clothing, one open notebook. Sophisticated editorial gouache illustration, warm natural light, wide composition, quiet lower portion for UI text.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "action-digital",
+      "prompt": "Use case: illustration-story\nAsset type: landscape 3:2 digital discovery background for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: Moroccan young adults discovering creative digital skills in a bright workshop, one small laptop, camera and headphones arranged naturally on a table, teal and coral accents, sunlit cream architecture. Sophisticated textured editorial illustration, lively but uncluttered wide composition, quieter lower area for UI overlay.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "action-reflection",
+      "prompt": "Use case: illustration-story\nAsset type: landscape 3:2 personal reflection background for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A young Moroccan adult sitting thoughtfully on a shaded rooftop terrace with an open notebook, distant Atlas foothills, a potted olive tree and warm soft sky. Sophisticated textured editorial gouache illustration, sage, warm ochre and teal, calm wide composition with quiet lower portion for UI overlay.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "mediator-field",
+      "prompt": "Use case: photorealistic-natural\nAsset type: landscape 3:2 mediator fieldwork editorial visual for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A Moroccan female youth mediator and two young adults walking toward a welcoming community centre in the Souss-Massa countryside. Sunlit cream and earthy village architecture, subtle plants, authentic contemporary clothing, documentary editorial photography, wide composition, faces natural and believable, sense of trust and purposeful movement.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    },
+    {
+      "id": "partner-training",
+      "prompt": "Use case: photorealistic-natural\nAsset type: landscape 3:2 partner program showcase visual for BidayaNeet, a Moroccan youth inclusion platform.\nPrimary request: A Moroccan vocational instructor coaching young adults in a modern practical training workshop, professional simple workwear, neatly organised tools and safe equipment in the background, authentic focused expressions and collaboration. Crisp editorial documentary photography, soft daylight, warm steel and muted teal, wide composition.\nConstraints: premium authentic editorial quality; no text, logos, watermark, UI, collage, montage, or fake brand marks. One coherent scene. Respectful everyday Moroccan context; natural anatomy and believable proportions. Compose for a responsive card."
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "id": "story-salma",
+      "path": "public/editorial/story-salma.webp"
+    },
+    {
+      "id": "story-omar",
+      "path": "public/editorial/story-omar.webp"
+    },
+    {
+      "id": "story-fatima",
+      "path": "public/editorial/story-fatima.webp"
+    },
+    {
+      "id": "story-youssef",
+      "path": "public/editorial/story-youssef.webp"
+    },
+    {
+      "id": "story-amina",
+      "path": "public/editorial/story-amina.webp"
+    },
+    {
+      "id": "story-khalid",
+      "path": "public/editorial/story-khalid.webp"
+    },
+    {
+      "id": "opp-web-dev",
+      "path": "public/editorial/opp-web-dev.webp"
+    },
+    {
+      "id": "opp-marketing",
+      "path": "public/editorial/opp-marketing.webp"
+    },
+    {
+      "id": "opp-retail",
+      "path": "public/editorial/opp-retail.webp"
+    },
+    {
+      "id": "opp-entrepreneur",
+      "path": "public/editorial/opp-entrepreneur.webp"
+    },
+    {
+      "id": "assistant-bot",
+      "path": "public/editorial/assistant-bot.webp"
+    },
+    {
+      "id": "mountain-progress",
+      "path": "public/editorial/mountain-progress.webp"
+    },
+    {
+      "id": "action-cv",
+      "path": "public/editorial/action-cv.webp"
+    },
+    {
+      "id": "action-interview",
+      "path": "public/editorial/action-interview.webp"
+    },
+    {
+      "id": "action-digital",
+      "path": "public/editorial/action-digital.webp"
+    },
+    {
+      "id": "action-reflection",
+      "path": "public/editorial/action-reflection.webp"
+    },
+    {
+      "id": "mediator-field",
+      "path": "public/editorial/mediator-field.webp"
+    },
+    {
+      "id": "partner-training",
+      "path": "public/editorial/partner-training.webp"
+    }
+  ]
+}

@@ -13,170 +13,23 @@ import {
   MapPin,
   Plus,
   Search,
-  ShieldCheck,
   Target,
   Users,
   Zap,
 } from "lucide-react";
-import { fieldActions, opportunities, youngPeople } from "@/lib/demo-data";
+import {
+  appointmentFixtures,
+  profileFixtures,
+  type DemoAppointment,
+  fieldActions,
+  opportunities,
+  youngPeople,
+} from "@/lib/demo-data";
 import { downloadCsv } from "@/lib/export-csv";
+import { useSimulatedState } from "@/lib/simulated-backend";
 import { EmptyState, Metric, PageIntro, Panel, Tag } from "./UI";
 
-export function MediatorDashboard() {
-  return (
-    <>
-      <section className="mediator-hero">
-        <div>
-          <div className="eyebrow">L’ACCOMPAGNEMENT FAIT LA DIFFÉRENCE</div>
-          <h1>
-            Bonjour Imane.
-            <br />
-            Chaque rencontre ouvre une voie.
-          </h1>
-          <p>
-            Retrouve tes suivis, prépare tes rendez-vous et aide chaque jeune à
-            construire son prochain pas.
-          </p>
-          <Link href="/mediator/caseload" className="button button-primary">
-            Retrouver mes jeunes
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-        <div className="hero-number">
-          <strong>05</strong>
-          <span>parcours à accompagner</span>
-        </div>
-      </section>
-      <div className="metrics-row four">
-        <Metric
-          label="Jeunes accompagnés"
-          value={5}
-          note="Ton portefeuille démo"
-          icon={<Users size={19} />}
-        />
-        <Metric
-          label="Suivis prioritaires"
-          value={2}
-          note="Un contact à préparer"
-          icon={<ShieldCheck size={19} />}
-        />
-        <Metric
-          label="Rendez-vous à venir"
-          value={5}
-          note="5 – 7 octobre"
-          icon={<CalendarDays size={19} />}
-        />
-        <Metric
-          label="Parcours intégré"
-          value={1}
-          note="Un nouveau départ"
-          icon={<Target size={19} />}
-        />
-      </div>
-      <div className="mediator-dashboard">
-        <div className="stack">
-          <Panel
-            title="Un contact peut tout changer"
-            note="Les jeunes qui ont besoin de ton attention."
-            href="/mediator/caseload"
-          >
-            {youngPeople
-              .filter((person) => person.priority === "Prioritaire")
-              .map((person) => (
-                <div className="person-row" key={person.id}>
-                  <Image src={person.photo} alt="" width={43} height={43} />
-                  <div>
-                    <h3>{person.name}</h3>
-                    <p>
-                      {person.city} · {person.blocker}
-                    </p>
-                  </div>
-                  <Tag tone="orange">Prioritaire</Tag>
-                  <Link
-                    href={`/mediator/caseload/${person.id}`}
-                    aria-label={`Ouvrir le dossier de ${person.name}`}
-                  >
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-              ))}
-          </Panel>
-          <Panel
-            title="Les parcours avancent"
-            note="Une vue rapide de tes derniers suivis."
-            href="/mediator/caseload"
-          >
-            {youngPeople.slice(0, 3).map((person) => (
-              <div className="person-row" key={person.id}>
-                <Image src={person.photo} alt="" width={40} height={40} />
-                <div>
-                  <h3>{person.name}</h3>
-                  <p>{person.goal}</p>
-                </div>
-                <Tag tone={person.stage === "Intégré" ? "teal" : "blue"}>
-                  {person.stage}
-                </Tag>
-                <Link
-                  href={`/mediator/caseload/${person.id}`}
-                  aria-label={`Ouvrir le dossier de ${person.name}`}
-                >
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-            ))}
-          </Panel>
-        </div>
-        <div className="stack">
-          <Panel
-            title="Le prochain jour de terrain"
-            note="Lundi 5 octobre · Agadir"
-            href="/mediator/appointments"
-          >
-            {youngPeople.slice(0, 2).map((person, index) => (
-              <div className="schedule-row" key={person.id}>
-                <span className="schedule-time">
-                  {index === 0 ? "10:00" : "11:30"}
-                </span>
-                <div>
-                  <h3>{person.next}</h3>
-                  <p>{person.name}</p>
-                  <p>
-                    <MapPin
-                      size={11}
-                      style={{ display: "inline", verticalAlign: "middle" }}
-                    />{" "}
-                    Bureau BidayaNeet
-                  </p>
-                </div>
-              </div>
-            ))}
-          </Panel>
-          <Panel
-            title="Prochain atelier"
-            note="Un petit pas pour plusieurs parcours."
-          >
-            <Tag tone="orange">7 octobre · 10:00</Tag>
-            <h3 style={{ fontSize: 17, fontWeight: 500, margin: "14px 0 9px" }}>
-              Un CV qui te ressemble
-            </h3>
-            <p className="detail-text">
-              Un atelier pour aider les jeunes à mettre leurs compétences en
-              mots.
-            </p>
-            <Link
-              href="/mediator/micro-actions"
-              className="button button-secondary"
-              style={{ marginTop: 20 }}
-            >
-              Préparer l’atelier
-              <ArrowRight size={15} />
-            </Link>
-          </Panel>
-        </div>
-      </div>
-    </>
-  );
-}
+export { default as MediatorDashboard } from "./MediatorOverview";
 
 export function CaseloadPage() {
   const [query, setQuery] = useState("");
@@ -359,7 +212,9 @@ export function CaseloadPage() {
 
 export function CaseloadDetail({ id }: { id: string }) {
   const person = youngPeople.find((item) => item.id === id)!;
-  const [notes, setNotes] = useState<{ text: string; action: string }[]>([]);
+  const [notes, setNotes] = useSimulatedState<
+    { text: string; action: string }[]
+  >(`mediator.notes.${id}`, []);
   const [note, setNote] = useState("");
   const [action, setAction] = useState("Appel de suivi");
   function save(event: FormEvent) {
@@ -501,7 +356,7 @@ export function CaseloadDetail({ id }: { id: string }) {
                   <div>
                     <h3>{item.action}</h3>
                     <p>{item.text}</p>
-                    <small>Ajout local · cette session</small>
+                    <small>Suivi enregistré sur cet appareil</small>
                   </div>
                 </div>
               ))}
@@ -530,26 +385,13 @@ export function CaseloadDetail({ id }: { id: string }) {
   );
 }
 
-type Appointment = {
-  id: string;
-  name: string;
-  type: string;
-  date: string;
-  time: string;
-  location: string;
-  done: boolean;
-};
-const initialAppointments: Appointment[] = youngPeople.map((person, index) => ({
-  id: person.id,
-  name: person.name,
-  type: person.next,
-  date: index < 2 ? "2026-10-05" : index < 4 ? "2026-10-06" : "2026-10-07",
-  time: ["10:00", "11:30", "09:00", "14:00", "10:00"][index],
-  location: index === 3 ? "À domicile · Tiznit" : "Bureau BidayaNeet, Agadir",
-  done: false,
-}));
+type Appointment = DemoAppointment;
+const initialAppointments = appointmentFixtures;
 export function AppointmentsPage() {
-  const [appointments, setAppointments] = useState(initialAppointments);
+  const [appointments, setAppointments] = useSimulatedState(
+    "mediator.appointments",
+    initialAppointments,
+  );
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState("À venir");
   const [status, setStatus] = useState("");
@@ -762,9 +604,9 @@ export function AppointmentsPage() {
 
 export function MediatorOpportunitiesPage() {
   const [query, setQuery] = useState("");
-  const [referrals, setReferrals] = useState<
+  const [referrals, setReferrals] = useSimulatedState<
     { offer: string; person: string }[]
-  >([]);
+  >("mediator.referrals", []);
   const [selections, setSelections] = useState<Record<string, string>>({});
   const filtered = opportunities.filter((item) =>
     `${item.title} ${item.location}`
@@ -875,7 +717,10 @@ export function MediatorOpportunitiesPage() {
 }
 
 export function MediatorActionsPage() {
-  const [attendees, setAttendees] = useState<Record<number, string[]>>({});
+  const [attendees, setAttendees] = useSimulatedState<Record<number, string[]>>(
+    "mediator.attendees",
+    {},
+  );
   const [selected, setSelected] = useState<Record<number, string>>({});
   return (
     <>
@@ -884,89 +729,100 @@ export function MediatorActionsPage() {
         title="Actions de terrain"
         description="Prépare les ateliers et aide les jeunes à franchir un premier pas concret."
       />
-      <div className="action-grid">
+      <div className="field-itinerary">
         {fieldActions.map((action) => (
-          <Panel className="action-card" key={action.id}>
-            <div className="action-card-top">
-              <div className="action-icon">
-                <Zap size={20} />
+          <Panel className="field-action-row" key={action.id}>
+            <div className="field-action-image">
+              <Image
+                src={action.image}
+                alt=""
+                fill
+                sizes="(max-width: 760px) 90vw, 180px"
+              />
+              <span>{String(action.id).padStart(2, "0")}</span>
+            </div>
+            <div className="field-action-body">
+              <div className="action-card-top">
+                <div className="action-icon">
+                  <Zap size={20} />
+                </div>
+                <Tag tone="orange">{action.category}</Tag>
               </div>
-              <Tag tone="orange">{action.category}</Tag>
-            </div>
-            <h3>{action.title}</h3>
-            <p>{action.description}</p>
-            <div className="card-meta">
-              <span>
-                <CalendarDays size={13} />
-                {action.date}
-              </span>
-              <span>
-                <MapPin size={13} />
-                {action.city}
-              </span>
-            </div>
-            <label className="form-field">
-              Ajouter un participant
-              <select
-                className="field-input"
-                value={selected[action.id] ?? youngPeople[0].name}
-                onChange={(event) =>
-                  setSelected((current) => ({
+              <h3>{action.title}</h3>
+              <p>{action.description}</p>
+              <div className="card-meta">
+                <span>
+                  <CalendarDays size={13} />
+                  {action.date}
+                </span>
+                <span>
+                  <MapPin size={13} />
+                  {action.city}
+                </span>
+              </div>
+              <label className="form-field">
+                Ajouter un participant
+                <select
+                  className="field-input"
+                  value={selected[action.id] ?? youngPeople[0].name}
+                  onChange={(event) =>
+                    setSelected((current) => ({
+                      ...current,
+                      [action.id]: event.target.value,
+                    }))
+                  }
+                >
+                  {youngPeople.map((person) => (
+                    <option key={person.id}>{person.name}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="button button-secondary"
+                style={{ marginTop: 15 }}
+                disabled={(attendees[action.id] ?? []).includes(
+                  selected[action.id] ?? youngPeople[0].name,
+                )}
+                onClick={() => {
+                  const person = selected[action.id] ?? youngPeople[0].name;
+                  setAttendees((current) => ({
                     ...current,
-                    [action.id]: event.target.value,
-                  }))
-                }
+                    [action.id]: [...(current[action.id] ?? []), person],
+                  }));
+                }}
               >
-                {youngPeople.map((person) => (
-                  <option key={person.id}>{person.name}</option>
-                ))}
-              </select>
-            </label>
-            <button
-              className="button button-secondary"
-              style={{ marginTop: 15 }}
-              disabled={(attendees[action.id] ?? []).includes(
-                selected[action.id] ?? youngPeople[0].name,
+                <Plus size={14} />
+                Ajouter à l’atelier de démo
+              </button>
+              {(attendees[action.id] ?? []).length > 0 && (
+                <div className="skill-list">
+                  {attendees[action.id].map((name) => (
+                    <button
+                      key={name}
+                      className="tag tag-teal"
+                      aria-label={`Retirer ${name} de ${action.title}`}
+                      style={{ border: 0, cursor: "pointer" }}
+                      onClick={() =>
+                        setAttendees((current) => ({
+                          ...current,
+                          [action.id]: current[action.id].filter(
+                            (item) => item !== name,
+                          ),
+                        }))
+                      }
+                    >
+                      {name} ×
+                    </button>
+                  ))}
+                </div>
               )}
-              onClick={() => {
-                const person = selected[action.id] ?? youngPeople[0].name;
-                setAttendees((current) => ({
-                  ...current,
-                  [action.id]: [...(current[action.id] ?? []), person],
-                }));
-              }}
-            >
-              <Plus size={14} />
-              Ajouter à l’atelier de démo
-            </button>
-            {(attendees[action.id] ?? []).length > 0 && (
-              <div className="skill-list">
-                {attendees[action.id].map((name) => (
-                  <button
-                    key={name}
-                    className="tag tag-teal"
-                    aria-label={`Retirer ${name} de ${action.title}`}
-                    style={{ border: 0, cursor: "pointer" }}
-                    onClick={() =>
-                      setAttendees((current) => ({
-                        ...current,
-                        [action.id]: current[action.id].filter(
-                          (item) => item !== name,
-                        ),
-                      }))
-                    }
-                  >
-                    {name} ×
-                  </button>
-                ))}
-              </div>
-            )}
-            <p className="form-note">
-              {(attendees[action.id] ?? []).length} participant
-              {(attendees[action.id] ?? []).length > 1 ? "s" : ""} sélectionné
-              {(attendees[action.id] ?? []).length > 1 ? "s" : ""} · Cliquez sur
-              un nom pour le retirer.
-            </p>
+              <p className="form-note">
+                {(attendees[action.id] ?? []).length} participant
+                {(attendees[action.id] ?? []).length > 1 ? "s" : ""} sélectionné
+                {(attendees[action.id] ?? []).length > 1 ? "s" : ""} · Cliquez
+                sur un nom pour le retirer.
+              </p>
+            </div>
           </Panel>
         ))}
       </div>
@@ -1099,6 +955,10 @@ export function MediatorReportsPage() {
 
 export function MediatorProfilePage() {
   const [status, setStatus] = useState("");
+  const [profile, setProfile] = useSimulatedState(
+    "mediator.profile",
+    profileFixtures.mediator,
+  );
   return (
     <>
       <PageIntro
@@ -1109,9 +969,20 @@ export function MediatorProfilePage() {
       <div className="two-column">
         <Panel title="Informations professionnelles">
           <form
+            key={JSON.stringify(profile)}
             onSubmit={(event) => {
               event.preventDefault();
-              setStatus("Profil mis à jour dans cette page de démonstration.");
+              const data = new FormData(event.currentTarget);
+              setProfile((current) => ({
+                ...current,
+                ...Object.fromEntries(
+                  Array.from(data.entries()).filter(
+                    (entry): entry is [string, string] =>
+                      entry[0] in current && typeof entry[1] === "string",
+                  ),
+                ),
+              }));
+              setStatus("Informations enregistrées sur cet appareil.");
             }}
           >
             <div className="form-grid">
@@ -1119,7 +990,8 @@ export function MediatorProfilePage() {
                 Prénom
                 <input
                   className="field-input"
-                  defaultValue="Imane"
+                  name="firstName"
+                  defaultValue={profile.firstName}
                   required
                   autoComplete="given-name"
                 />
@@ -1128,7 +1000,8 @@ export function MediatorProfilePage() {
                 Nom
                 <input
                   className="field-input"
-                  defaultValue="Rami"
+                  name="lastName"
+                  defaultValue={profile.lastName}
                   required
                   autoComplete="family-name"
                 />
@@ -1138,14 +1011,19 @@ export function MediatorProfilePage() {
                 <input
                   className="field-input"
                   type="email"
-                  defaultValue="imane@example.com"
+                  name="email"
+                  defaultValue={profile.email}
                   required
                   autoComplete="email"
                 />
               </label>
               <label className="form-field">
                 Zone principale
-                <select className="field-input" defaultValue="Agadir">
+                <select
+                  className="field-input"
+                  name="city"
+                  defaultValue={profile.city}
+                >
                   {["Agadir", "Inezgane", "Taroudant", "Tiznit", "Tata"].map(
                     (city) => (
                       <option key={city}>{city}</option>
@@ -1157,7 +1035,8 @@ export function MediatorProfilePage() {
                 Langue d’accompagnement
                 <select
                   className="field-input"
-                  defaultValue="Français et darija"
+                  name="language"
+                  defaultValue={profile.language}
                 >
                   {[
                     "Français et darija",
@@ -1174,7 +1053,8 @@ export function MediatorProfilePage() {
                 Présentation
                 <textarea
                   className="field-input"
-                  defaultValue="J’accompagne les jeunes à clarifier leur projet et à trouver une première opportunité qui leur ressemble."
+                  name="presentation"
+                  defaultValue={profile.presentation}
                   maxLength={2000}
                 />
               </label>
@@ -1182,7 +1062,8 @@ export function MediatorProfilePage() {
                 Disponibilités
                 <input
                   className="field-input"
-                  defaultValue="Lundi au vendredi, 09:00 – 17:00"
+                  name="availability"
+                  defaultValue={profile.availability}
                   maxLength={200}
                 />
               </label>
@@ -1197,20 +1078,21 @@ export function MediatorProfilePage() {
               </div>
             )}
             <p className="form-note">
-              Aucune information n’est sauvegardée sur un serveur dans cette
-              version.
+              Informations de démonstration enregistrées sur cet appareil.
             </p>
           </form>
         </Panel>
         <div className="stack">
           <Panel className="profile-summary">
             <Image
-              src="/user-portal/story-amina.jpg"
+              src="/editorial/story-amina.webp"
               alt=""
               width={90}
               height={90}
             />
-            <h2>Imane Rami</h2>
+            <h2>
+              {profile.firstName} {profile.lastName}
+            </h2>
             <p>Médiatrice · Agadir</p>
             <Tag>Accompagnement de proximité</Tag>
             <div className="definition-grid" style={{ textAlign: "left" }}>

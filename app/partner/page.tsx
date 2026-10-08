@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Clock,
   FilePlus2,
-  Filter,
   MapPin,
   Send,
   TrendingUp,
@@ -15,9 +14,10 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import Brand from "@/components/Brand";
 import WorkspaceShell from "@/components/workspace/WorkspaceShell";
 import PartnerLogo from "@/components/PartnerLogo";
+import Image from "next/image";
+import { useSimulatedState } from "@/lib/simulated-backend";
 
 type ReferralStatus =
   | "New"
@@ -293,8 +293,14 @@ function SectionHeader({
 }
 
 export default function ProgramCollaboratorPage() {
-  const [referrals, setReferrals] = useState(initialReferrals);
-  const [opportunities, setOpportunities] = useState(initialOpportunities);
+  const [referrals, setReferrals] = useSimulatedState(
+    "partner.referrals",
+    initialReferrals,
+  );
+  const [opportunities, setOpportunities] = useSimulatedState(
+    "partner.opportunities",
+    initialOpportunities,
+  );
   const [selectedId, setSelectedId] = useState(initialReferrals[0].id);
   const [statusFilter, setStatusFilter] = useState<"All" | ReferralStatus>(
     "All",
@@ -308,26 +314,29 @@ export default function ProgramCollaboratorPage() {
     capacity: "20",
     deadline: "Jun 30",
   });
-  const [activity, setActivity] = useState<Activity[]>([
-    {
-      id: 1,
-      text: "Shortlisted Fatima for digital cohort",
-      time: "09:10",
-      color: "#00B8A9",
-    },
-    {
-      id: 2,
-      text: "Updated capacity for Auto Mechanics Cohort",
-      time: "Yesterday",
-      color: "#2E86C1",
-    },
-    {
-      id: 3,
-      text: "Example placement feedback for regional team",
-      time: "Yesterday",
-      color: "#27AE60",
-    },
-  ]);
+  const [activity, setActivity] = useSimulatedState<Activity[]>(
+    "partner.activity",
+    [
+      {
+        id: 1,
+        text: "Shortlisted Fatima for digital cohort",
+        time: "09:10",
+        color: "#00B8A9",
+      },
+      {
+        id: 2,
+        text: "Updated capacity for Auto Mechanics Cohort",
+        time: "Yesterday",
+        color: "#2E86C1",
+      },
+      {
+        id: 3,
+        text: "Example placement feedback for regional team",
+        time: "Yesterday",
+        color: "#27AE60",
+      },
+    ],
+  );
 
   const selectedReferral =
     referrals.find((item) => item.id === selectedId) ?? referrals[0];
@@ -468,8 +477,6 @@ export default function ProgramCollaboratorPage() {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            <Brand width={100} height={40} />
-            <div style={{ width: 1, height: 36, background: "#E8ECF0" }} />
             <div style={{ flex: 1 }}>
               <h1
                 style={{
@@ -516,126 +523,58 @@ export default function ProgramCollaboratorPage() {
             gap: 22,
           }}
         >
-          <section
-            style={{
-              background: "linear-gradient(135deg, #FFFFFF 0%, #F6FFFD 100%)",
-              border: "1px solid #D9F2EF",
-              borderRadius: 8,
-              padding: "18px 20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 24,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  background: "#E0F7F5",
-                  color: "#008B80",
-                  borderRadius: 999,
-                  padding: "4px 10px",
-                  fontSize: "0.72rem",
-                  fontWeight: 800,
-                  marginBottom: 8,
-                }}
-              >
-                <BriefcaseBusinessIcon /> Partner operations
-              </div>
-              <h2
-                style={{
-                  color: "#1A2B3C",
-                  fontSize: "1.35rem",
-                  fontWeight: 800,
-                }}
-              >
-                Manage referrals from BidayaNeet
+          <section className="partner-showcase">
+            <div className="partner-showcase-copy">
+              <span className="eyebrow">YOUR NEXT COHORT STARTS HERE</span>
+              <h2>
+                Open a place.
+                <br />
+                Change a young person’s future.
               </h2>
-              <p
-                style={{ color: "#7F8C9A", fontSize: "0.82rem", marginTop: 4 }}
-              >
-                Review matched candidates, open new seats, schedule interviews,
-                and prepare placement feedback for the regional team.
+              <p>
+                Connect your programs with motivated candidates and bring their
+                next step within reach.
               </p>
+              <div className="partner-showcase-actions">
+                <a className="button button-primary" href="#referrals">
+                  Review referrals <Users size={16} />
+                </a>
+                <a className="text-link" href="#programs">
+                  Manage programs <FilePlus2 size={15} />
+                </a>
+              </div>
+              <div className="partner-showcase-stats">
+                <div>
+                  <strong>{openCapacity}</strong>
+                  <span>available seats</span>
+                </div>
+                <div>
+                  <strong>{acceptedCount}</strong>
+                  <span>placements confirmed</span>
+                </div>
+                <div>
+                  <strong>{averageMatch}%</strong>
+                  <span>average match</span>
+                </div>
+              </div>
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 112px)",
-                gap: 10,
-                textAlign: "center",
-              }}
-            >
-              <div
-                style={{
-                  background: "white",
-                  border: "1px solid #E8ECF0",
-                  borderRadius: 8,
-                  padding: 10,
-                }}
-              >
-                <strong
-                  style={{
-                    display: "block",
-                    color: "#2E86C1",
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  {referrals.length}
-                </strong>
-                <span style={{ color: "#7F8C9A", fontSize: "0.68rem" }}>
-                  referrals
-                </span>
-              </div>
-              <div
-                style={{
-                  background: "white",
-                  border: "1px solid #E8ECF0",
-                  borderRadius: 8,
-                  padding: 10,
-                }}
-              >
-                <strong
-                  style={{
-                    display: "block",
-                    color: "#00B8A9",
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  {openCapacity}
-                </strong>
-                <span style={{ color: "#7F8C9A", fontSize: "0.68rem" }}>
-                  open seats
-                </span>
-              </div>
-              <div
-                style={{
-                  background: "white",
-                  border: "1px solid #E8ECF0",
-                  borderRadius: 8,
-                  padding: 10,
-                }}
-              >
-                <strong
-                  style={{
-                    display: "block",
-                    color: "#F5A623",
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  {averageMatch}%
-                </strong>
-                <span style={{ color: "#7F8C9A", fontSize: "0.68rem" }}>
-                  avg match
-                </span>
-              </div>
+            <div className="partner-showcase-photo">
+              <Image
+                src="/editorial/partner-training.webp"
+                alt="Vocational training with an instructor and young learners"
+                fill
+                sizes="(max-width: 760px) 95vw, 40vw"
+              />
+              <span>
+                <CheckCircle2 size={14} /> Learning by doing. Growing together.
+              </span>
             </div>
           </section>
 
-          <section style={{ display: "flex", gap: 16 }}>
+          <section
+            className="partner-stat-strip"
+            style={{ display: "flex", gap: 16 }}
+          >
             <StatCard
               label="Incoming Referrals"
               value={`${referrals.filter((item) => item.status !== "Accepted" && item.status !== "Rejected").length}`}
@@ -671,6 +610,8 @@ export default function ProgramCollaboratorPage() {
           </section>
 
           <section
+            id="referrals"
+            className="partner-referrals-section"
             style={{
               display: "grid",
               gridTemplateColumns: "1.35fr 0.85fr",
@@ -971,6 +912,8 @@ export default function ProgramCollaboratorPage() {
           </section>
 
           <section
+            id="programs"
+            className="partner-programs-section"
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
@@ -1191,10 +1134,10 @@ export default function ProgramCollaboratorPage() {
                   <FilePlus2 size={14} /> Publish opportunity
                 </button>
               </form>
-              <div style={{ marginTop: 16 }}>
+              <div id="activity" style={{ marginTop: 16 }}>
                 <SectionHeader
                   title="Activity Log"
-                  subtitle="Recent collaborator actions synced to the regional admin."
+                  subtitle="Collaborator actions saved on this device in the simulated backend."
                 />
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 10 }}
@@ -1244,8 +1187,4 @@ export default function ProgramCollaboratorPage() {
       </div>
     </WorkspaceShell>
   );
-}
-
-function BriefcaseBusinessIcon() {
-  return <Filter size={13} />;
 }

@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import "./production.css";
-
-const dmSans = localFont({
-  src: "../public/fonts/dm-sans-variable.ttf",
-  variable: "--font-ui",
-  display: "swap",
-  weight: "100 1000",
-});
+import "./original-youth.css";
+import "./original-theme.css";
+import "./refinement.css";
 
 export const metadata: Metadata = {
   title: "BidayaNeet",
@@ -22,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className={dmSans.variable}>
+    <html lang="fr">
       <body>{children}</body>
     </html>
   );

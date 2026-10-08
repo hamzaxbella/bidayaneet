@@ -20,7 +20,7 @@ There is no dashboard switcher on the logo. Each role has an auth entry at `/aut
 
 ## Integration status
 
-The frontend uses labeled demonstration data. The authentication provider was deferred; no real sessions, server-side role enforcement, application submissions, messages, uploads, or account creation are implemented. Local interactions demonstrate the intended flows without sending data to anyone.
+The frontend uses labeled demonstration data. The authentication provider was deferred; no real sessions, server-side role enforcement, application submissions, messages, uploads, or account creation are implemented. The user chose a simulated backend for now: favorites, enrollments, prepared applications, profiles, messages, follow-ups, appointments, referrals, and partner offers persist on the current device through `lib/simulated-backend.ts`. Clearing site storage resets this demo. Local interactions do not send data to anyone.
 
 ## Google Maps
 
@@ -47,6 +47,6 @@ npm run build
 npm run start
 ```
 
-See [the UI refactor notes](docs/ui-refactor.md) for routes, design decisions, map provenance, and the backend integration boundary. The imagegen reference, prompt, and screenshots are saved in `output/design/`. DM Sans is self-hosted under `public/fonts/` with its OFL license; its source is the [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl/dmsans).
+See [the UI refactor notes](docs/ui-refactor.md) for routes, the restored original design, map provenance, and the backend integration boundary. The requested refinements preserve the original Inter/system font stack and white/teal identity, adding floating collapsible navigation, portrait story cards, image-backed micro-actions, and distinct actor layouts. Eighteen new visuals were generated with the built-in imagegen tool; files are in `public/editorial/` and prompts in `output/design/refinement-prompts.json`. Original, restored, and refined screenshots are saved in `output/design/`. The earlier imagegen proposal remains as a historical reference.
 
 When production publishing is requested, validate, commit, and push through the configured GitHub delivery pipeline. Do not bypass that pipeline with a hosting-provider deployment.

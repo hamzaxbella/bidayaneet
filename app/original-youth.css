@@ -1,0 +1,1131 @@
+/* Original youth dashboard styling from cf8b6a3, scoped to prevent page conflicts. */
+/* User portal */
+.original-youth-dashboard .portal-page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #0e265c;
+  padding-left: 252px;
+  padding-bottom: 58px;
+}
+
+.original-youth-dashboard .portal-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 252px;
+  background: #ffffff;
+  border-right: 1px solid #e8ecf0;
+  box-shadow: 10px 0 30px rgba(26, 43, 60, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 20px 20px;
+  z-index: 20;
+}
+
+.original-youth-dashboard .portal-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 34px;
+}
+
+.original-youth-dashboard .portal-logo img {
+  object-fit: contain;
+}
+
+.original-youth-dashboard .portal-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.original-youth-dashboard .portal-nav-item {
+  min-height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #42577f;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0 14px;
+}
+
+.original-youth-dashboard .portal-nav-item.active {
+  background: linear-gradient(100deg, #ddf7f3, #eaf7f6);
+  color: #007b7a;
+}
+
+.original-youth-dashboard .portal-nav-item strong {
+  margin-left: auto;
+  background: #ff5a1f;
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+}
+
+.original-youth-dashboard .portal-sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.original-youth-dashboard .user-chip {
+  border: 1px solid #e8ecf0;
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0e265c;
+}
+
+.original-youth-dashboard .user-chip img,
+.original-youth-dashboard .mediator-body img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.original-youth-dashboard .user-chip div {
+  flex: 1;
+}
+
+.original-youth-dashboard .user-chip b,
+.original-youth-dashboard .user-chip span {
+  display: block;
+}
+
+.original-youth-dashboard .user-chip b {
+  font-size: 0.75rem;
+}
+
+.original-youth-dashboard .user-chip span {
+  color: #7f8c9a;
+  font-size: 0.66rem;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+.original-youth-dashboard .help-card {
+  background: linear-gradient(145deg, #eef8ff, #ffffff);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.original-youth-dashboard .help-card img {
+  align-self: center;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.original-youth-dashboard .help-card b {
+  font-size: 0.9rem;
+}
+
+.original-youth-dashboard .help-card p {
+  color: #42577f;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.original-youth-dashboard .help-card a,
+.original-youth-dashboard .portal-section-header a,
+.original-youth-dashboard .wide-link {
+  text-decoration: none;
+}
+
+.original-youth-dashboard .help-card a {
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0e265c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(26, 43, 60, 0.08);
+}
+
+.original-youth-dashboard .portal-main {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 36px 40px 40px;
+}
+
+.original-youth-dashboard .portal-topbar {
+  display: grid;
+  grid-template-columns: 1fr 360px 42px;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+.original-youth-dashboard .portal-topbar h1 {
+  font-size: 2rem;
+  line-height: 1.05;
+  font-weight: 900;
+  color: #0e265c;
+}
+
+.original-youth-dashboard .portal-topbar p {
+  color: #42577f;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.original-youth-dashboard .portal-search {
+  height: 44px;
+  border: 1px solid #dde5ee;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  color: #647392;
+}
+
+.original-youth-dashboard .portal-search input {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  color: #0e265c;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.original-youth-dashboard .portal-search input::placeholder {
+  color: #647392;
+}
+
+.original-youth-dashboard .icon-bell {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  background: #ffffff;
+  color: #42577f;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.original-youth-dashboard .icon-bell span {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff5a1f;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+}
+
+.original-youth-dashboard .hero-grid {
+  display: grid;
+  grid-template-columns: minmax(420px, 1.6fr) minmax(260px, 0.95fr) minmax(
+      300px,
+      1.1fr
+    );
+  gap: 22px;
+  margin-bottom: 28px;
+}
+
+.original-youth-dashboard .portal-card,
+.original-youth-dashboard .portal-panel {
+  background: #ffffff;
+  border: 1px solid #e8ecf0;
+  border-radius: 14px;
+  box-shadow: 0 10px 28px rgba(26, 43, 60, 0.06);
+}
+
+.original-youth-dashboard .profile-card {
+  overflow: hidden;
+}
+
+.original-youth-dashboard .profile-main {
+  min-height: 148px;
+  display: grid;
+  grid-template-columns: 128px 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+}
+
+.original-youth-dashboard .avatar-ring {
+  width: 118px;
+  height: 118px;
+  border: 8px solid #2fc5b7;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.original-youth-dashboard .avatar-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.original-youth-dashboard .profile-copy {
+  position: relative;
+}
+
+.original-youth-dashboard .profile-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.original-youth-dashboard .profile-status b {
+  font-size: 0.86rem;
+}
+
+.original-youth-dashboard .profile-status span {
+  background: #ddf8ea;
+  color: #008a58;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .profile-copy p {
+  color: #42577f;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  font-weight: 700;
+  max-width: 240px;
+}
+
+.original-youth-dashboard .profile-copy small {
+  position: absolute;
+  right: 0;
+  bottom: -4px;
+  color: #0e265c;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.original-youth-dashboard .progress-line {
+  width: calc(100% - 94px);
+  height: 8px;
+  border-radius: 999px;
+  background: #e4e9ee;
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.original-youth-dashboard .progress-line i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #00a99d;
+}
+
+.original-youth-dashboard .profile-stats {
+  border-top: 1px dashed #dde5ee;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.original-youth-dashboard .profile-stats div {
+  padding: 14px 12px 16px;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  column-gap: 8px;
+  align-items: start;
+}
+
+.original-youth-dashboard .profile-stats svg {
+  color: #00a99d;
+  margin-top: 2px;
+}
+
+.original-youth-dashboard .profile-stats b {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.original-youth-dashboard .profile-stats span {
+  grid-column: 2;
+  color: #42577f;
+  font-size: 0.76rem;
+  line-height: 1.3;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+.original-youth-dashboard .assistant-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.original-youth-dashboard .assistant-card > b {
+  font-size: 1.1rem;
+  margin-bottom: 14px;
+}
+
+.original-youth-dashboard .assistant-card div {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.original-youth-dashboard .assistant-card img {
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.original-youth-dashboard .assistant-card p {
+  color: #42577f;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  font-weight: 700;
+}
+
+.original-youth-dashboard .assistant-card button,
+.original-youth-dashboard .mediator-actions button:first-child {
+  height: 46px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #00b8a9, #008e83);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.original-youth-dashboard .quote-card {
+  position: relative;
+  padding: 30px 28px;
+  overflow: hidden;
+  background: linear-gradient(150deg, #f6fbff, #ffffff);
+}
+
+.original-youth-dashboard .quote-card blockquote {
+  position: relative;
+  z-index: 1;
+  max-width: 260px;
+  color: #42577f;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  font-weight: 800;
+}
+
+.original-youth-dashboard .quote-card p {
+  position: relative;
+  z-index: 1;
+  color: #42577f;
+  font-size: 0.88rem;
+  font-weight: 900;
+  margin-top: 26px;
+}
+
+.original-youth-dashboard .quote-card img {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 190px;
+  height: 128px;
+  object-fit: cover;
+  border-top-left-radius: 70px;
+  opacity: 0.92;
+}
+
+.original-youth-dashboard .portal-panel {
+  padding: 24px;
+  margin-bottom: 28px;
+}
+
+.original-youth-dashboard .portal-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.original-youth-dashboard .portal-section-header h2 {
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #0e265c;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .portal-section-header p {
+  color: #647392;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.original-youth-dashboard .portal-section-header a {
+  border: 1px solid #dde5ee;
+  border-radius: 8px;
+  color: #42577f;
+  padding: 10px 16px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.original-youth-dashboard .opportunity-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.original-youth-dashboard .opportunity-card {
+  border: 1px solid #dde5ee;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.original-youth-dashboard .opportunity-image {
+  height: 140px;
+  position: relative;
+}
+
+.original-youth-dashboard .opportunity-image img {
+  object-fit: cover;
+}
+
+.original-youth-dashboard .opportunity-image span {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ffffff;
+  border: 3px solid;
+  border-radius: 7px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .opportunity-body {
+  padding: 16px 16px 18px;
+}
+
+.original-youth-dashboard .opportunity-body small {
+  display: inline-flex;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .opportunity-body h3 {
+  color: #0e265c;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  font-weight: 900;
+  margin-top: 10px;
+}
+
+.original-youth-dashboard .meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #42577f;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.original-youth-dashboard .meta span:last-child {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.original-youth-dashboard .opportunity-body p {
+  min-height: 56px;
+  color: #42577f;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  font-weight: 650;
+  margin-top: 12px;
+}
+
+.original-youth-dashboard .opportunity-body button,
+.original-youth-dashboard .task-item button,
+.original-youth-dashboard .micro-grid button,
+.original-youth-dashboard .mediator-actions button:last-child {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #00a99d;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #007b7a;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.original-youth-dashboard .story-shell {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  gap: 10px;
+}
+
+.original-youth-dashboard .round-arrow {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(26, 43, 60, 0.1);
+  color: #0e265c;
+  display: grid;
+  place-items: center;
+}
+
+.original-youth-dashboard .story-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
+  gap: 18px;
+}
+
+.original-youth-dashboard .story-card {
+  position: relative;
+  height: 230px;
+  border-radius: 14px;
+  overflow: hidden;
+  color: #ffffff;
+  background: #0e265c;
+}
+
+.original-youth-dashboard .story-card::after {
+  content: "";
+  position: absolute;
+  inset: 40% 0 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+}
+
+.original-youth-dashboard .story-card img {
+  object-fit: cover;
+}
+
+.original-youth-dashboard .story-card > span {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 999px;
+  padding: 3px 7px;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .story-card button {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+}
+
+.original-youth-dashboard .story-card div {
+  position: absolute;
+  z-index: 2;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+}
+
+.original-youth-dashboard .story-card b,
+.original-youth-dashboard .story-card small {
+  display: block;
+}
+
+.original-youth-dashboard .story-card b {
+  font-size: 0.88rem;
+}
+
+.original-youth-dashboard .story-card small {
+  font-size: 0.72rem;
+  margin-top: 3px;
+}
+
+.original-youth-dashboard .lower-grid {
+  display: grid;
+  grid-template-columns: minmax(420px, 0.95fr) minmax(480px, 1.25fr);
+  gap: 26px;
+  align-items: start;
+  margin-bottom: 28px;
+}
+
+.original-youth-dashboard .task-card,
+.original-youth-dashboard .journey-card,
+.original-youth-dashboard .micro-card,
+.original-youth-dashboard .notif-card,
+.original-youth-dashboard .mediator-card {
+  padding: 26px;
+}
+
+.original-youth-dashboard .task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.original-youth-dashboard .task-item {
+  display: grid;
+  grid-template-columns: 42px 1fr 72px 110px;
+  align-items: center;
+  gap: 14px;
+}
+
+.original-youth-dashboard .task-item > span,
+.original-youth-dashboard .notification-item > span,
+.original-youth-dashboard .micro-grid article > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+}
+
+.original-youth-dashboard .task-item b,
+.original-youth-dashboard .task-item small {
+  display: block;
+}
+
+.original-youth-dashboard .task-item b {
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.original-youth-dashboard .task-item small {
+  color: #647392;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.original-youth-dashboard .task-item em {
+  justify-self: end;
+  border-radius: 6px;
+  background: #fff1ec;
+  color: #ff5a1f;
+  padding: 5px 8px;
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .task-item:first-child em {
+  background: transparent;
+  color: #007b7a;
+}
+
+.original-youth-dashboard .task-item button {
+  margin: 0;
+  height: 36px;
+}
+
+.original-youth-dashboard .wide-link {
+  height: 46px;
+  border: 1px solid #e8ecf0;
+  border-radius: 12px;
+  color: #007b7a;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 900;
+  margin-top: 22px;
+}
+
+.original-youth-dashboard .right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.original-youth-dashboard .journey-card h2 {
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .journey-card > p {
+  color: #647392;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.original-youth-dashboard .journey-line {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+  position: relative;
+}
+
+.original-youth-dashboard .journey-line div {
+  text-align: center;
+  color: #a8b2c1;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .journey-line div span {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #cfd6df;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+}
+
+.original-youth-dashboard .journey-line div.done span {
+  background: #00a99d;
+}
+
+.original-youth-dashboard .journey-line div.done {
+  color: #007b7a;
+}
+
+.original-youth-dashboard .journey-summary {
+  border: 1px solid #e8ecf0;
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 145px;
+  gap: 16px;
+  align-items: center;
+}
+
+.original-youth-dashboard .journey-summary b {
+  font-size: 0.95rem;
+}
+
+.original-youth-dashboard .journey-summary p {
+  color: #647392;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  font-weight: 650;
+  margin-top: 8px;
+}
+
+.original-youth-dashboard .journey-summary strong {
+  color: #00a99d;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.original-youth-dashboard .journey-summary span {
+  display: block;
+  color: #42577f;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.original-youth-dashboard .micro-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.original-youth-dashboard .micro-grid article {
+  border: 1px solid #e8ecf0;
+  border-radius: 14px;
+  padding: 18px 16px;
+}
+
+.original-youth-dashboard .micro-grid b,
+.original-youth-dashboard .micro-grid small,
+.original-youth-dashboard .micro-grid p {
+  display: block;
+}
+
+.original-youth-dashboard .micro-grid b {
+  color: #0e265c;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  margin-top: 12px;
+}
+
+.original-youth-dashboard .micro-grid small,
+.original-youth-dashboard .micro-grid p {
+  color: #647392;
+  font-size: 0.76rem;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.original-youth-dashboard .notification-item {
+  display: grid;
+  grid-template-columns: 48px 1fr 34px;
+  gap: 16px;
+  align-items: start;
+  padding: 16px 0;
+}
+
+.original-youth-dashboard .notification-item + .notification-item {
+  border-top: 1px solid #f0f3f7;
+}
+
+.original-youth-dashboard .notification-item b {
+  font-size: 0.92rem;
+}
+
+.original-youth-dashboard .notification-item p {
+  color: #647392;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  font-weight: 650;
+  margin-top: 6px;
+}
+
+.original-youth-dashboard .notification-item time {
+  color: #647392;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.original-youth-dashboard .mediator-body {
+  display: grid;
+  grid-template-columns: 88px 180px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.original-youth-dashboard .mediator-body h3 {
+  font-size: 1.2rem;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .mediator-body b,
+.original-youth-dashboard .mediator-body span,
+.original-youth-dashboard .mediator-body em {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #42577f;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-top: 8px;
+  font-style: normal;
+}
+
+.original-youth-dashboard .mediator-body em {
+  width: fit-content;
+  background: #ddf8ea;
+  color: #008a58;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .mediator-body p {
+  color: #42577f;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  font-weight: 650;
+}
+
+.original-youth-dashboard .mediator-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+  padding-left: 98px;
+}
+
+.original-youth-dashboard .mediator-actions button {
+  height: 40px;
+}
+
+.original-youth-dashboard .portal-footer {
+  min-height: 52px;
+  background: #ffffff;
+  border-top: 1px solid #e8ecf0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 0 28px;
+  color: #647392;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.original-youth-dashboard .portal-footer div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.original-youth-dashboard .portal-footer > span {
+  text-align: center;
+}
+
+.original-youth-dashboard .portal-footer div:last-child {
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.original-youth-dashboard .portal-footer a {
+  color: #647392;
+  text-decoration: none;
+}
+
+.original-youth-dashboard .portal-lite-page {
+  min-height: 100vh;
+  background: #f8fbfd;
+  padding: 36px;
+}
+
+.original-youth-dashboard .portal-lite-shell {
+  max-width: 920px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e8ecf0;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 10px 28px rgba(26, 43, 60, 0.06);
+}
+
+.original-youth-dashboard .portal-lite-shell a {
+  color: #007b7a;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.original-youth-dashboard .portal-lite-shell h1 {
+  color: #0e265c;
+  font-size: 1.8rem;
+  margin: 20px 0 8px;
+}
+
+.original-youth-dashboard .portal-lite-shell p {
+  color: #42577f;
+  line-height: 1.6;
+}
+
+.original-youth-dashboard .portal-lite-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.original-youth-dashboard .portal-lite-grid article {
+  border: 1px solid #e8ecf0;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.original-youth-dashboard .portal-lite-grid b {
+  color: #0e265c;
+  display: block;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 1180px) {
+  .original-youth-dashboard .portal-page {
+    padding-left: 0;
+  }
+  .original-youth-dashboard .portal-sidebar {
+    position: static;
+    width: auto;
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid #e8ecf0;
+  }
+  .original-youth-dashboard .portal-main {
+    max-width: none;
+  }
+  .original-youth-dashboard .portal-footer {
+    left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .original-youth-dashboard .portal-topbar,
+  .original-youth-dashboard .hero-grid,
+  .original-youth-dashboard .lower-grid,
+  .original-youth-dashboard .mediator-body {
+    grid-template-columns: 1fr;
+  }
+  .original-youth-dashboard .opportunity-row,
+  .original-youth-dashboard .story-row,
+  .original-youth-dashboard .micro-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .original-youth-dashboard .mediator-actions {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .original-youth-dashboard .portal-main {
+    padding: 22px 14px 70px;
+  }
+  .original-youth-dashboard .profile-main,
+  .original-youth-dashboard .profile-stats,
+  .original-youth-dashboard .opportunity-row,
+  .original-youth-dashboard .story-row,
+  .original-youth-dashboard .task-item,
+  .original-youth-dashboard .journey-summary,
+  .original-youth-dashboard .micro-grid,
+  .original-youth-dashboard .portal-footer {
+    grid-template-columns: 1fr;
+  }
+  .original-youth-dashboard .portal-footer {
+    height: auto;
+    position: static;
+    padding: 14px;
+    text-align: center;
+  }
+  .original-youth-dashboard .portal-footer div,
+  .original-youth-dashboard .portal-footer div:last-child {
+    justify-content: center;
+  }
+  .original-youth-dashboard .profile-copy small {
+    position: static;
+    display: block;
+    margin-top: 8px;
+  }
+  .original-youth-dashboard .progress-line {
+    width: 100%;
+  }
+}

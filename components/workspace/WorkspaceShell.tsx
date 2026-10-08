@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -13,14 +13,15 @@ import {
   ChartNoAxesCombined,
   CircleHelp,
   ClipboardList,
-  Compass,
-  Heart,
   House,
   MapPin,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   MessageCircle,
   Settings,
   Sparkles,
+  Star,
   UserRound,
   Users,
   X,
@@ -29,18 +30,20 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Brand from "@/components/Brand";
+import { useSimulatedState } from "@/lib/simulated-backend";
+import { profileFixtures } from "@/lib/demo-data";
 
 export type WorkspaceRole = "neet" | "mediator" | "admin" | "partner";
 const navigation = {
   neet: [
-    ["", "Mon espace", House],
-    ["/opportunities", "Opportunités", Compass],
-    ["/journey", "Mon parcours", ChartNoAxesCombined],
-    ["/micro-actions", "Petits pas", Zap],
+    ["", "Home", House],
+    ["/opportunities", "Mes opportunités", Settings],
+    ["/stories", "Histoires inspirantes", Star],
+    ["/journey", "Mon parcours", ClipboardList],
+    ["/micro-actions", "Micro-actions", ShieldCheck],
     ["/messages", "Messages", MessageCircle],
-    ["/stories", "Histoires inspirantes", Heart],
     ["/profile", "Mon profil", UserRound],
-    ["/help", "Aide & conseils", CircleHelp],
+    ["/help", "Aide", CircleHelp],
   ],
   mediator: [
     ["", "Vue d’ensemble", House],
@@ -54,37 +57,42 @@ const navigation = {
     ["/help", "Centre d’aide", CircleHelp],
   ],
   admin: [
-    ["/", "Overview", House],
-    ["/neets", "Young people", Users],
+    ["/", "Dashboard", House],
+    ["/neets", "NEETs", Users],
     ["/mediators", "Mediators", ShieldCheck],
     ["/programs", "Programs", ClipboardList],
     ["/opportunities", "Opportunities", BriefcaseBusiness],
-    ["/micro-actions", "Field actions", Zap],
-    ["/heatmap", "Geographic coverage", Map],
-    ["/reports", "Impact reports", ChartNoAxesCombined],
+    ["/micro-actions", "Micro-actions", Zap],
+    ["/heatmap", "Heatmap", Map],
+    ["/reports", "Reports", ChartNoAxesCombined],
     ["/alerts", "Alerts", Bell],
     ["/settings", "Settings", Settings],
   ],
-  partner: [["", "Partner workspace", BriefcaseBusiness]],
+  partner: [
+    ["", "Overview", House],
+    ["#referrals", "Referrals", Users],
+    ["#programs", "Programs & capacity", BriefcaseBusiness],
+    ["#activity", "Activity", ChartNoAxesCombined],
+  ],
 } as const;
 const identities = {
   neet: {
     name: "Yassine El Amrani",
     label: "Espace jeune",
     initials: "YE",
-    photo: "/user-portal/story-khalid.jpg",
+    photo: "/editorial/story-khalid.webp",
   },
   mediator: {
     name: "Imane Rami",
     label: "Espace médiateur",
     initials: "IR",
-    photo: "/user-portal/story-amina.jpg",
+    photo: "/editorial/story-amina.webp",
   },
   admin: {
     name: "Amina El Mansouri",
     label: "Regional administration",
     initials: "AE",
-    photo: "/user-portal/story-fatima.jpg",
+    photo: "",
   },
   partner: {
     name: "OFPPT Souss-Massa",
@@ -94,6 +102,21 @@ const identities = {
   },
 };
 
+function subscribeToHash(notify: () => void) {
+  window.addEventListener("hashchange", notify);
+  window.addEventListener("popstate", notify);
+  return () => {
+    window.removeEventListener("hashchange", notify);
+    window.removeEventListener("popstate", notify);
+  };
+}
+function getHash() {
+  return window.location.hash;
+}
+function getServerHash() {
+  return "";
+}
+
 export default function WorkspaceShell({
   role,
   children,
@@ -102,7 +125,12 @@ export default function WorkspaceShell({
   children: ReactNode;
 }) {
   const path = usePathname();
+  const hash = useSyncExternalStore(subscribeToHash, getHash, getServerHash);
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useSimulatedState(
+    `navigation.${role}.collapsed`,
+    false,
+  );
   const sidebarRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!open || !window.matchMedia("(max-width: 760px)").matches) return;
@@ -141,7 +169,11 @@ export default function WorkspaceShell({
     };
   }, [open]);
   const prefix = role === "admin" ? "" : `/${role}`;
-  const identity = identities[role];
+  const [profile] = useSimulatedState(`${role}.profile`, profileFixtures[role]);
+  const identity = {
+    ...identities[role],
+    name: `${profile.firstName} ${profile.lastName}`,
+  };
   const help =
     role === "admin"
       ? "/settings"
@@ -149,11 +181,13 @@ export default function WorkspaceShell({
         ? "/auth/partner/sign-in"
         : `${prefix}/help`;
   const current =
-    navigation[role].find(([suffix]) => path === `${prefix}${suffix}`)?.[1] ??
-    identity.label;
+    navigation[role].find(
+      ([suffix]) =>
+        (role === "partner" ? path + hash : path) === `${prefix}${suffix}`,
+    )?.[1] ?? identity.label;
   return (
     <div
-      className={`workspace workspace-${role}`}
+      className={`workspace workspace-${role} ${path === prefix ? "workspace-home" : ""} ${collapsed ? "workspace-collapsed" : ""}`}
       lang={role === "admin" || role === "partner" ? "en" : "fr"}
     >
       <a className="skip-link" href="#workspace-content">
@@ -176,7 +210,27 @@ export default function WorkspaceShell({
         aria-label="Navigation principale"
       >
         <div className="workspace-brand">
-          <Brand />
+          <div className="expanded-brand">
+            <Brand width={148} height={78} />
+          </div>
+          <div className="collapsed-brand">
+            <Brand width={48} height={48} />
+          </div>
+          <button
+            className="sidebar-collapse icon-button"
+            aria-label={
+              collapsed ? "Développer la navigation" : "Réduire la navigation"
+            }
+            aria-expanded={!collapsed}
+            aria-controls={`navigation-${role}`}
+            onClick={() => setCollapsed((value) => !value)}
+          >
+            {collapsed ? (
+              <PanelLeftOpen size={18} />
+            ) : (
+              <PanelLeftClose size={18} />
+            )}
+          </button>
           <button
             className="mobile-close icon-button"
             aria-label="Fermer le menu"
@@ -190,7 +244,7 @@ export default function WorkspaceShell({
           {navigation[role].map(([suffix, label, Icon]) => {
             const href = `${prefix}${suffix}`;
             const active =
-              path === href ||
+              (role === "partner" ? path + hash === href : path === href) ||
               (suffix !== "" && suffix !== "/" && path.startsWith(`${href}/`));
             return (
               <Link
@@ -198,7 +252,15 @@ export default function WorkspaceShell({
                 href={href}
                 className={`workspace-nav ${active ? "active" : ""}`}
                 aria-current={active ? "page" : undefined}
-                onClick={() => setOpen(false)}
+                aria-label={label}
+                title={collapsed ? label : undefined}
+                onClick={(event) => {
+                  if (role === "partner") {
+                    event.preventDefault();
+                    window.location.hash = suffix;
+                  }
+                  setOpen(false);
+                }}
               >
                 <Icon size={18} strokeWidth={1.8} />
                 <span>{label}</span>
@@ -207,29 +269,10 @@ export default function WorkspaceShell({
             );
           })}
         </nav>
-        <div className="sidebar-support">
-          <Sparkles size={18} />
-          <b>
-            {role === "admin" || role === "partner"
-              ? "Every step makes an impact."
-              : "Un petit pas. Un nouvel avenir."}
-          </b>
-          <p>
-            {role === "neet"
-              ? "Ton médiateur est là pour t’accompagner."
-              : role === "mediator"
-                ? "Ensemble, rapprochons les jeunes de leurs ambitions."
-                : "Working together for youth integration."}
-          </p>
-          <Link href={help}>
-            {role === "admin" || role === "partner"
-              ? "Workspace support"
-              : "Besoin d’un coup de main ?"}
-            <ArrowUpRight size={14} />
-          </Link>
-        </div>
         <Link
           className="workspace-user"
+          aria-label={identity.name}
+          title={collapsed ? identity.name : undefined}
           href={
             role === "admin"
               ? "/settings"
@@ -251,6 +294,36 @@ export default function WorkspaceShell({
           </span>
           <ArrowUpRight size={15} />
         </Link>
+        <div className="sidebar-support">
+          {role === "neet" ? (
+            <Image
+              src="/editorial/mountain-progress.webp"
+              alt=""
+              width={94}
+              height={50}
+            />
+          ) : (
+            <Sparkles size={18} />
+          )}
+          <b>
+            {role === "admin" || role === "partner"
+              ? "Need help?"
+              : "Besoin d’aide ?"}
+          </b>
+          <p>
+            {role === "neet"
+              ? "Ton médiateur est là pour t’accompagner."
+              : role === "mediator"
+                ? "Ensemble, rapprochons les jeunes de leurs ambitions."
+                : "Working together for youth integration."}
+          </p>
+          <Link href={help}>
+            {role === "admin" || role === "partner"
+              ? "Help Center"
+              : "Centre d’aide"}
+            <ArrowUpRight size={14} />
+          </Link>
+        </div>
       </aside>
       <div className="workspace-body">
         <header className="workspace-topbar">

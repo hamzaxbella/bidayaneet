@@ -12,21 +12,25 @@ import {
   Check,
   CheckCircle2,
   Clock3,
-  Compass,
   FileText,
-  Heart,
   MapPin,
   Search,
-  Users,
 } from "lucide-react";
-import { fieldActions, opportunities, stories } from "@/lib/demo-data";
+import { fieldActions, opportunities, profileFixtures } from "@/lib/demo-data";
 import { EmptyState, PageIntro, Panel, Tag } from "./UI";
 import OpportunityCard from "./OpportunityCard";
 import { useYouth } from "./YouthProvider";
-import { AppointmentCard, NextSteps } from "./YouthDashboard";
+import { AppointmentCard, NextSteps } from "./YouthWidgets";
+import StoryReels from "./StoryReels";
+import MicroActionCard from "./MicroActionCard";
+import { useSimulatedState } from "@/lib/simulated-backend";
 
-export function OpportunitiesPage() {
-  const [query, setQuery] = useState("");
+export function OpportunitiesPage({
+  initialQuery = "",
+}: {
+  initialQuery?: string;
+}) {
+  const [query, setQuery] = useState(initialQuery);
   const [type, setType] = useState("Toutes");
   const [location, setLocation] = useState("Tous les lieux");
   const [tab, setTab] = useState("Pour moi");
@@ -126,8 +130,8 @@ export function OpportunitiesPage() {
         />
       )}
       <p className="form-note">
-        Les offres sont présentées à titre d’exemple. Tes sélections restent
-        dans cette session de démonstration.
+        Les offres sont présentées à titre d’exemple. Tes sélections restent sur
+        cet appareil dans la démonstration.
       </p>
     </>
   );
@@ -338,7 +342,7 @@ export function JourneyPage() {
 
 export function MicroActionsPage() {
   const [filter, setFilter] = useState("Tous les petits pas");
-  const { enrolled, toggleEnrolled } = useYouth();
+  const { enrolled } = useYouth();
   const filtered = fieldActions.filter(
     (item) => filter !== "Mes inscriptions" || enrolled.includes(item.id),
   );
@@ -367,71 +371,9 @@ export function MicroActionsPage() {
         ))}
       </div>
       {filtered.length ? (
-        <div className="action-grid">
+        <div className="actions-discovery-grid">
           {filtered.map((action) => (
-            <Panel key={action.id} className="action-card">
-              <div className="action-card-top">
-                <div className="action-icon">
-                  {action.icon === "file" ? (
-                    <FileText size={20} />
-                  ) : action.icon === "users" ? (
-                    <Users size={20} />
-                  ) : action.icon === "heart" ? (
-                    <Heart size={20} />
-                  ) : (
-                    <Compass size={20} />
-                  )}
-                </div>
-                <Tag
-                  tone={action.category === "À ton rythme" ? "orange" : "teal"}
-                >
-                  {action.category}
-                </Tag>
-              </div>
-              <h3>{action.title}</h3>
-              <p>{action.description}</p>
-              <ul className="detail-list">
-                <li>
-                  <CalendarDays size={14} />
-                  {action.date} · {action.time}
-                </li>
-                <li>
-                  <MapPin size={14} />
-                  {action.city}
-                </li>
-              </ul>
-              <div className="action-card-bottom" style={{ marginTop: 20 }}>
-                <span className="card-meta" style={{ margin: 0 }}>
-                  <Clock3 size={13} />
-                  {action.duration}
-                </span>
-                <button
-                  className={`button button-small ${enrolled.includes(action.id) ? "button-secondary" : "button-primary"}`}
-                  onClick={() => toggleEnrolled(action.id)}
-                >
-                  {enrolled.includes(action.id)
-                    ? "Annuler ma sélection"
-                    : action.category === "À ton rythme"
-                      ? "Choisir ce petit pas"
-                      : "M’inscrire en démo"}
-                  {enrolled.includes(action.id) ? (
-                    <Check size={14} />
-                  ) : (
-                    <ArrowRight size={14} />
-                  )}
-                </button>
-              </div>
-              {enrolled.includes(action.id) && (
-                <p
-                  className="form-note"
-                  role="status"
-                  style={{ marginBottom: 0 }}
-                >
-                  Sélection enregistrée pour cette session. Inscription réelle
-                  disponible après connexion du service.
-                </p>
-              )}
-            </Panel>
+            <MicroActionCard key={action.id} action={action} />
           ))}
         </div>
       ) : (
@@ -445,58 +387,14 @@ export function MicroActionsPage() {
 }
 
 export function StoriesPage() {
-  const [expanded, setExpanded] = useState<string[]>([]);
   return (
     <>
       <PageIntro
         eyebrow="DES PARCOURS QUI DONNENT CONFIANCE"
-        title="Ils ont trouvé leur chemin"
-        description="Des histoires pour te rappeler que chaque nouveau départ est possible."
+        title="Un déclic peut tout changer"
+        description="Des parcours de jeunes comme toi. Ouvre une histoire et découvre leur premier pas."
       />
-      <div className="stories-grid">
-        {stories.map((story) => (
-          <article className="story-card" key={story.id}>
-            <div className="story-image">
-              <Image
-                src={story.image}
-                alt={`Portrait de ${story.name}`}
-                fill
-                sizes="(max-width: 650px) 95vw, 45vw"
-              />
-            </div>
-            <div className="story-body">
-              <Tag tone="muted">{story.city}</Tag>
-              <h2>
-                {story.name} · {story.role}
-              </h2>
-              <blockquote>« {story.quote} »</blockquote>
-              <button
-                className="text-link"
-                aria-expanded={expanded.includes(story.id)}
-                aria-controls={`story-${story.id}`}
-                onClick={() =>
-                  setExpanded((current) =>
-                    current.includes(story.id)
-                      ? current.filter((id) => id !== story.id)
-                      : [...current, story.id],
-                  )
-                }
-                style={{ border: 0, background: "transparent" }}
-              >
-                {expanded.includes(story.id)
-                  ? "Fermer le récit"
-                  : "Découvrir son parcours"}
-                <ArrowRight size={15} />
-              </button>
-              {expanded.includes(story.id) && (
-                <p className="story-expanded" id={`story-${story.id}`}>
-                  {story.text}
-                </p>
-              )}
-            </div>
-          </article>
-        ))}
-      </div>
+      <StoryReels />
       <p className="form-note">
         Récits et portraits de démonstration, créés pour illustrer les parcours
         d’accompagnement.
@@ -509,12 +407,23 @@ export function YouthProfilePage() {
   const [status, setStatus] = useState("");
   const [document, setDocument] = useState("");
   const [documentError, setDocumentError] = useState("");
-  const [skills, setSkills] = useState(
-    "Relation client, outils bureautiques, communication",
+  const [profile, setProfile] = useSimulatedState(
+    "neet.profile",
+    profileFixtures.neet,
   );
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("Profil mis à jour dans cette session de démonstration.");
+    const data = new FormData(event.currentTarget);
+    setProfile((current) => ({
+      ...current,
+      ...Object.fromEntries(
+        Array.from(data.entries()).filter(
+          (entry): entry is [string, string] =>
+            entry[0] in current && typeof entry[1] === "string",
+        ),
+      ),
+    }));
+    setStatus("Informations enregistrées sur cet appareil.");
   }
   return (
     <>
@@ -528,14 +437,14 @@ export function YouthProfilePage() {
           title="Mes informations"
           note="Tu peux les modifier à tout moment."
         >
-          <form onSubmit={save}>
+          <form onSubmit={save} key={JSON.stringify(profile)}>
             <div className="form-grid">
               <label className="form-field">
                 Prénom
                 <input
                   className="field-input"
                   name="firstName"
-                  defaultValue="Yassine"
+                  defaultValue={profile.firstName}
                   required
                   autoComplete="given-name"
                   maxLength={80}
@@ -546,7 +455,7 @@ export function YouthProfilePage() {
                 <input
                   className="field-input"
                   name="lastName"
-                  defaultValue="El Amrani"
+                  defaultValue={profile.lastName}
                   required
                   autoComplete="family-name"
                   maxLength={80}
@@ -558,7 +467,7 @@ export function YouthProfilePage() {
                   className="field-input"
                   name="email"
                   type="email"
-                  defaultValue="yassine@example.com"
+                  defaultValue={profile.email}
                   required
                   autoComplete="email"
                 />
@@ -568,6 +477,7 @@ export function YouthProfilePage() {
                 <input
                   className="field-input"
                   name="phone"
+                  defaultValue={profile.phone}
                   type="tel"
                   placeholder="+212 6 00 00 00 00"
                   autoComplete="tel"
@@ -578,7 +488,7 @@ export function YouthProfilePage() {
                 <select
                   className="field-input"
                   name="city"
-                  defaultValue="Agadir"
+                  defaultValue={profile.city}
                 >
                   {[
                     "Agadir",
@@ -599,7 +509,7 @@ export function YouthProfilePage() {
                 <select
                   className="field-input"
                   name="goal"
-                  defaultValue="Une formation"
+                  defaultValue={profile.goal}
                 >
                   {[
                     "Une formation",
@@ -617,8 +527,7 @@ export function YouthProfilePage() {
                 <textarea
                   className="field-input"
                   name="skills"
-                  value={skills}
-                  onChange={(event) => setSkills(event.target.value)}
+                  defaultValue={profile.skills}
                   maxLength={1000}
                 />
               </label>
@@ -627,7 +536,7 @@ export function YouthProfilePage() {
                 <textarea
                   className="field-input"
                   name="interests"
-                  defaultValue="J’aimerais découvrir le développement web et travailler dans une équipe."
+                  defaultValue={profile.interests}
                   maxLength={2000}
                 />
               </label>
@@ -644,20 +553,21 @@ export function YouthProfilePage() {
               </div>
             )}
             <p className="form-note">
-              Les modifications restent dans la page ouverte. Aucun profil réel
-              n’est créé.
+              Informations de démonstration enregistrées sur cet appareil.
             </p>
           </form>
         </Panel>
         <div className="stack">
           <Panel className="profile-summary">
             <Image
-              src="/user-portal/story-khalid.jpg"
+              src="/editorial/story-khalid.webp"
               alt=""
               width={90}
               height={90}
             />
-            <h2>Yassine El Amrani</h2>
+            <h2>
+              {profile.firstName} {profile.lastName}
+            </h2>
             <p>22 ans · Agadir</p>
             <Tag>Accompagnement actif</Tag>
             <progress value={document ? 90 : 78} max={100} />
@@ -665,7 +575,7 @@ export function YouthProfilePage() {
               {document ? 90 : 78}% du profil de démonstration complété
             </small>
             <div className="skill-list" style={{ justifyContent: "center" }}>
-              {skills
+              {profile.skills
                 .split(",")
                 .filter(Boolean)
                 .slice(0, 5)

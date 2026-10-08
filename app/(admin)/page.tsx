@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   TrendingUp,
   MoreVertical,
@@ -394,15 +395,20 @@ function FunnelBar({
 /* ── Footer ── */
 
 export default function DashboardPage() {
+  const [query, setQuery] = useState("");
+  const filteredNEETs = recentNEETs.filter((person) =>
+    Object.values(person).join(" ").toLowerCase().includes(query.toLowerCase()),
+  );
   return (
     <div
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
     >
       <PageHeader
-        title="Regional overview"
+        title="Main Dashboard"
         subtitle="Regional monitoring for Souss-Massa"
         actionLabel="Export overview"
         showFilters={true}
+        onSearch={setQuery}
       />
 
       <div
@@ -857,12 +863,28 @@ export default function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {recentNEETs.map((n, i) => (
+              {filteredNEETs.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={8}
+                    style={{
+                      padding: 20,
+                      textAlign: "center",
+                      color: "#7F8C9A",
+                    }}
+                  >
+                    No profiles match your search.
+                  </td>
+                </tr>
+              )}
+              {filteredNEETs.map((n, i) => (
                 <tr
                   key={i}
                   style={{
                     borderBottom:
-                      i < recentNEETs.length - 1 ? "1px solid #F4F6F9" : "none",
+                      i < filteredNEETs.length - 1
+                        ? "1px solid #F4F6F9"
+                        : "none",
                   }}
                 >
                   <td style={{ padding: "10px 12px" }}>

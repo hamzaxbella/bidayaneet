@@ -1,5 +1,5 @@
 "use client";
-import { CalendarDays, Download } from "lucide-react";
+import { CalendarDays, Download, MapPin, Search } from "lucide-react";
 import { downloadCsv } from "@/lib/export-csv";
 interface PageHeaderProps {
   title: string;
@@ -8,6 +8,7 @@ interface PageHeaderProps {
   actionIcon?: React.ReactNode;
   showFilters?: boolean;
   searchPlaceholder?: string;
+  onSearch?: (query: string) => void;
 }
 export default function PageHeader({
   title,
@@ -15,18 +16,32 @@ export default function PageHeader({
   actionLabel,
   actionIcon,
   showFilters = true,
+  searchPlaceholder = "Search NEET profiles...",
+  onSearch,
 }: PageHeaderProps) {
   return (
     <div className="admin-header">
       <div className="admin-header-main">
         <div>
-          <div className="eyebrow">SOUSS-MASSA · REGIONAL IMPACT</div>
           <h1>{title}</h1>
-          <p>{subtitle}</p>
+          <p>
+            <MapPin size={12} /> {subtitle}
+          </p>
         </div>
         <div className="admin-header-tools">
+          {onSearch && (
+            <div className="original-admin-search">
+              <Search size={15} />
+              <input
+                type="search"
+                aria-label="Search NEET profiles"
+                placeholder={searchPlaceholder}
+                onChange={(event) => onSearch(event.target.value)}
+              />
+            </div>
+          )}
           <button
-            className="button button-secondary"
+            className="btn-primary"
             onClick={() =>
               downloadCsv("bidayaneet-regional-overview-demo.csv", [
                 ["Metric", "Value", "Period", "Source"],
@@ -43,8 +58,11 @@ export default function PageHeader({
       </div>
       {showFilters && (
         <div className="admin-period">
-          <CalendarDays size={13} />
-          <span>May 2025 · Sample reporting period</span>
+          <span className="original-period">
+            <CalendarDays size={13} /> May 1 – May 31, 2025
+          </span>
+          <span className="original-period">Souss-Massa</span>
+          <span>Sample reporting period</span>
         </div>
       )}
     </div>

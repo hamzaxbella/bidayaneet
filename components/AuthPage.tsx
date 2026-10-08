@@ -105,7 +105,7 @@ export default function AuthPage({
           </p>
         </div>
         <Image
-          src="/user-portal/mountain-progress.jpg"
+          src="/editorial/mountain-progress.webp"
           alt="Un chemin qui mène au sommet"
           width={580}
           height={450}

@@ -92,7 +92,9 @@ test("logos have no dashboard switcher and role navigation stays within its work
   for (const role of ["neet", "mediator", "partner"]) {
     await page.goto(`/${role}`);
     await expect(
-      page.locator(".workspace-brand button:not(.mobile-close)"),
+      page.locator(
+        ".workspace-brand button:not(.mobile-close):not(.sidebar-collapse)",
+      ),
     ).toHaveCount(0);
     await expect(page.locator(".workspace-brand a")).toHaveCount(0);
     const hrefs = await page
@@ -134,6 +136,33 @@ test("opportunities support search, favorites, details, and prepared application
   await expect(page.locator(".empty-state")).toBeVisible();
 });
 
+test("restored youth dashboard keeps its original panels and searches opportunities", async ({
+  page,
+}) => {
+  await page.goto("/neet");
+  const dashboard = page.locator(".original-youth-dashboard");
+  await expect(dashboard.locator(".profile-card")).toBeVisible();
+  await expect(dashboard.locator(".assistant-card")).toBeVisible();
+  await expect(dashboard.locator(".quote-card")).toBeVisible();
+  const search = dashboard.getByRole("textbox", {
+    name: "Rechercher des opportunités, programmes",
+  });
+  await search.fill("web");
+  await search.press("Enter");
+  await expect(page).toHaveURL("/neet/opportunities?q=web");
+  await expect(page.locator(".opportunity-card")).toHaveCount(1);
+  await expect(
+    page.getByRole("textbox", { name: "Rechercher une opportunité" }),
+  ).toHaveValue("web");
+
+  await page.goto("/");
+  await page
+    .getByRole("searchbox", { name: "Search NEET profiles" })
+    .fill("Yassine");
+  await expect(page.locator("table tbody tr")).toHaveCount(1);
+  await expect(page.locator("table tbody")).toContainText("Yassine");
+});
+
 test("mediator can search a caseload and record a local follow-up", async ({
   page,
 }) => {
@@ -150,6 +179,14 @@ test("mediator can search a caseload and record a local follow-up", async ({
   await expect(page.locator(".timeline")).toContainText(
     "Préparer le CV avant le prochain rendez-vous.",
   );
+  await page.reload();
+  await expect(page.locator(".timeline")).toContainText(
+    "Préparer le CV avant le prochain rendez-vous.",
+  );
+  await page.goto("/mediator/caseload/FZ");
+  await expect(page.locator(".timeline")).not.toContainText(
+    "Préparer le CV avant le prochain rendez-vous.",
+  );
 });
 
 test("appointments can be created and completed locally", async ({ page }) => {
@@ -164,6 +201,9 @@ test("appointments can be created and completed locally", async ({ page }) => {
     .filter({ hasText: "Bureau de test" });
   await expect(appointment).toBeVisible();
   await appointment.getByRole("button", { name: "Marquer terminé" }).click();
+  await page.getByRole("button", { name: "Terminés", exact: true }).click();
+  await expect(appointment).toBeVisible();
+  await page.reload();
   await page.getByRole("button", { name: "Terminés", exact: true }).click();
   await expect(appointment).toBeVisible();
 });
@@ -189,6 +229,130 @@ test("conversations keep local replies isolated per recipient", async ({
   await expect(page.getByRole("log")).toContainText(
     "Bonjour Imane, je prépare mes questions.",
   );
+  await page.reload();
+  await expect(page.getByRole("log")).toContainText(
+    "Bonjour Imane, je prépare mes questions.",
+  );
+});
+
+test("floating sidebar collapses, persists, and retains accessible role links", async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Desktop collapse only");
+  for (const route of ["/neet", "/mediator", "/partner", "/"]) {
+    await page.goto(route);
+    const sidebar = page.locator(".workspace-sidebar");
+    await expect.poll(async () => (await sidebar.boundingBox())?.x).toBe(10);
+    await page.getByRole("button", { name: "Réduire la navigation" }).click();
+    await expect(page.locator(".workspace")).toHaveClass(/workspace-collapsed/);
+    await expect
+      .poll(async () => (await sidebar.boundingBox())?.width)
+      .toBe(82);
+    await expect(sidebar.locator("nav a").first()).toHaveAccessibleName(
+      /Home|Vue d’ensemble|Overview|Dashboard/,
+    );
+    await page.reload();
+    await expect(page.locator(".workspace")).toHaveClass(/workspace-collapsed/);
+    await page
+      .getByRole("button", { name: "Développer la navigation" })
+      .click();
+    await expect
+      .poll(async () => (await sidebar.boundingBox())?.width)
+      .toBe(248);
+  }
+});
+
+test("portrait stories open an accessible viewer, navigate, and restore focus", async ({
+  page,
+}) => {
+  await page.goto("/neet/stories");
+  await expect(page.locator(".reel-card")).toHaveCount(6);
+  const first = page.getByRole("button", {
+    name: "Découvrir le récit de Salma",
+    exact: true,
+  });
+  const box = await first.boundingBox();
+  expect(box!.height / box!.width).toBeCloseTo(16 / 9, 1);
+  await first.click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(
+    dialog.getByRole("button", { name: "Fermer l’histoire" }),
+  ).toBeFocused();
+  await expect
+    .poll(() => dialog.evaluate((element) => element.scrollTop))
+    .toBe(0);
+  await expect(dialog.getByRole("heading")).toContainText("Salma");
+  await dialog.getByRole("button", { name: "Suivant", exact: true }).click();
+  await expect(dialog.getByRole("heading")).toContainText("Omar");
+  await page.keyboard.press("ArrowUp");
+  await expect(dialog.getByRole("heading")).toContainText("Salma");
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(first).toBeFocused();
+});
+
+test("image-backed micro-actions persist selections across reload and dashboard navigation", async ({
+  page,
+}) => {
+  await page.goto("/neet/micro-actions");
+  const card = page
+    .locator(".action-visual")
+    .filter({ hasText: "Un CV qui te ressemble" });
+  await expect(card.locator("img")).toBeVisible();
+  await card.getByRole("button", { name: "M’inscrire en démo" }).click();
+  await expect(card.getByRole("status")).toContainText("cet appareil");
+  await page.reload();
+  await page
+    .getByRole("button", { name: "Mes inscriptions", exact: true })
+    .click();
+  await expect(page.locator(".action-visual")).toHaveCount(1);
+  await page.goto("/neet");
+  await expect(
+    page
+      .locator(".action-visual")
+      .filter({ hasText: "Un CV qui te ressemble" })
+      .getByRole("button", { name: "Annuler ma sélection" }),
+  ).toHaveAttribute("aria-pressed", "true");
+});
+
+test("partner referrals and program capacity use the persistent demo repository", async ({
+  page,
+}) => {
+  await page.goto("/partner");
+  const referral = page
+    .locator("table tbody tr")
+    .filter({ hasText: "Yassine El Amrani" });
+  await referral.getByRole("button", { name: "Accept", exact: true }).click();
+  await expect(referral).toContainText("Accepted");
+  await page.reload();
+  await expect(referral).toContainText("Accepted");
+  await page
+    .locator(".partner-showcase-actions")
+    .getByRole("link", { name: /Manage programs/ })
+    .click();
+  await expect(page).toHaveURL(/#programs$/);
+  await expect(page.locator("#programs")).toBeInViewport();
+});
+
+test("profile changes persist and update the correct role dashboard", async ({
+  page,
+}) => {
+  for (const [role, firstName, button] of [
+    ["neet", "Nadia", "Enregistrer mes informations"],
+    ["mediator", "Siham", "Enregistrer mes informations"],
+  ]) {
+    await page.goto(`/${role}/profile`);
+    await page.getByLabel("Prénom", { exact: true }).fill(firstName);
+    await page.getByRole("button", { name: button, exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("cet appareil");
+    await page.reload();
+    await expect(page.getByLabel("Prénom", { exact: true })).toHaveValue(
+      firstName,
+    );
+    await page.goto(`/${role}`);
+    await expect(page.locator("h1").first()).toContainText(firstName);
+  }
 });
 
 test("auth validates passwords without establishing a fake session", async ({
@@ -220,6 +384,7 @@ test("coverage map includes the south and retains layer selection", async ({
   });
   await page.goto("/heatmap");
   const map = page.locator(".national-map");
+  await expect(map).toBeVisible();
   expect(
     await map.evaluate((element) => element.getBoundingClientRect().width),
   ).toBeGreaterThan(280);
@@ -258,7 +423,7 @@ test("mobile navigation opens and closes after selecting a page", async ({
   await expect(page.locator(".workspace-sidebar")).toHaveClass(/is-open/);
   await expect(page.locator(".mobile-close")).toBeFocused();
   await page.keyboard.press("Shift+Tab");
-  await expect(page.locator(".workspace-user")).toBeFocused();
+  await expect(page.locator(".sidebar-support a")).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.locator(".mobile-close")).toBeFocused();
   await page.keyboard.press("Escape");

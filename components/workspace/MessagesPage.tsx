@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
+import { useSimulatedState } from "@/lib/simulated-backend";
 import Image from "next/image";
 import { Send } from "lucide-react";
 import { PageIntro } from "./UI";
@@ -13,7 +14,7 @@ export default function MessagesPage({ role }: { role: "neet" | "mediator" }) {
             id: "imane",
             name: "Imane Rami",
             subtitle: "Ta médiatrice · Agadir",
-            photo: "/user-portal/story-amina.jpg",
+            photo: "/editorial/story-amina.webp",
             initial:
               "Bonjour Yassine ! Pour notre prochain rendez-vous, prépare les métiers qui t’intéressent. Nous regarderons les formations ensemble.",
           },
@@ -21,7 +22,7 @@ export default function MessagesPage({ role }: { role: "neet" | "mediator" }) {
             id: "team",
             name: "Équipe BidayaNeet",
             subtitle: "Conseils & accompagnement",
-            photo: "/user-portal/assistant-bot.jpg",
+            photo: "/editorial/assistant-bot.webp",
             initial:
               "Bienvenue dans ton espace ! Les petits pas sont là pour t’aider à avancer à ton rythme.",
           },
@@ -31,7 +32,7 @@ export default function MessagesPage({ role }: { role: "neet" | "mediator" }) {
             id: "yassine",
             name: "Yassine El Amrani",
             subtitle: "Activé · Agadir",
-            photo: "/user-portal/story-khalid.jpg",
+            photo: "/editorial/story-khalid.webp",
             initial:
               "Bonjour Imane, la formation en développement web m’intéresse. Est-ce qu’on peut en parler à notre rendez-vous ?",
           },
@@ -39,7 +40,7 @@ export default function MessagesPage({ role }: { role: "neet" | "mediator" }) {
             id: "fatima",
             name: "Fatima Zahra A.",
             subtitle: "Orientation · Inezgane",
-            photo: "/user-portal/story-fatima.jpg",
+            photo: "/editorial/story-fatima.webp",
             initial:
               "Bonjour, j’ai préparé mon CV pour le stage. Pourrais-tu m’aider à préparer l’entretien ?",
           },
@@ -54,9 +55,9 @@ export default function MessagesPage({ role }: { role: "neet" | "mediator" }) {
         ];
   const [selected, setSelected] = useState(people[0].id);
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<
+  const [messages, setMessages] = useSimulatedState<
     Record<string, { text: string; time: string }[]>
-  >({});
+  >(`messages.${role}`, {});
   const logRef = useRef<HTMLDivElement>(null);
   const current = people.find((person) => person.id === selected)!;
   function send(event: FormEvent) {

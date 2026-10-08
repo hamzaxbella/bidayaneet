@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
+import { useSimulatedState } from "@/lib/simulated-backend";
 
 type YouthState = {
   saved: string[];
@@ -14,10 +15,19 @@ type YouthState = {
 };
 const Context = createContext<YouthState | null>(null);
 export default function YouthProvider({ children }: { children: ReactNode }) {
-  const [saved, setSaved] = useState<string[]>([]);
-  const [applications, setApplications] = useState<string[]>([]);
-  const [completed, setCompleted] = useState<number[]>([0]);
-  const [enrolled, setEnrolled] = useState<number[]>([]);
+  const [saved, setSaved] = useSimulatedState<string[]>("neet.saved", []);
+  const [applications, setApplications] = useSimulatedState<string[]>(
+    "neet.applications",
+    [],
+  );
+  const [completed, setCompleted] = useSimulatedState<number[]>(
+    "neet.completed",
+    [0],
+  );
+  const [enrolled, setEnrolled] = useSimulatedState<number[]>(
+    "neet.enrolled",
+    [],
+  );
   return (
     <Context.Provider
       value={{

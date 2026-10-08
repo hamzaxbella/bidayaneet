@@ -7,7 +7,7 @@ export const opportunities = [
     location: "Agadir",
     duration: "6 mois",
     match: 92,
-    image: "/user-portal/opp-web-dev.jpg",
+    image: "/editorial/opp-web-dev.webp",
     description:
       "Apprends à créer des applications web, construis ton portfolio et prépare ton premier stage.",
     skills: ["HTML & CSS", "JavaScript", "Travail en équipe"],
@@ -23,7 +23,7 @@ export const opportunities = [
     location: "Casablanca",
     duration: "3 mois",
     match: 88,
-    image: "/user-portal/opp-marketing.jpg",
+    image: "/editorial/opp-marketing.webp",
     description:
       "Rejoins une équipe créative et développe tes compétences en communication et réseaux sociaux.",
     skills: ["Communication", "Réseaux sociaux", "Créativité"],
@@ -39,7 +39,7 @@ export const opportunities = [
     location: "Agadir",
     duration: "CDI",
     match: 85,
-    image: "/user-portal/opp-retail.jpg",
+    image: "/editorial/opp-retail.webp",
     description:
       "Accueille et conseille les clients dans une équipe qui t’accompagne dès le premier jour.",
     skills: ["Relation client", "Organisation", "Français"],
@@ -55,7 +55,7 @@ export const opportunities = [
     location: "En ligne",
     duration: "8 semaines",
     match: 82,
-    image: "/user-portal/opp-entrepreneur.jpg",
+    image: "/editorial/opp-entrepreneur.webp",
     description:
       "Transforme ton idée en projet grâce à des ateliers pratiques et un mentor dédié.",
     skills: ["Entrepreneuriat", "Gestion", "Présentation"],
@@ -70,7 +70,7 @@ export const stories = [
     name: "Salma",
     role: "Développeuse web",
     city: "Agadir",
-    image: "/user-portal/story-salma.jpg",
+    image: "/editorial/story-salma.webp",
     quote:
       "Je pensais que le numérique n’était pas pour moi. Aujourd’hui, j’en ai fait mon métier.",
     text: "Après une période sans emploi, Salma a commencé par un atelier de découverte. Avec l’aide de sa médiatrice, elle a rejoint une formation, créé son premier portfolio et trouvé un stage. Ce sont les petits objectifs chaque semaine qui l’ont aidée à garder confiance.",
@@ -80,7 +80,7 @@ export const stories = [
     name: "Omar",
     role: "Entrepreneur",
     city: "Taroudant",
-    image: "/user-portal/story-omar.jpg",
+    image: "/editorial/story-omar.webp",
     quote:
       "Mon idée avait besoin d’un premier pas, et de quelqu’un qui y croyait.",
     text: "Omar souhaitait créer une petite activité locale. Un programme d’accompagnement lui a permis de tester son idée, comprendre ses coûts et rencontrer ses premiers clients. Son conseil : parler de son projet et demander de l’aide tôt.",
@@ -90,7 +90,7 @@ export const stories = [
     name: "Fatima",
     role: "Assistante RH",
     city: "Inezgane",
-    image: "/user-portal/story-fatima.jpg",
+    image: "/editorial/story-fatima.webp",
     quote: "J’ai appris à parler de mes compétences avec confiance.",
     text: "Fatima a travaillé son CV et préparé ses entretiens avec son médiateur. Une immersion professionnelle lui a permis de découvrir les ressources humaines et de construire un projet qui lui ressemble.",
   },
@@ -99,9 +99,28 @@ export const stories = [
     name: "Youssef",
     role: "Technicien",
     city: "Tiznit",
-    image: "/user-portal/story-youssef.jpg",
+    image: "/editorial/story-youssef.webp",
     quote: "Une formation pratique m’a ouvert une nouvelle voie.",
     text: "Youssef a découvert la maintenance lors d’une visite de centre de formation. Il a choisi un parcours technique et a continué à rencontrer son médiateur pour organiser son transport et son stage.",
+  },
+  {
+    id: "amina",
+    name: "Amina",
+    role: "Médiatrice de proximité",
+    city: "Agadir",
+    image: "/editorial/story-amina.webp",
+    quote: "Une rencontre peut suffire à remettre un projet en mouvement.",
+    text: "Amina a trouvé sa voie en accompagnant les jeunes de son quartier. Après une formation, elle a rejoint une équipe de médiation. Elle aime prendre le temps d’écouter avant de proposer un premier objectif accessible. Aujourd’hui, elle aide à son tour d’autres jeunes à choisir leur prochain pas.",
+  },
+  {
+    id: "khalid",
+    name: "Khalid",
+    role: "Conseiller clientèle",
+    city: "Agadir",
+    image: "/editorial/story-khalid.webp",
+    quote:
+      "Le plus difficile était de commencer. Ensuite, chaque pas comptait.",
+    text: "Khalid a commencé par refaire son CV et participer à un atelier d’entretien. Sa médiatrice l’a aidé à reconnaître ses compétences et à rencontrer un employeur local. Il travaille maintenant dans une équipe où il continue à apprendre, et garde un contact régulier avec son accompagnatrice.",
   },
 ];
 export const youngPeople = [
@@ -117,7 +136,7 @@ export const youngPeople = [
     goal: "Formation en développement web",
     next: "Entretien d’orientation",
     date: "5 oct. · 10:00",
-    photo: "/user-portal/story-khalid.jpg",
+    photo: "/editorial/story-khalid.webp",
     skills: "Relation client, outils bureautiques",
     blocker: "CV à finaliser",
   },
@@ -133,7 +152,7 @@ export const youngPeople = [
     goal: "Stage en marketing digital",
     next: "Préparer un entretien",
     date: "5 oct. · 11:30",
-    photo: "/user-portal/story-fatima.jpg",
+    photo: "/editorial/story-fatima.webp",
     skills: "Communication, réseaux sociaux",
     blocker: "Transport à organiser",
   },
@@ -149,7 +168,7 @@ export const youngPeople = [
     goal: "Créer une activité locale",
     next: "Appel de suivi",
     date: "6 oct. · 09:00",
-    photo: "/user-portal/story-omar.jpg",
+    photo: "/editorial/story-omar.webp",
     skills: "Entrepreneuriat, vente",
     blocker: "Aucun frein identifié",
   },
@@ -165,7 +184,7 @@ export const youngPeople = [
     goal: "Clarifier son projet",
     next: "Visite de proximité",
     date: "6 oct. · 14:00",
-    photo: "/user-portal/story-salma.jpg",
+    photo: "/editorial/story-salma.webp",
     skills: "Créativité, organisation",
     blocker: "Contraintes familiales",
   },
@@ -181,7 +200,7 @@ export const youngPeople = [
     goal: "Découvrir les métiers techniques",
     next: "Reprendre contact",
     date: "7 oct. · 10:00",
-    photo: "/user-portal/story-youssef.jpg",
+    photo: "/editorial/story-youssef.webp",
     skills: "Travail manuel, mécanique",
     blocker: "Mobilité et distance",
   },
@@ -198,6 +217,7 @@ export const fieldActions = [
     description:
       "Mets en valeur tes compétences et repars avec une première version de ton CV.",
     icon: "file",
+    image: "/editorial/action-cv.webp",
   },
   {
     id: 2,
@@ -210,6 +230,7 @@ export const fieldActions = [
     description:
       "Entraîne-toi avec un médiateur et découvre comment présenter ton parcours.",
     icon: "users",
+    image: "/editorial/action-interview.webp",
   },
   {
     id: 3,
@@ -222,6 +243,7 @@ export const fieldActions = [
     description:
       "Rencontre des professionnels et découvre des parcours de formation accessibles.",
     icon: "compass",
+    image: "/editorial/action-digital.webp",
   },
   {
     id: 4,
@@ -234,5 +256,56 @@ export const fieldActions = [
     description:
       "Identifie trois métiers qui t’intéressent et partage-les avec ton médiateur.",
     icon: "heart",
+    image: "/editorial/action-reflection.webp",
   },
 ];
+
+export type DemoAppointment = {
+  id: string;
+  name: string;
+  type: string;
+  date: string;
+  time: string;
+  location: string;
+  done: boolean;
+};
+export const appointmentFixtures: DemoAppointment[] = youngPeople.map(
+  (person, index) => ({
+    id: person.id,
+    name: person.name,
+    type: person.next,
+    date: index < 2 ? "2026-10-05" : index < 4 ? "2026-10-06" : "2026-10-07",
+    time: ["10:00", "11:30", "09:00", "14:00", "10:00"][index],
+    location: index === 3 ? "À domicile · Tiznit" : "Bureau BidayaNeet, Agadir",
+    done: false,
+  }),
+);
+
+export const profileFixtures: Record<
+  "neet" | "mediator" | "admin" | "partner",
+  Record<string, string>
+> = {
+  neet: {
+    firstName: "Yassine",
+    lastName: "El Amrani",
+    email: "yassine@example.com",
+    phone: "",
+    city: "Agadir",
+    goal: "Une formation",
+    skills: "Relation client, outils bureautiques, communication",
+    interests:
+      "J’aimerais découvrir le développement web et travailler dans une équipe.",
+  },
+  mediator: {
+    firstName: "Imane",
+    lastName: "Rami",
+    email: "imane@example.com",
+    city: "Agadir",
+    language: "Français et darija",
+    presentation:
+      "J’accompagne les jeunes à clarifier leur projet et à trouver une première opportunité qui leur ressemble.",
+    availability: "Lundi au vendredi, 09:00 – 17:00",
+  },
+  admin: { firstName: "Amina", lastName: "El Mansouri" },
+  partner: { firstName: "OFPPT", lastName: "Souss-Massa" },
+};

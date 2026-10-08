@@ -1,23 +1,26 @@
 # BidayaNeet UI refactor
 
-## Design review
+## Requested refinements — October 7, 2026
 
-The original youth portal lived at `/mediator`. Its supporting pages were short placeholder cards, and the logo exposed a menu for switching between unrelated dashboards. The desktop interface used almost uniformly bold text, crowded panels, inconsistent spacing, and a fixed layout that was difficult to use on a phone.
+The restored white and teal interface remains the foundation. `app/refinement.css` adds floating, rounded sidebars with 10 px outer margins, persistent desktop collapse, accessible icon labels, and the existing mobile drawer. Partner navigation now opens its referral, program, and activity sections.
 
-Before screenshots are saved in `output/design/`: `neet-before.png`, `admin-before.png`, and `partner-before.png`.
+Youth stories use six 9:16 portrait covers and a full-screen narrative reader with keyboard navigation, Escape dismissal, and focus restoration. These are still-image stories; no video playback is simulated. Micro-actions have four distinct photographic backgrounds, readable overlays, and persistent selections. The mediator home presents an agenda and priority list, field actions use an itinerary, and the partner home presents a program showcase and referral pipeline. Regional admin retains its data-focused composition.
 
-The built-in imagegen tool received the youth screenshot as a visual reference. Its proposed redesign is saved at `output/design/dashboard-concept.png`. The complete prompt is in `output/design/imagegen-prompt.md`. This image is a design reference; the product is implemented with real components.
+Eighteen assets were generated with the built-in `image_gen` tool and visually inspected in `output/design/refined-assets-contact-sheet.png`. Final files are in `public/editorial/`; exact prompts and file paths are recorded in `output/design/refinement-prompts.json` and `output/design/refinement-assets.json`. Real organization logos are preserved. Generated photography illustrates demo records and does not depict verified participants.
 
-Notes taken from the generated concept and applied to the interface:
+The user chose a simulated backend for this iteration. `lib/simulated-backend.ts` stores demo state under `bidayaneet.demo.v2.*` in localStorage, updates components within the page, and synchronizes changes across tabs. If storage is unavailable, the demo remains usable in memory. Replace this adapter with the business API when it is supplied.
 
-- Use a quiet navy navigation panel and a light canvas to establish hierarchy.
-- Give the greeting and the next useful action more room than secondary information.
-- Keep an appointment card and a short checklist close to the main youth journey.
-- Use teal for actions and progress, and orange sparingly for attention.
-- Reduce bold text, add a clear heading scale, and use a locally hosted variable font.
-- Keep photographic opportunities aligned, with consistent metadata and actions.
-- Share spacing, buttons, panels, navigation, forms, and empty states across roles.
-- Make navigation a drawer on small screens, and allow tables to scroll within their own containers.
+## Original visual restored — October 7, 2026
+
+The user requested the original appearance after reviewing the broader redesign. `git pull --ff-only origin master` was run before this restoration and reported that the checkout was already up to date at `75b4e63`. The original interface at `cf8b6a3` supplies the visual reference.
+
+White sidebars, bright teal actions, the original font stack, compact admin and partner layouts, and the youth dashboard's profile, assistant, quote, opportunity, and story panels are restored. Completed mediator and youth pages and auth forms follow that same visual style. The original youth portal now lives at `/neet`; `/mediator` retains its dedicated mediator workflows.
+
+Responsive layouts, the keyboard-accessible mobile drawer, useful dashboard search, URL-only role access, completed page flows, auth screens, and the map replacement remain. The restoration changes presentation without reverting these features.
+
+`app/original-youth.css` scopes the original youth styles. `app/original-theme.css` restores shared colors, navigation, typography, cards, and headers across the workspaces. Original screenshots are saved in `output/design/`: `neet-before.png`, `admin-before.png`, and `partner-before.png`. Restoration screenshots use the `restored-` prefix.
+
+The earlier imagegen proposal, `output/design/dashboard-concept.png`, and its prompt remain as historical design artifacts. That proposal is no longer the visual direction for the application.
 
 ## Route ownership
 
@@ -38,13 +41,13 @@ Auth supports `sign-in`, `register`, `forgot-password`, and `reset-password` for
 
 This work completes the requested workspace pages and visual refactor. The user explicitly deferred the authentication provider. Dashboards remain demonstration workspaces; there are no authenticated sessions or server-side access controls yet.
 
-- Youth favorites, application preparation, checklists, and workshop selections survive client navigation inside the youth layout for the current session. Reloading clears them.
-- Messages, follow-up notes, appointments, participant lists, and profile edits are local demonstrations. They do not send notifications, submit applications, create accounts, or persist to a server.
+- Youth favorites, prepared applications, checklists, workshop selections, and youth/mediator profiles persist on the current device across navigation and reloads.
+- Messages, follow-up notes, appointments, participant lists, mediator referrals, partner referrals/offers, and activity logs also persist locally. They do not send notifications, submit applications, create accounts, or persist to a server.
 - CV selection validates PDF type and the 5 MB limit locally; it does not upload a file.
 - CSV exports produce real UTF-8 downloads and escape potential spreadsheet formula cells.
 - Loading, empty, validation, error, and not-found states are included.
 
-Before using real accounts, connect an authentication provider, enforce role authorization on the server and data layer, and replace the demo fixtures with the business API. These are separate integration tasks, not simulated by the UI.
+Before using real accounts, connect an authentication provider, enforce role authorization on the server and data layer, and replace the demo fixtures with the business API. The demo repository models UI state; real accounts, authorization, and network delivery remain separate integration tasks.
 
 ## Maps
 
@@ -64,6 +67,12 @@ Documentation: [Google Maps Embed API](https://developers.google.com/maps/docume
 
 Final desktop and mobile screenshots are saved under `output/design/`. Release work must follow the repository's GitHub delivery path when publishing is requested.
 
-Final results: production build and TypeScript checks passed, ESLint passed, and the browser suite passed 21 tests with one intentional desktop skip for the mobile-only menu test. The suite checks overflow against the configured viewport width, including mobile browsers that expand their layout viewport when content overflows. It also checks drawer focus cycling, Escape dismissal, focus restoration, and the map container width.
+The suite checks overflow against the configured viewport width, including mobile browsers that expand their layout viewport when content overflows. It also checks the restored youth panels and dashboard search, drawer focus cycling, Escape dismissal, focus restoration, and the map container width.
+
+Restoration validation: the production build and TypeScript checks passed, ESLint passed, and the desktop/mobile browser suite passed 23 tests with one intentional desktop skip for the mobile-only menu test. All 30 workspace routes and 16 auth screens were checked.
 
 Next.js and its ESLint configuration were upgraded to 16.3.8, with Playwright 1.63.0 and patched transitive dependencies. `npm audit` reported zero vulnerabilities after the dependency updates.
+
+Refinement validation: the production build and TypeScript checks passed; ESLint passed without warnings; the desktop/mobile suite passed 32 tests, with two intentional skips for controls specific to the other viewport. Checks include all 30 workspace routes and 16 auth screens, persistent role profiles and greetings, isolated messages and dossier notes, appointments, referrals, enrollments, desktop sidebar collapse, story opening focus, navigation, dismissal, and focus restoration.
+
+Final refinement screenshots use `refined-<page>-desktop.png`, `refined-<page>-tablet.png`, and `refined-<page>-mobile.png` for youth home, stories, micro-actions, mediator home/field actions, partner, and admin. Additional captures show the story viewer, collapsed sidebar, and phone navigation. Screens were reviewed at 1440, 1024, and 390 px; lazy images were loaded and chart animations settled before capturing. No horizontal page overflow was found.
