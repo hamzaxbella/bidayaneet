@@ -7,6 +7,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   ArrowUpRight,
+  ArrowUpLeft,
   Bell,
   BriefcaseBusiness,
   CalendarDays,
@@ -18,6 +19,8 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
   MessageCircle,
   Settings,
   Sparkles,
@@ -32,18 +35,21 @@ import {
 import Brand from "@/components/Brand";
 import { useSimulatedState } from "@/lib/simulated-backend";
 import { profileFixtures } from "@/lib/demo-data";
+import { locationsAr, normalizeYouthProfile, youthName, youthProfileFixture } from "@/lib/youth-ar";
+import YouthNotifications from "./YouthNotifications";
+import YouthAssistant from "./YouthAssistant";
 
 export type WorkspaceRole = "neet" | "mediator" | "admin" | "partner";
 const navigation = {
   neet: [
-    ["", "Home", House],
-    ["/opportunities", "Mes opportunités", Settings],
-    ["/stories", "Histoires inspirantes", Star],
-    ["/journey", "Mon parcours", ClipboardList],
-    ["/micro-actions", "Micro-actions", ShieldCheck],
-    ["/messages", "Messages", MessageCircle],
-    ["/profile", "Mon profil", UserRound],
-    ["/help", "Aide", CircleHelp],
+    ["", "الرئيسية", House],
+    ["/opportunities", "فرصي", Settings],
+    ["/stories", "قصص ملهمة", Star],
+    ["/journey", "مساري", ClipboardList],
+    ["/micro-actions", "خطوات صغيرة", ShieldCheck],
+    ["/messages", "الرسائل", MessageCircle],
+    ["/profile", "ملفي", UserRound],
+    ["/help", "المساعدة", CircleHelp],
   ],
   mediator: [
     ["", "Vue d’ensemble", House],
@@ -78,7 +84,7 @@ const navigation = {
 const identities = {
   neet: {
     name: "Yassine El Amrani",
-    label: "Espace jeune",
+    label: "فضاء الشباب",
     initials: "YE",
     photo: "/editorial/story-khalid.webp",
   },
@@ -125,6 +131,11 @@ export default function WorkspaceShell({
   children: ReactNode;
 }) {
   const path = usePathname();
+  const messenger = path.endsWith("/messages");
+  const english = role === "admin" || role === "partner";
+  const ExternalArrow = role === "neet" ? ArrowUpLeft : ArrowUpRight;
+  const ExpandNavigation = role === "neet" ? PanelRightOpen : PanelLeftOpen;
+  const CollapseNavigation = role === "neet" ? PanelRightClose : PanelLeftClose;
   const hash = useSyncExternalStore(subscribeToHash, getHash, getServerHash);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useSimulatedState(
@@ -132,6 +143,24 @@ export default function WorkspaceShell({
     false,
   );
   const sidebarRef = useRef<HTMLElement>(null);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!messenger) return;
+    const workspace = workspaceRef.current;
+    const viewport = window.visualViewport;
+    const updateHeight = () => workspace?.style.setProperty(
+      "--workspace-viewport-height",
+      `${Math.min(window.innerHeight, viewport?.height ?? window.innerHeight)}px`,
+    );
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    viewport?.addEventListener("resize", updateHeight);
+    return () => {
+      workspace?.style.removeProperty("--workspace-viewport-height");
+      window.removeEventListener("resize", updateHeight);
+      viewport?.removeEventListener("resize", updateHeight);
+    };
+  }, [messenger]);
   useEffect(() => {
     if (!open || !window.matchMedia("(max-width: 760px)").matches) return;
     const sidebar = sidebarRef.current;
@@ -169,10 +198,17 @@ export default function WorkspaceShell({
     };
   }, [open]);
   const prefix = role === "admin" ? "" : `/${role}`;
-  const [profile] = useSimulatedState(`${role}.profile`, profileFixtures[role]);
+  const [profile] = useSimulatedState(
+    `${role}.profile`,
+    role === "neet" ? youthProfileFixture : profileFixtures[role],
+  );
+  const youthProfile = role === "neet" ? normalizeYouthProfile(profile) : null;
   const identity = {
     ...identities[role],
-    name: `${profile.firstName} ${profile.lastName}`,
+    name:
+      youthProfile
+        ? youthName(youthProfile.firstName, youthProfile.lastName)
+        : `${profile.firstName} ${profile.lastName}`,
   };
   const help =
     role === "admin"
@@ -187,18 +223,28 @@ export default function WorkspaceShell({
     )?.[1] ?? identity.label;
   return (
     <div
-      className={`workspace workspace-${role} ${path === prefix ? "workspace-home" : ""} ${collapsed ? "workspace-collapsed" : ""}`}
-      lang={role === "admin" || role === "partner" ? "en" : "fr"}
+      ref={workspaceRef}
+      className={`workspace workspace-${role} ${path === prefix ? "workspace-home" : ""} ${collapsed ? "workspace-collapsed" : ""} ${messenger ? "workspace-messenger" : ""}`}
+      lang={
+        role === "neet"
+          ? "ar"
+          : role === "admin" || role === "partner"
+            ? "en"
+            : "fr"
+      }
+      dir={role === "neet" ? "rtl" : undefined}
     >
       <a className="skip-link" href="#workspace-content">
         {role === "admin" || role === "partner"
           ? "Skip to content"
-          : "Aller au contenu"}
+          : role === "neet"
+            ? "انتقل إلى المحتوى"
+            : "Aller au contenu"}
       </a>
       {open && (
         <button
           className="sidebar-backdrop"
-          aria-label="Fermer le menu"
+          aria-label={role === "neet" ? "إغلاق القائمة" : english ? "Close menu" : "Fermer le menu"}
           tabIndex={-1}
           onClick={() => setOpen(false)}
         />
@@ -207,7 +253,9 @@ export default function WorkspaceShell({
         ref={sidebarRef}
         id={`navigation-${role}`}
         className={`workspace-sidebar ${open ? "is-open" : ""}`}
-        aria-label="Navigation principale"
+        aria-label={
+          role === "neet" ? "القائمة الرئيسية" : english ? "Main navigation" : "Navigation principale"
+        }
       >
         <div className="workspace-brand">
           <div className="expanded-brand">
@@ -219,21 +267,29 @@ export default function WorkspaceShell({
           <button
             className="sidebar-collapse icon-button"
             aria-label={
-              collapsed ? "Développer la navigation" : "Réduire la navigation"
+              role === "neet"
+                ? collapsed
+                  ? "توسيع القائمة"
+                  : "طي القائمة"
+                : english
+                  ? collapsed ? "Expand navigation" : "Collapse navigation"
+                  : collapsed
+                  ? "Développer la navigation"
+                  : "Réduire la navigation"
             }
             aria-expanded={!collapsed}
             aria-controls={`navigation-${role}`}
             onClick={() => setCollapsed((value) => !value)}
           >
             {collapsed ? (
-              <PanelLeftOpen size={18} />
+              <ExpandNavigation size={18} />
             ) : (
-              <PanelLeftClose size={18} />
+              <CollapseNavigation size={18} />
             )}
           </button>
           <button
             className="mobile-close icon-button"
-            aria-label="Fermer le menu"
+            aria-label={role === "neet" ? "إغلاق القائمة" : english ? "Close menu" : "Fermer le menu"}
             onClick={() => setOpen(false)}
           >
             <X size={20} />
@@ -264,7 +320,7 @@ export default function WorkspaceShell({
               >
                 <Icon size={18} strokeWidth={1.8} />
                 <span>{label}</span>
-                {label === "Messages" && <span className="nav-count">2</span>}
+                {suffix === "/messages" && <span className="nav-count">2</span>}
               </Link>
             );
           })}
@@ -288,11 +344,9 @@ export default function WorkspaceShell({
           )}
           <span>
             <b>{identity.name}</b>
-            <small>
-              {role === "neet" ? "Agadir · Mon profil" : identity.label}
-            </small>
+            <small>{youthProfile ? `${locationsAr[youthProfile.city] ?? youthProfile.city} · ملفي` : identity.label}</small>
           </span>
-          <ArrowUpRight size={15} />
+          <ExternalArrow size={15} />
         </Link>
         <div className="sidebar-support">
           {role === "neet" ? (
@@ -308,11 +362,13 @@ export default function WorkspaceShell({
           <b>
             {role === "admin" || role === "partner"
               ? "Need help?"
-              : "Besoin d’aide ?"}
+              : role === "neet"
+                ? "تحتاج إلى مساعدة؟"
+                : "Besoin d’aide ?"}
           </b>
           <p>
             {role === "neet"
-              ? "Ton médiateur est là pour t’accompagner."
+              ? "وسيطتك هنا لمواكبتك في كل خطوة."
               : role === "mediator"
                 ? "Ensemble, rapprochons les jeunes de leurs ambitions."
                 : "Working together for youth integration."}
@@ -320,8 +376,10 @@ export default function WorkspaceShell({
           <Link href={help}>
             {role === "admin" || role === "partner"
               ? "Help Center"
-              : "Centre d’aide"}
-            <ArrowUpRight size={14} />
+              : role === "neet"
+                ? "مركز المساعدة"
+                : "Centre d’aide"}
+            <ExternalArrow size={14} />
           </Link>
         </div>
       </aside>
@@ -329,7 +387,7 @@ export default function WorkspaceShell({
         <header className="workspace-topbar">
           <button
             className="mobile-menu icon-button"
-            aria-label="Ouvrir le menu"
+            aria-label={role === "neet" ? "فتح القائمة" : english ? "Open menu" : "Ouvrir le menu"}
             aria-expanded={open}
             aria-controls={`navigation-${role}`}
             onClick={() => setOpen(true)}
@@ -345,32 +403,41 @@ export default function WorkspaceShell({
             <span className="demo-label">
               {role === "admin" || role === "partner"
                 ? "Demo workspace"
-                : "Espace de démonstration"}
+                : role === "neet"
+                  ? "فضاء تجريبي"
+                  : "Espace de démonstration"}
             </span>
             <span className="topbar-location">
               <MapPin size={14} />
-              Souss-Massa
+              {role === "neet" ? "سوس ماسة" : "Souss-Massa"}
             </span>
-            <Link
-              href={
-                role === "admin"
-                  ? "/alerts"
-                  : role === "partner"
-                    ? "/auth/partner/sign-in"
-                    : `${prefix}/messages`
-              }
-              className="icon-button"
-              aria-label={
-                role === "admin" ? "View alerts" : "Voir les notifications"
-              }
-            >
-              <Bell size={19} />
-            </Link>
+            {role === "neet" || role === "mediator" ? (
+              <YouthNotifications role={role} />
+            ) : (
+              <Link
+                href={
+                  role === "admin"
+                    ? "/alerts"
+                    : role === "partner"
+                      ? "/auth/partner/sign-in"
+                      : `${prefix}/messages`
+                }
+                className="icon-button"
+                aria-label={
+                  role === "admin" ? "View alerts" : english ? "View notifications" : "Voir les notifications"
+                }
+              >
+                <Bell size={19} />
+              </Link>
+            )}
+            {role === "neet" && messenger && <YouthAssistant compact />}
             <Link href={`/auth/${role}/sign-in`} className="account-link">
               {role === "admin" || role === "partner"
                 ? "Sign in"
-                : "Se connecter"}
-              <ArrowUpRight size={13} />
+                : role === "neet"
+                  ? "تسجيل الدخول"
+                  : "Se connecter"}
+              <ExternalArrow size={13} />
             </Link>
           </div>
         </header>
@@ -386,10 +453,13 @@ export default function WorkspaceShell({
           <span>
             {role === "admin" || role === "partner"
               ? "First step. Brighter future."
-              : "Premier pas. Un avenir meilleur."}
+              : role === "neet"
+                ? "خطوة أولى. مستقبل أفضل."
+                : "Premier pas. Un avenir meilleur."}
           </span>
         </footer>
       </div>
+      {role === "neet" && !messenger && <YouthAssistant />}
     </div>
   );
 }

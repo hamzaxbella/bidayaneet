@@ -1,0 +1,153 @@
+/* Mediator portal: consistent controls around the existing workspace. */
+.workspace-mediator .filter-bar {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.workspace-mediator .filter-bar > [data-slot="select-trigger"] {
+  width: auto;
+  min-width: 170px;
+}
+.workspace-mediator .mediator-search {
+  flex: 1 1 260px;
+  width: auto;
+}
+.mediator-terrain-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 22px;
+}
+.mediator-terrain-card,
+.mediator-offer-card {
+  min-width: 0;
+  padding-top: 0;
+}
+.mediator-terrain-image,
+.mediator-offer-image {
+  position: relative;
+  height: 200px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.mediator-terrain-image img,
+.mediator-offer-image img {
+  object-fit: cover;
+}
+.mediator-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 18px;
+}
+.mediator-card-content [data-slot="select-trigger"] {
+  width: 100%;
+  max-width: 100%;
+}
+.mediator-card-content .card-meta {
+  margin: 0;
+}
+.mediator-card-footer {
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.mediator-participant-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.mediator-attendees {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mediator-attendees li {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.mediator-dialog-attendees {
+  padding: 0;
+  list-style: none;
+}
+.mediator-dialog-attendees li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.mediator-feedback {
+  margin: 16px 0;
+}
+.mediator-dialog-footer {
+  margin-top: 22px;
+}
+.mediator-agenda-filters {
+  margin: 22px 0;
+}
+.workspace-mediator .appointment-card {
+  gap: 20px;
+}
+@media (max-width: 1100px) {
+  .mediator-card-footer [data-slot="button"] {
+    flex: 1 1 auto;
+  }
+}
+@media (max-width: 760px) {
+  .mediator-terrain-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mediator-terrain-image,
+  .mediator-offer-image {
+    height: 180px;
+  }
+  .workspace-mediator .filter-bar > [data-slot="select-trigger"] {
+    flex: 1 1 150px;
+    min-width: 0;
+  }
+  .workspace-mediator .filter-bar > [data-slot="toggle-group"] {
+    flex-wrap: wrap;
+  }
+  .workspace-mediator .appointment-card {
+    flex-wrap: wrap;
+  }
+}
+
+.workspace-mediator .mediator-search [data-slot="input-group-control"] { min-height: 40px; }
+.workspace-mediator .filter-bar [data-slot="input-group"] { min-height: 40px; }
+.mediator-terrain-image { height: 180px; }
+.mediator-terrain-card [data-slot="card-header"],
+.mediator-offer-card [data-slot="card-header"] { gap: 8px; }
+.mediator-terrain-card [data-slot="card-title"] h2,
+.mediator-offer-card [data-slot="card-title"] h2 { font: inherit; margin: 0; }
+.mediator-terrain-card .action-card-top,
+.mediator-offer-card .action-card-top { margin-bottom: 4px; }
+.mediator-terrain-card .mediator-card-footer [data-slot="button"] { flex: 1; }
+.mediator-attendees li { max-width: 100%; }
+.mediator-attendees [data-slot="badge"] { white-space: normal; overflow-wrap: anywhere; }
+.mediator-dialog-attendees { display: flex; flex-direction: column; gap: 8px; }
+.mediator-card-content [data-slot="alert-description"] { overflow-wrap: anywhere; }
+.workspace-mediator .agenda-entry small,
+.workspace-mediator .person-row p,
+.workspace-mediator .appointment-card p { overflow-wrap: anywhere; }
+@media (max-width: 1100px) and (min-width: 761px) {
+  .mediator-terrain-grid { gap: 16px; }
+  .mediator-card-footer [data-slot="button"] { flex-basis: 100%; }
+  .mediator-offer-card .action-card-top { flex-wrap: wrap; gap: 8px; }
+}
+@media (max-width: 400px) {
+  .mediator-card-footer [data-slot="button"] { flex-basis: 100%; }
+  .mediator-terrain-card .action-card-top { flex-wrap: wrap; gap: 8px; }
+}
+@media (max-width: 760px) {
+  .workspace-mediator .appointment-card { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: start; gap: 12px; padding: 16px; }
+  .workspace-mediator .appointment-card .date-tile { grid-row: 1 / span 2; width: 52px; padding-inline: 4px; }
+  .workspace-mediator .appointment-card > [data-slot="button"] { grid-column: 2; justify-self: start; max-width: 100%; }
+}

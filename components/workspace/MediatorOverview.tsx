@@ -17,6 +17,7 @@ import {
 } from "@/lib/demo-data";
 import { useSimulatedState } from "@/lib/simulated-backend";
 import { EmptyState, Panel, Tag } from "./UI";
+import { Button } from "@/components/ui/button";
 
 export default function MediatorOverview() {
   const [profile] = useSimulatedState(
@@ -43,9 +44,11 @@ export default function MediatorOverview() {
           </h1>
           <p>Des liens à renforcer. Des premiers pas à préparer.</p>
         </div>
-        <Link href="/mediator/appointments" className="button button-primary">
-          <CalendarDays size={16} /> Ouvrir mon agenda
-        </Link>
+        <Button asChild>
+          <Link href="/mediator/appointments">
+            <CalendarDays data-icon="inline-start" /> Ouvrir mon agenda
+          </Link>
+        </Button>
       </header>
       <div className="mediator-status-strip">
         <div>

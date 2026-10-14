@@ -41,7 +41,9 @@ test("every workspace route renders without errors or horizontal page overflow",
   for (const route of routes) {
     const response = await page.goto(route);
     expect(response?.status(), route).toBe(200);
-    await expect(page.locator("h1").first(), route).toBeVisible();
+    if (route.endsWith("/messages"))
+      await expect(page.getByRole("heading", { level: 1 })).toBeAttached();
+    else await expect(page.locator("h1").first(), route).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     expect(
       await page.evaluate(
@@ -108,31 +110,21 @@ test("opportunities support search, favorites, details, and prepared application
   page,
 }) => {
   await page.goto("/neet/opportunities");
-  await page
-    .getByRole("textbox", { name: "Rechercher une opportunité" })
-    .fill("web");
-  await expect(page.locator(".opportunity-card")).toHaveCount(1);
-  await page.getByRole("button", { name: /Ajouter aux favoris/ }).click();
-  await page
-    .getByRole("button", { name: "Mes favoris (1)", exact: true })
-    .click();
-  await expect(page.locator(".opportunity-card")).toHaveCount(1);
-  await page.getByRole("link", { name: "Découvrir l’opportunité" }).click();
-  await page.getByRole("button", { name: "Préparer ma candidature" }).click();
+  await page.getByRole("textbox", { name: "ابحث عن فرصة" }).fill("web");
+  await expect(page.locator(".youth-opportunity-card")).toHaveCount(1);
+  await page.getByRole("button", { name: /إضافة إلى المفضلة/ }).click();
+  await page.getByRole("tab", { name: "المفضلة (1)", exact: true }).click();
+  await expect(page.locator(".youth-opportunity-card")).toHaveCount(1);
+  await page.getByRole("link", { name: "اكتشف الفرصة" }).click();
+  await page.getByRole("button", { name: "حضّر ترشيحي" }).click();
   await expect(
-    page.getByRole("button", { name: "Candidature préparée" }),
+    page.getByRole("button", { name: "تم تحضير الترشيح" }),
   ).toBeDisabled();
-  await expect(page.getByRole("status")).toContainText("Aucune candidature");
-  await page
-    .getByRole("link", { name: "Toutes les opportunités", exact: true })
-    .click();
-  await page
-    .getByRole("button", { name: "Mes candidatures (1)", exact: true })
-    .click();
-  await expect(page.locator(".opportunity-card")).toHaveCount(1);
-  await page
-    .getByRole("textbox", { name: "Rechercher une opportunité" })
-    .fill("zzzz");
+  await expect(page.getByRole("status")).toContainText("لم يُرسل أي ترشيح");
+  await page.getByRole("link", { name: "كل الفرص", exact: true }).click();
+  await page.getByRole("tab", { name: "ترشيحاتي (1)", exact: true }).click();
+  await expect(page.locator(".youth-opportunity-card")).toHaveCount(1);
+  await page.getByRole("textbox", { name: "ابحث عن فرصة" }).fill("zzzz");
   await expect(page.locator(".empty-state")).toBeVisible();
 });
 
@@ -145,19 +137,19 @@ test("restored youth dashboard keeps its original panels and searches opportunit
   await expect(dashboard.locator(".assistant-card")).toBeVisible();
   await expect(dashboard.locator(".quote-card")).toBeVisible();
   const search = dashboard.getByRole("textbox", {
-    name: "Rechercher des opportunités, programmes",
+    name: "البحث عن فرص وبرامج",
   });
   await search.fill("web");
   await search.press("Enter");
   await expect(page).toHaveURL("/neet/opportunities?q=web");
-  await expect(page.locator(".opportunity-card")).toHaveCount(1);
-  await expect(
-    page.getByRole("textbox", { name: "Rechercher une opportunité" }),
-  ).toHaveValue("web");
+  await expect(page.locator(".youth-opportunity-card")).toHaveCount(1);
+  await expect(page.getByRole("textbox", { name: "ابحث عن فرصة" })).toHaveValue(
+    "web",
+  );
 
   await page.goto("/");
   await page
-    .getByRole("searchbox", { name: "Search NEET profiles" })
+    .getByRole("textbox", { name: "Search NEET profiles" })
     .fill("Yassine");
   await expect(page.locator("table tbody tr")).toHaveCount(1);
   await expect(page.locator("table tbody")).toContainText("Yassine");
@@ -201,35 +193,41 @@ test("appointments can be created and completed locally", async ({ page }) => {
     .filter({ hasText: "Bureau de test" });
   await expect(appointment).toBeVisible();
   await appointment.getByRole("button", { name: "Marquer terminé" }).click();
-  await page.getByRole("button", { name: "Terminés", exact: true }).click();
+  await page.getByRole("radio", { name: "Terminés", exact: true }).click();
   await expect(appointment).toBeVisible();
   await page.reload();
-  await page.getByRole("button", { name: "Terminés", exact: true }).click();
+  await page.getByRole("radio", { name: "Terminés", exact: true }).click();
   await expect(appointment).toBeVisible();
 });
 
 test("conversations keep local replies isolated per recipient", async ({
   page,
-}) => {
+}, testInfo) => {
   await page.goto("/neet/messages");
+  await page.locator(".messenger-contact").first().click();
   await page
-    .getByRole("textbox", { name: "Votre message" })
+    .getByRole("textbox", { name: "رسالتك" })
     .fill("Bonjour Imane, je prépare mes questions.");
   await page
-    .getByRole("button", { name: "Ajouter le message à la démonstration" })
+    .getByRole("button", { name: "إضافة الرسالة إلى المحادثة التجريبية" })
     .click();
   await expect(page.getByRole("log")).toContainText(
     "Bonjour Imane, je prépare mes questions.",
   );
-  await page.getByRole("button", { name: /Équipe BidayaNeet/ }).click();
+  if (testInfo.project.name === "mobile")
+    await page.getByRole("button", { name: "العودة إلى المحادثات" }).click();
+  await page.getByRole("button", { name: /فريق بداية نيت/ }).click();
   await expect(page.getByRole("log")).not.toContainText(
     "Bonjour Imane, je prépare mes questions.",
   );
-  await page.getByRole("button", { name: /Imane Rami/ }).click();
+  if (testInfo.project.name === "mobile")
+    await page.getByRole("button", { name: "العودة إلى المحادثات" }).click();
+  await page.getByRole("button", { name: /إيمان رامي/ }).click();
   await expect(page.getByRole("log")).toContainText(
     "Bonjour Imane, je prépare mes questions.",
   );
   await page.reload();
+  await page.locator(".messenger-contact").first().click();
   await expect(page.getByRole("log")).toContainText(
     "Bonjour Imane, je prépare mes questions.",
   );
@@ -242,19 +240,32 @@ test("floating sidebar collapses, persists, and retains accessible role links", 
   for (const route of ["/neet", "/mediator", "/partner", "/"]) {
     await page.goto(route);
     const sidebar = page.locator(".workspace-sidebar");
-    await expect.poll(async () => (await sidebar.boundingBox())?.x).toBe(10);
-    await page.getByRole("button", { name: "Réduire la navigation" }).click();
+    await expect
+      .poll(async () => {
+        const b = await sidebar.boundingBox();
+        return route === "/neet"
+          ? page.viewportSize()!.width - b!.x - b!.width
+          : b?.x;
+      })
+      .toBe(10);
+    await page
+      .getByRole("button", {
+        name: route === "/neet" ? "طي القائمة" : route === "/mediator" ? "Réduire la navigation" : "Collapse navigation",
+      })
+      .click();
     await expect(page.locator(".workspace")).toHaveClass(/workspace-collapsed/);
     await expect
       .poll(async () => (await sidebar.boundingBox())?.width)
       .toBe(82);
     await expect(sidebar.locator("nav a").first()).toHaveAccessibleName(
-      /Home|Vue d’ensemble|Overview|Dashboard/,
+      /الرئيسية|Vue d’ensemble|Overview|Dashboard/,
     );
     await page.reload();
     await expect(page.locator(".workspace")).toHaveClass(/workspace-collapsed/);
     await page
-      .getByRole("button", { name: "Développer la navigation" })
+      .getByRole("button", {
+        name: route === "/neet" ? "توسيع القائمة" : route === "/mediator" ? "Développer la navigation" : "Expand navigation",
+      })
       .click();
     await expect
       .poll(async () => (await sidebar.boundingBox())?.width)
@@ -266,9 +277,9 @@ test("portrait stories open an accessible viewer, navigate, and restore focus", 
   page,
 }) => {
   await page.goto("/neet/stories");
-  await expect(page.locator(".reel-card")).toHaveCount(6);
+  await expect(page.locator(".reel-card")).toHaveCount(4);
   const first = page.getByRole("button", {
-    name: "Découvrir le récit de Salma",
+    name: "اكتشف قصة سلمى",
     exact: true,
   });
   const box = await first.boundingBox();
@@ -277,16 +288,16 @@ test("portrait stories open an accessible viewer, navigate, and restore focus", 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await expect(
-    dialog.getByRole("button", { name: "Fermer l’histoire" }),
+    dialog.getByRole("button", { name: "إغلاق القصة" }),
   ).toBeFocused();
   await expect
     .poll(() => dialog.evaluate((element) => element.scrollTop))
     .toBe(0);
-  await expect(dialog.getByRole("heading")).toContainText("Salma");
-  await dialog.getByRole("button", { name: "Suivant", exact: true }).click();
-  await expect(dialog.getByRole("heading")).toContainText("Omar");
+  await expect(dialog.getByRole("heading")).toContainText("سلمى");
+  await dialog.getByRole("button", { name: "التالي", exact: true }).click();
+  await expect(dialog.getByRole("heading")).toContainText("عمر");
   await page.keyboard.press("ArrowUp");
-  await expect(dialog.getByRole("heading")).toContainText("Salma");
+  await expect(dialog.getByRole("heading")).toContainText("سلمى");
   await page.keyboard.press("Escape");
   await expect(dialog).not.toBeVisible();
   await expect(first).toBeFocused();
@@ -298,21 +309,19 @@ test("image-backed micro-actions persist selections across reload and dashboard 
   await page.goto("/neet/micro-actions");
   const card = page
     .locator(".action-visual")
-    .filter({ hasText: "Un CV qui te ressemble" });
+    .filter({ hasText: "سيرة ذاتية تعبّر عنك" });
   await expect(card.locator("img")).toBeVisible();
-  await card.getByRole("button", { name: "M’inscrire en démo" }).click();
-  await expect(card.getByRole("status")).toContainText("cet appareil");
+  await card.getByRole("button", { name: "اختيار سيرة ذاتية تعبّر عنك", exact: true }).click();
+  await expect(card.getByRole("status")).toContainText("هذا الجهاز");
   await page.reload();
-  await page
-    .getByRole("button", { name: "Mes inscriptions", exact: true })
-    .click();
+  await page.getByRole("tab", { name: "تسجيلاتي (1)", exact: true }).click();
   await expect(page.locator(".action-visual")).toHaveCount(1);
   await page.goto("/neet");
   await expect(
     page
       .locator(".action-visual")
-      .filter({ hasText: "Un CV qui te ressemble" })
-      .getByRole("button", { name: "Annuler ma sélection" }),
+      .filter({ hasText: "سيرة ذاتية تعبّر عنك" })
+      .getByRole("button", { name: "إلغاء اختيار سيرة ذاتية تعبّر عنك", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
 });
 
@@ -323,7 +332,7 @@ test("partner referrals and program capacity use the persistent demo repository"
   const referral = page
     .locator("table tbody tr")
     .filter({ hasText: "Yassine El Amrani" });
-  await referral.getByRole("button", { name: "Accept", exact: true }).click();
+  await referral.getByRole("button", { name: "Accept Yassine El Amrani", exact: true }).click();
   await expect(referral).toContainText("Accepted");
   await page.reload();
   await expect(referral).toContainText("Accepted");
@@ -339,17 +348,23 @@ test("profile changes persist and update the correct role dashboard", async ({
   page,
 }) => {
   for (const [role, firstName, button] of [
-    ["neet", "Nadia", "Enregistrer mes informations"],
+    ["neet", "Nadia", "حفظ معلوماتي"],
     ["mediator", "Siham", "Enregistrer mes informations"],
   ]) {
     await page.goto(`/${role}/profile`);
-    await page.getByLabel("Prénom", { exact: true }).fill(firstName);
+    await page
+      .getByLabel(role === "neet" ? "الاسم الشخصي" : "Prénom", { exact: true })
+      .fill(firstName);
     await page.getByRole("button", { name: button, exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("cet appareil");
-    await page.reload();
-    await expect(page.getByLabel("Prénom", { exact: true })).toHaveValue(
-      firstName,
+    await expect(page.getByRole("status")).toContainText(
+      role === "neet" ? "هذا الجهاز" : "cet appareil",
     );
+    await page.reload();
+    await expect(
+      page.getByLabel(role === "neet" ? "الاسم الشخصي" : "Prénom", {
+        exact: true,
+      }),
+    ).toHaveValue(firstName);
     await page.goto(`/${role}`);
     await expect(page.locator("h1").first()).toContainText(firstName);
   }
@@ -359,16 +374,16 @@ test("auth validates passwords without establishing a fake session", async ({
   page,
 }) => {
   await page.goto("/auth/neet/reset-password");
-  await page.getByLabel("Mot de passe", { exact: true }).fill("password123");
-  await page.getByLabel("Confirmer le mot de passe").fill("different123");
-  await page.getByRole("button", { name: "Définir le mot de passe" }).click();
+  await page.getByLabel("كلمة المرور", { exact: true }).fill("password123");
+  await page.getByLabel("تأكيد كلمة المرور").fill("different123");
+  await page.getByRole("button", { name: "تعيين كلمة المرور" }).click();
   await expect(page.locator(".auth-form").getByRole("alert")).toContainText(
-    "identiques",
+    "تتطابق",
   );
-  await page.getByLabel("Confirmer le mot de passe").fill("password123");
-  await page.getByRole("button", { name: "Définir le mot de passe" }).click();
+  await page.getByLabel("تأكيد كلمة المرور").fill("password123");
+  await page.getByRole("button", { name: "تعيين كلمة المرور" }).click();
   await expect(page.getByRole("status")).toContainText(
-    "Aucun mot de passe réel",
+    "لم يتم تغيير أي كلمة مرور فعلية",
   );
   await expect(page).toHaveURL("/auth/neet/reset-password");
   expect(await page.context().cookies()).toEqual([]);
@@ -391,17 +406,17 @@ test("coverage map includes the south and retains layer selection", async ({
   await expect(map.getByText("Laâyoune", { exact: true })).toBeVisible();
   await expect(map.getByText("Dakhla", { exact: true })).toBeVisible();
   await page
-    .getByRole("button", { name: "Mediator Coverage", exact: true })
+    .getByRole("radio", { name: "Mediator Coverage", exact: true })
     .click();
-  await expect(map.getByRole("status")).toContainText("Agadir · 12");
-  await map.getByRole("button", { name: "Souss-Massa", exact: true }).click();
+  await expect(map.locator(".map-selection")).toContainText("Agadir · 12");
+  await map.getByRole("radio", { name: "Souss-Massa", exact: true }).click();
   await map
     .getByRole("button", {
-      name: "Taroudant : 6, données de démonstration",
+      name: "Taroudant : 6, demonstration data",
       exact: true,
     })
     .click();
-  await expect(map.getByRole("status")).toContainText("Taroudant · 6");
+  await expect(map.locator(".map-selection")).toContainText("Taroudant · 6");
   expect(legacyRequests).toEqual([]);
 });
 
@@ -410,7 +425,7 @@ test("CSV report export creates a real download", async ({ page }) => {
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Télécharger le CSV" }).click();
   expect((await downloadPromise).suggestedFilename()).toBe(
-    "bidayaneet-activite-demo.csv",
+    "bidayaneet-activite-septembre-demo.csv",
   );
 });
 
@@ -419,7 +434,7 @@ test("mobile navigation opens and closes after selecting a page", async ({
 }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "Mobile menu only");
   await page.goto("/neet");
-  await page.getByRole("button", { name: "Ouvrir le menu" }).click();
+  await page.getByRole("button", { name: "فتح القائمة" }).click();
   await expect(page.locator(".workspace-sidebar")).toHaveClass(/is-open/);
   await expect(page.locator(".mobile-close")).toBeFocused();
   await page.keyboard.press("Shift+Tab");
@@ -427,13 +442,11 @@ test("mobile navigation opens and closes after selecting a page", async ({
   await page.keyboard.press("Tab");
   await expect(page.locator(".mobile-close")).toBeFocused();
   await page.keyboard.press("Escape");
-  await expect(
-    page.getByRole("button", { name: "Ouvrir le menu" }),
-  ).toBeFocused();
-  await page.getByRole("button", { name: "Ouvrir le menu" }).click();
+  await expect(page.getByRole("button", { name: "فتح القائمة" })).toBeFocused();
+  await page.getByRole("button", { name: "فتح القائمة" }).click();
   await page
     .locator(".workspace-sidebar")
-    .getByRole("link", { name: "Mon parcours", exact: true })
+    .getByRole("link", { name: "مساري", exact: true })
     .click();
   await expect(page).toHaveURL("/neet/journey");
   await expect(page.locator(".workspace-sidebar")).not.toHaveClass(/is-open/);

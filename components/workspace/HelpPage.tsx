@@ -4,35 +4,42 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, MessageCircle, Search } from "lucide-react";
 import { EmptyState, PageIntro } from "./UI";
+import { normalizeArabicSearch } from "@/lib/youth-ar";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 
 export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
+  const text = (fr: string, ar: string) => (role === "neet" ? ar : fr);
   const [query, setQuery] = useState("");
   const questions =
     role === "neet"
       ? [
           [
-            "Comment fonctionne mon accompagnement ?",
-            "Ton médiateur apprend à te connaître, t’aide à clarifier tes envies et te propose des étapes adaptées. Tu peux avancer à ton rythme et demander de l’aide à chaque étape.",
+            "كيف تتم مواكبتي؟",
+            "تتعرّف وسيطتك على مسارك وتساعدك على تحديد طموحاتك وتقترح خطوات تناسبك. تقدّم حسب إيقاعك واطلب المساعدة في كل مرحلة.",
           ],
           [
-            "Comment trouver une formation ou un emploi ?",
-            "Dans Opportunités, filtre les offres par type et par lieu. Ouvre une offre pour découvrir ses conditions, enregistre-la dans tes favoris et échange avec ton médiateur.",
+            "كيف أجد تكويناً أو عملاً؟",
+            "في صفحة الفرص، اختر النوع والمدينة. افتح فرصة لمعرفة شروطها واحفظها في المفضلة وتحدّث عنها مع وسيطتك.",
           ],
           [
-            "Comment préparer mon rendez-vous ?",
-            "Note les métiers qui t’intéressent, les questions que tu veux poser et les difficultés que tu rencontres. Si tu as un CV, apporte-le. Tu n’as pas besoin d’avoir toutes les réponses.",
+            "كيف أستعد لموعدي؟",
+            "دوّن المهن التي تهمّك وأسئلتك والصعوبات التي تواجهها. أحضر سيرتك الذاتية إن توفّرت. لا تحتاج إلى كل الإجابات مسبقاً.",
           ],
           [
-            "Qu’est-ce qu’un petit pas ?",
-            "C’est une action courte et concrète : un atelier CV, une découverte métier, un entretien de coaching. Choisis une activité dans Petits pas pour commencer.",
+            "ما المقصود بخطوة صغيرة؟",
+            "نشاط قصير وعملي، مثل ورشة سيرة ذاتية أو اكتشاف مهنة أو مقابلة مواكبة. اختر نشاطاً من صفحة الخطوات الصغيرة لتبدأ.",
           ],
           [
-            "Comment gérer mes informations ?",
-            "Dans Mon profil, tu peux revoir tes informations et sélectionner ton CV. Dans cette version de démonstration, les changements restent dans ton navigateur et aucun fichier n’est transmis.",
+            "كيف أعدّل معلوماتي؟",
+            "في ملفي، يمكنك تعديل معلوماتك واختيار سيرتك الذاتية. في النسخة التجريبية تبقى التعديلات في متصفحك ولا يُرسل أي ملف.",
           ],
           [
-            "Puis-je utiliser le site sur mon téléphone ?",
-            "Oui. Ouvre le menu en haut à gauche pour retrouver ton espace, tes opportunités et tes messages.",
+            "هل يمكنني استخدام الموقع من الهاتف؟",
+            "نعم. افتح القائمة في أعلى اليمين لتجد فرصك ورسائلك ومسارك.",
           ],
         ]
       : [
@@ -61,47 +68,50 @@ export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
             "Cet espace contient uniquement des exemples. Le service d’authentification et les données métier seront connectés séparément.",
           ],
         ];
-  const filtered = questions.filter(([title, text]) =>
-    `${title} ${text}`
-      .toLocaleLowerCase("fr")
-      .includes(query.toLocaleLowerCase("fr")),
-  );
+  const normalize = role === "neet" ? normalizeArabicSearch : (value: string) => value.toLocaleLowerCase("fr");
+  const filtered = questions.filter(([title, text]) => normalize(`${title} ${text}`).includes(normalize(query)));
   return (
     <>
       <PageIntro
-        eyebrow="ON EST LÀ POUR TOI"
-        title="Comment peut-on t’aider ?"
-        description="Des réponses simples pour avancer sereinement dans ton espace."
+        eyebrow={text("ON EST LÀ POUR TOI", "نحن إلى جانبك")}
+        title={text("Comment peut-on t’aider ?", "كيف يمكننا مساعدتك؟")}
+        description={text(
+          "Des réponses simples pour avancer sereinement dans ton espace.",
+          "إجابات بسيطة لتتقدّم بثقة في فضائك.",
+        )}
       />
       <section className="help-header">
         <h2>
           {role === "neet"
-            ? "Tu peux toujours en parler."
+            ? "يمكنك التحدّث دائماً."
             : "L’accompagnement commence par l’écoute."}
         </h2>
         <p>
           {role === "neet"
-            ? "Ton médiateur est ton premier contact pour les opportunités, les ateliers et les prochaines étapes."
+            ? "وسيطتك هي أول من تتواصل معه بشأن الفرص والورشات والخطوات المقبلة."
             : "Retrouve les échanges avec les jeunes et les partenaires dans ton espace messages."}
         </p>
         <Link href={`/${role}/messages`} className="button button-primary">
           <MessageCircle size={16} />
-          {role === "neet"
-            ? "Contacter ma médiatrice"
-            : "Ouvrir mes conversations"}
-          <ArrowRight size={15} />
+          {role === "neet" ? "تواصل مع وسيطتي" : "Ouvrir mes conversations"}
+          <ArrowRight className={role === "neet" ? "youth-forward-arrow" : undefined} size={15} />
         </Link>
       </section>
       <div className="filter-bar">
-        <div className="search-field">
-          <Search size={16} />
-          <input
-            aria-label="Rechercher dans l’aide"
-            placeholder="Une question sur ton espace…"
+        <InputGroup>
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupInput
+            aria-label={text("Rechercher dans l’aide", "البحث في المساعدة")}
+            placeholder={text(
+              "Une question sur ton espace…",
+              "سؤال حول فضائك…",
+            )}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-        </div>
+        </InputGroup>
       </div>
       <div className="faq-list">
         {filtered.map(([title, text]) => (
@@ -113,8 +123,11 @@ export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
       </div>
       {!filtered.length && (
         <EmptyState
-          title="Essayons autrement"
-          description="Utilise un autre mot-clé ou ouvre une conversation pour demander de l’aide."
+          title={text("Essayons autrement", "لنجرّب طريقة أخرى")}
+          description={text(
+            "Utilise un autre mot-clé ou ouvre une conversation pour demander de l’aide.",
+            "جرّب كلمة أخرى أو افتح محادثة لطلب المساعدة.",
+          )}
         />
       )}
     </>

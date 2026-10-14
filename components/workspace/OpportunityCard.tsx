@@ -1,21 +1,31 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bookmark, MapPin, Clock3 } from "lucide-react";
+import { ArrowLeft, Bookmark, MapPin, Clock3 } from "lucide-react";
 import { opportunities } from "@/lib/demo-data";
+import { arabicOpportunities } from "@/lib/youth-ar";
 import { useYouth } from "./YouthProvider";
-import { Tag } from "./UI";
-
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 export default function OpportunityCard({
-  opportunity,
+  opportunity: source,
 }: {
   opportunity: (typeof opportunities)[number];
 }) {
+  const opportunity =
+    arabicOpportunities.find((item) => item.id === source.id) ?? source;
   const { saved, toggleSaved } = useYouth();
   const isSaved = saved.includes(opportunity.id);
   return (
-    <article className="opportunity-card">
+    <Card className="youth-opportunity-card">
       <div className="opportunity-image">
         <Image
           src={opportunity.image}
@@ -23,55 +33,52 @@ export default function OpportunityCard({
           fill
           sizes="(max-width: 650px) 90vw, (max-width: 1100px) 45vw, 30vw"
         />
-        <span className="match-chip">{opportunity.match}% compatible</span>
-        <button
-          className={`save-button ${isSaved ? "is-saved" : ""}`}
-          aria-label={`${isSaved ? "Retirer des" : "Ajouter aux"} favoris : ${opportunity.title}`}
+        <Badge className="youth-match-badge">{opportunity.match}% توافق</Badge>
+        <Button
+          variant="secondary"
+          size="icon"
+          className="youth-save-button"
+          aria-label={`${isSaved ? "إزالة من" : "إضافة إلى"} المفضلة: ${opportunity.title}`}
           aria-pressed={isSaved}
           onClick={() => toggleSaved(opportunity.id)}
         >
-          <Bookmark size={17} fill={isSaved ? "currentColor" : "none"} />
-        </button>
+          <Bookmark fill={isSaved ? "currentColor" : "none"} />
+        </Button>
       </div>
-      <div className="opportunity-content">
-        <div>
-          <Tag
-            tone={
-              opportunity.type === "Stage"
-                ? "blue"
-                : opportunity.type === "Emploi"
-                  ? "orange"
-                  : "teal"
-            }
-          >
-            {opportunity.type}
-          </Tag>
-          <span className="org-label">{opportunity.organization}</span>
+      <CardHeader>
+        <div className="youth-offer-heading">
+          <Badge variant="secondary">{opportunity.type}</Badge>
+          <bdi>{opportunity.organization}</bdi>
         </div>
-        <h3>
+        <CardTitle>
+          <h3>
           <Link href={`/neet/opportunities/${opportunity.id}`}>
             {opportunity.title}
           </Link>
-        </h3>
-        <p>{opportunity.description}</p>
+          </h3>
+        </CardTitle>
+        <CardDescription>{opportunity.description}</CardDescription>
+      </CardHeader>
+      <CardContent>
         <div className="card-meta">
           <span>
-            <MapPin size={13} />
+            <MapPin size={14} />
             {opportunity.location}
           </span>
           <span>
-            <Clock3 size={13} />
+            <Clock3 size={14} />
             {opportunity.duration}
           </span>
         </div>
-        <Link
-          className="card-action"
-          href={`/neet/opportunities/${opportunity.id}`}
-        >
-          Découvrir l’opportunité
-          <ArrowRight size={16} />
-        </Link>
-      </div>
-    </article>
+      </CardContent>
+      <CardFooter>
+        <Button asChild>
+          <Link href={`/neet/opportunities/${opportunity.id}`}>
+            اكتشف الفرصة
+            <ArrowLeft data-icon="inline-end" />
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

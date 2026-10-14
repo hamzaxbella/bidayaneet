@@ -8,23 +8,23 @@ import { useYouth } from "./YouthProvider";
 
 export function AppointmentCard() {
   return (
-    <Panel title="Prochain rendez-vous" className="appointment-panel">
+    <Panel title="الموعد المقبل" className="appointment-panel">
       <div className="appointment-info">
         <div className="date-tile">
-          <span>LUN.</span>
-          <strong>05</strong>
-          <span>OCT.</span>
+          <span>الاثنين</span>
+          <strong>19</strong>
+          <span>أكتوبر</span>
         </div>
         <div>
-          <Tag>Orientation</Tag>
-          <h3>Parlons de ton projet</h3>
+          <Tag>توجيه</Tag>
+          <h3>لنتحدث عن مشروعك</h3>
           <p>
             <Clock3 size={14} />
-            10:00 – 11:00
+            <bdi dir="ltr">10:00 – 11:00</bdi>
           </p>
           <p>
             <MapPin size={14} />
-            Bureau BidayaNeet, Agadir
+            مكتب بداية، أكادير
           </p>
         </div>
       </div>
@@ -36,30 +36,30 @@ export function AppointmentCard() {
           height={42}
         />
         <div>
-          <b>Imane Rami</b>
-          <span>Ta médiatrice</span>
+          <b>إيمان رامي</b>
+          <span>وسيطتك</span>
         </div>
         <span className="online-dot" />
       </div>
       <Link href="/neet/messages" className="button button-secondary">
-        Préparer mon rendez-vous
+        حضّر موعدي
         <ArrowRight size={15} />
       </Link>
     </Panel>
   );
 }
 const tasks = [
-  "Finaliser mon CV",
-  "Explorer deux opportunités",
-  "Préparer mon entretien",
-  "Partager mes envies avec Imane",
+  "إتمام سيرتي الذاتية",
+  "اكتشاف فرصتين",
+  "الاستعداد للمقابلة",
+  "مشاركة طموحاتي مع إيمان",
 ];
 export function NextSteps() {
   const { completed, toggleCompleted } = useYouth();
   return (
     <Panel
-      title="Mes prochains petits pas"
-      note="À ton rythme, un pas après l’autre."
+      title="خطواتي الصغيرة المقبلة"
+      note="حسب إيقاعك، خطوة بعد أخرى."
       href="/neet/micro-actions"
     >
       <div className="task-list">
@@ -80,7 +80,7 @@ export function NextSteps() {
       </div>
       <div className="progress-caption">
         <span>
-          {completed.length} sur {tasks.length} réalisés
+          {completed.length} من {tasks.length} منجزة
         </span>
         <span>{Math.round((completed.length / tasks.length) * 100)}%</span>
       </div>

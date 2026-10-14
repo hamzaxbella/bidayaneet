@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowRight, Inbox } from "lucide-react";
+import { ArrowLeft, ArrowRight, Inbox } from "lucide-react";
 
 export function PageIntro({
   eyebrow,
@@ -47,7 +47,7 @@ export function Panel({
           </div>
           {href && (
             <Link href={href} className="text-link">
-              Tout voir <ArrowRight size={15} />
+              {href.startsWith("/neet/") ? <>عرض الكل <ArrowLeft size={15} /></> : <>Tout voir <ArrowRight size={15} /></>}
             </Link>
           )}
         </div>

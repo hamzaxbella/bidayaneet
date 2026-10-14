@@ -1,0 +1,145 @@
+/* Shared surface and semantic tokens for the focused portal refactor. */
+@font-face {
+  font-family: Cairo;
+  src: url("/fonts/cairo-variable.ttf") format("truetype");
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --primary: #008477;
+  --primary-foreground: #fff;
+  --secondary: #e7f5f2;
+  --secondary-foreground: #075b54;
+  --muted: #f1f5f6;
+  --muted-foreground: #627481;
+  --text-muted-ui: #627481;
+  --foreground: #1a2b3c;
+  --card-foreground: #1a2b3c;
+  --popover-foreground: #1a2b3c;
+  --accent: #e8f7f4;
+  --accent-foreground: #075b54;
+  --border: #e2e9ed;
+  --input: #d7e2e6;
+  --ring: #008477;
+  --destructive: #b83232;
+  --radius: 14px;
+}
+.workspace .workspace-body {
+  background: #fff;
+  border: 1px solid #e7eeed;
+  border-radius: 22px;
+  min-height: calc(100dvh - 20px);
+}
+.workspace .workspace-content {
+  background: #fff;
+  min-height: calc(100dvh - 140px);
+}
+.workspace-admin .workspace-content > div > div:first-child:not(.admin-header),
+.partner-content > header {
+  background: transparent !important;
+}
+.workspace .workspace-content > .admin-page {
+  min-height: 0;
+}
+.workspace-neet,
+.auth-neet {
+  font-family: Cairo, Arial, sans-serif;
+}
+.workspace-neet button,
+.workspace-neet input,
+.workspace-neet textarea,
+.workspace-neet select,
+.auth-neet input,
+.auth-neet button {
+  font-family: inherit;
+}
+.workspace-neet [data-slot] {
+  font-family: inherit;
+  --font-sans: Cairo, Arial, sans-serif;
+  --font-heading: Cairo, Arial, sans-serif;
+}
+[data-slot="select-content"][dir="rtl"] {
+  font-family: Cairo, Arial, sans-serif;
+}
+[data-slot="dialog-overlay"] {
+  backdrop-filter: blur(7px);
+  background: rgb(17 40 47 / 28%);
+}
+[data-slot="dialog-content"] {
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  box-shadow: 0 24px 100px #13313835;
+}
+[data-slot="dialog-title"] {
+  line-height: 1.4;
+  font-weight: 700;
+}
+[data-slot="button"]:not(:disabled) {
+  cursor: pointer;
+}
+[data-slot="input"],
+[data-slot="select-trigger"],
+[data-slot="textarea"] {
+  min-height: 40px;
+}
+[data-slot="button"][data-size="default"] {
+  min-height: 38px;
+}
+body:has(.workspace.workspace-messenger) {
+  overflow: hidden;
+}
+.workspace.workspace-messenger {
+  height: var(--workspace-viewport-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
+}
+.workspace.workspace-messenger .workspace-sidebar {
+  height: 100%;
+  min-height: 0;
+}
+.workspace.workspace-messenger .workspace-body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.workspace.workspace-messenger .workspace-topbar {
+  min-width: 0;
+}
+.workspace.workspace-messenger .workspace-content {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.workspace.workspace-messenger .workspace-footer {
+  display: none;
+}
+@media (max-width: 760px) {
+  .workspace .workspace-body {
+    min-height: calc(100dvh - 20px);
+  }
+  .workspace.workspace-messenger .workspace-body {
+    border: 0;
+    border-radius: 0;
+  }
+  .workspace.workspace-messenger .workspace-sidebar {
+    height: calc(var(--workspace-viewport-height, 100dvh) - 20px);
+  }
+  .workspace.workspace-messenger .workspace-topbar {
+    padding-inline: 12px;
+  }
+  .workspace.workspace-messenger .topbar-location,
+  .workspace.workspace-messenger .account-link {
+    display: none;
+  }
+  [data-slot="dialog-content"] {
+    max-height: calc(100dvh - 24px);
+  }
+}

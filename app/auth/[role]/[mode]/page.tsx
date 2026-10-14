@@ -17,8 +17,9 @@ export async function generateMetadata({
   params: Promise<{ role: string; mode: string }>;
 }) {
   const { role } = await params;
+  const label = role === "neet" ? "فضاء الشباب" : role === "admin" ? "Regional administration" : role === "partner" ? "Partner workspace" : roleLabels[role as AuthRole] ?? "Sign in";
   return {
-    title: `BidayaNeet · ${roleLabels[role as AuthRole] ?? "Connexion"}`,
+    title: `${role === "neet" ? "بداية" : "BidayaNeet"} · ${label}`,
   };
 }
 export default async function Page({

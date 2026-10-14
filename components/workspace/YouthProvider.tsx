@@ -1,9 +1,12 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type Dispatch, type SetStateAction, type ReactNode } from "react";
 import { useSimulatedState } from "@/lib/simulated-backend";
+import { normalizeYouthProfile, youthProfileFixture } from "@/lib/youth-ar";
 
 type YouthState = {
+  profile: Record<string, string>;
+  setProfile: Dispatch<SetStateAction<Record<string, string>>>;
   saved: string[];
   applications: string[];
   completed: number[];
@@ -15,6 +18,11 @@ type YouthState = {
 };
 const Context = createContext<YouthState | null>(null);
 export default function YouthProvider({ children }: { children: ReactNode }) {
+  const [storedProfile, setProfile] = useSimulatedState("neet.profile", youthProfileFixture);
+  const profile = useMemo(() => normalizeYouthProfile(storedProfile), [storedProfile]);
+  useEffect(() => {
+    if (JSON.stringify(storedProfile) !== JSON.stringify(profile)) setProfile(profile);
+  }, [storedProfile, profile, setProfile]);
   const [saved, setSaved] = useSimulatedState<string[]>("neet.saved", []);
   const [applications, setApplications] = useSimulatedState<string[]>(
     "neet.applications",
@@ -31,6 +39,8 @@ export default function YouthProvider({ children }: { children: ReactNode }) {
   return (
     <Context.Provider
       value={{
+        profile,
+        setProfile,
         saved,
         applications,
         completed,

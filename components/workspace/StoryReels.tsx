@@ -12,12 +12,12 @@ import {
   MapPin,
   X,
 } from "lucide-react";
-import { stories } from "@/lib/demo-data";
+import { arabicStories as stories } from "@/lib/youth-ar";
 
 export default function StoryReels({ compact = false }: { compact?: boolean }) {
+  const [start, setStart] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
-  const rail = useRef<HTMLDivElement>(null);
   const story = selected === null ? null : stories[selected];
   function move(direction: number) {
     setSelected((value) =>
@@ -48,13 +48,13 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
   }, [selected]);
   return (
     <div className={`reels ${compact ? "reels-compact" : "reels-library"}`}>
-      <div className={compact ? "reels-rail" : "reels-grid"} ref={rail}>
-        {stories.map((item, index) => (
+      <div className="reels-grid youth-reels-four">
+        {stories.slice(start, start + 4).map((item, index) => (
           <button
             className="reel-card"
             key={item.id}
-            onClick={() => setSelected(index)}
-            aria-label={`Découvrir le récit de ${item.name}`}
+            onClick={() => setSelected(start + index)}
+            aria-label={`اكتشف قصة ${item.name}`}
           >
             <Image
               src={item.image}
@@ -67,7 +67,7 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
               }
             />
             <span className="reel-reading">
-              <BookOpen size={12} /> 45 s de lecture
+              <BookOpen size={12} /> قصة في 45 ثانية
             </span>
             <span className="reel-open">
               <ArrowUpRight size={22} />
@@ -83,43 +83,45 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
           </button>
         ))}
       </div>
-      {compact && (
+      {
         <div className="reels-navigation">
-          <span>Un parcours. Un déclic. Un nouveau départ.</span>
+          <span>القصص {start + 1}–{start + 4} من {stories.length}</span>
           <div>
             <button
               className="icon-button"
-              aria-label="Histoires précédentes"
+              aria-label="القصص السابقة"
+              disabled={start === 0}
+              onClick={() => setStart((value) => Math.max(0, value - 2))}
+            >
+              <ChevronRight size={17} />
+            </button>
+            <button
+              className="icon-button"
+              aria-label="القصص التالية"
+              disabled={start >= stories.length - 4}
               onClick={() =>
-                rail.current?.scrollBy({ left: -260, behavior: "smooth" })
+                setStart((value) => Math.min(stories.length - 4, value + 2))
               }
             >
               <ChevronLeft size={17} />
             </button>
-            <button
-              className="icon-button"
-              aria-label="Histoires suivantes"
-              onClick={() =>
-                rail.current?.scrollBy({ left: 260, behavior: "smooth" })
-              }
-            >
-              <ChevronRight size={17} />
-            </button>
           </div>
         </div>
-      )}
+      }
       <dialog
         ref={dialog}
         className="story-dialog"
+        dir="rtl"
+        lang="ar"
         aria-labelledby="story-viewer-title"
         onCancel={() => setSelected(null)}
         onClose={() => setSelected(null)}
         onKeyDown={(event) => {
-          if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+          if (event.key === "ArrowDown" || event.key === "ArrowLeft") {
             event.preventDefault();
             move(1);
           }
-          if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+          if (event.key === "ArrowUp" || event.key === "ArrowRight") {
             event.preventDefault();
             move(-1);
           }
@@ -130,13 +132,13 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
             <div className="story-viewer-visual">
               <Image
                 src={story.image}
-                alt={`Portrait illustratif de ${story.name}`}
+                alt={`صورة توضيحية لـ ${story.name}`}
                 fill
                 sizes="(max-width: 760px) 100vw, 420px"
               />
               <div
                 className="story-position"
-                aria-label={`Histoire ${(selected ?? 0) + 1} sur ${stories.length}`}
+                aria-label={`قصة ${(selected ?? 0) + 1} من ${stories.length}`}
               >
                 {stories.map((item, index) => (
                   <span
@@ -150,34 +152,33 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
               </span>
             </div>
             <div className="story-viewer-content">
-              <span className="eyebrow">UN PARCOURS INSPIRANT</span>
+              <span className="eyebrow">مسار يلهمك</span>
               <h2 id="story-viewer-title">
-                {story.name}, {story.role.toLocaleLowerCase("fr")}
+                {story.name}، {story.role}
               </h2>
               <blockquote>« {story.quote} »</blockquote>
               <p>{story.text}</p>
               <p className="story-disclosure">
-                Récit de démonstration · portrait créé pour illustrer ce
-                parcours.
+                قصة تجريبية وصورة توضيحية لهذا المسار.
               </p>
               <div className="story-viewer-navigation">
                 <button
                   className="button button-secondary"
                   onClick={() => move(-1)}
                 >
-                  <ArrowUp size={16} /> Précédent
+                  <ArrowUp size={16} /> السابق
                 </button>
                 <button
                   className="button button-primary"
                   onClick={() => move(1)}
                 >
-                  Suivant <ArrowDown size={16} />
+                  التالي <ArrowDown size={16} />
                 </button>
               </div>
             </div>
             <button
               className="story-viewer-close icon-button"
-              aria-label="Fermer l’histoire"
+              aria-label="إغلاق القصة"
               onClick={() => setSelected(null)}
             >
               <X size={20} />

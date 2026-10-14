@@ -1,5 +1,7 @@
 # BidayaNeet UI refactor
 
+The current October 14 iteration is documented in [Refactor UI Run 2](refactor-run-2.md), with [independent acceptance evidence](refactor-run-2-review.md). The maps and youth language described below reflect earlier iterations.
+
 ## Requested refinements — October 7, 2026
 
 The restored white and teal interface remains the foundation. `app/refinement.css` adds floating, rounded sidebars with 10 px outer margins, persistent desktop collapse, accessible icon labels, and the existing mobile drawer. Partner navigation now opens its referral, program, and activity sections.

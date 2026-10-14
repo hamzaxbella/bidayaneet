@@ -13,6 +13,7 @@ import {
   MapPin,
   Plus,
   Search,
+  X,
   Target,
   Users,
   Zap,
@@ -27,7 +28,131 @@ import {
 } from "@/lib/demo-data";
 import { downloadCsv } from "@/lib/export-csv";
 import { useSimulatedState } from "@/lib/simulated-backend";
-import { EmptyState, Metric, PageIntro, Panel, Tag } from "./UI";
+import { Metric, PageIntro, Panel, Tag } from "./UI";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+} from "@/components/ui/input-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+function normalizeSearch(value: string) {
+  return value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr");
+}
+
+function PortalSelect({
+  options,
+  label,
+  id,
+  ...props
+}: {
+  options: string[];
+  label: string;
+  id?: string;
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  name?: string;
+}) {
+  const [uncontrolledValue, setUncontrolledValue] = useState(props.defaultValue ?? options[0]);
+  const value = props.value ?? uncontrolledValue;
+  return (
+    <Select {...props} value={value} onValueChange={(next) => {
+      setUncontrolledValue(next);
+      props.onValueChange?.(next);
+    }}>
+      <SelectTrigger id={id} aria-label={label}>
+        <SelectValue>{value}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {options.map((value) => (
+            <SelectItem key={value} value={value}>
+              {value}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}
+function PortalSearch({
+  label,
+  placeholder,
+  query,
+  onChange,
+}: {
+  label: string;
+  placeholder: string;
+  query: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <InputGroup className="mediator-search">
+      <InputGroupInput
+        aria-label={label}
+        placeholder={placeholder}
+        value={query}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <InputGroupAddon>
+        <Search />
+      </InputGroupAddon>
+    </InputGroup>
+  );
+}
+function PortalEmpty({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <Empty className="empty-state">
+      <EmptyHeader>
+        <EmptyTitle>{title}</EmptyTitle>
+        <EmptyDescription>{description}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
+  );
+}
 
 export { default as MediatorDashboard } from "./MediatorOverview";
 
@@ -37,9 +162,8 @@ export function CaseloadPage() {
   const [priority, setPriority] = useState("Tous les suivis");
   const filtered = youngPeople.filter(
     (person) =>
-      `${person.name} ${person.city} ${person.goal}`
-        .toLocaleLowerCase("fr")
-        .includes(query.toLocaleLowerCase("fr")) &&
+      normalizeSearch(`${person.name} ${person.city} ${person.goal}`)
+        .includes(normalizeSearch(query)) &&
       (stage === "Tous les parcours" || person.stage === stage) &&
       (priority === "Tous les suivis" || person.priority === priority),
   );
@@ -50,8 +174,8 @@ export function CaseloadPage() {
         title="Mes jeunes accompagnés"
         description="Garde le lien avec chaque jeune et prépare la prochaine étape de son parcours."
         action={
-          <button
-            className="button button-secondary"
+          <Button
+            variant="outline"
             onClick={() =>
               downloadCsv("bidayaneet-jeunes-demo.csv", [
                 ["Nom", "Ville", "Étape", "Priorité", "Prochaine action"],
@@ -65,45 +189,46 @@ export function CaseloadPage() {
               ])
             }
           >
-            <Download size={15} />
+            <Download data-icon="inline-start" />
             Exporter la sélection
-          </button>
+          </Button>
         }
       />
       <div className="filter-bar">
-        <div className="search-field">
-          <Search size={16} />
-          <input
-            aria-label="Rechercher un jeune"
-            placeholder="Un nom, une ville, un projet…"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </div>
-        <select
-          aria-label="Étape du parcours"
+        <PortalSearch
+          label="Rechercher un jeune"
+          placeholder="Un nom, une ville, un projet…"
+          query={query}
+          onChange={setQuery}
+        />
+        <PortalSelect
+          label="Étape du parcours"
           value={stage}
-          onChange={(event) => setStage(event.target.value)}
-        >
-          {[
+          onValueChange={setStage}
+          options={[
             "Tous les parcours",
             "Identifié",
             "Activé",
             "Orientation",
             "Intégré",
-          ].map((value) => (
-            <option key={value}>{value}</option>
-          ))}
-        </select>
-        <select
-          aria-label="Priorité du suivi"
+          ]}
+        />
+        <PortalSelect
+          label="Priorité du suivi"
           value={priority}
-          onChange={(event) => setPriority(event.target.value)}
+          onValueChange={setPriority}
+          options={["Tous les suivis", "Prioritaire", "Suivi régulier"]}
+        />
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setQuery("");
+            setStage("Tous les parcours");
+            setPriority("Tous les suivis");
+          }}
         >
-          {["Tous les suivis", "Prioritaire", "Suivi régulier"].map((value) => (
-            <option key={value}>{value}</option>
-          ))}
-        </select>
+          Réinitialiser
+        </Button>
       </div>
       <p className="results-count">
         {filtered.length} jeune{filtered.length > 1 ? "s" : ""} dans cette
@@ -201,7 +326,7 @@ export function CaseloadPage() {
           </table>
         </div>
       ) : (
-        <EmptyState
+        <PortalEmpty
           title="Aucun dossier dans cette sélection"
           description="Modifie tes filtres ou recherche une autre ville."
         />
@@ -246,10 +371,12 @@ export function CaseloadDetail({ id }: { id: string }) {
             )}
           </div>
         </div>
-        <Link href="/mediator/appointments" className="button button-primary">
-          <CalendarDays size={15} />
-          Préparer un rendez-vous
-        </Link>
+        <Button asChild>
+          <Link href="/mediator/appointments">
+            <CalendarDays data-icon="inline-start" />
+            Préparer un rendez-vous
+          </Link>
+        </Button>
       </div>
       <div className="two-column">
         <div className="stack">
@@ -283,47 +410,45 @@ export function CaseloadDetail({ id }: { id: string }) {
             note="Une trace claire pour préparer la prochaine rencontre."
           >
             <form onSubmit={save}>
-              <label className="form-field">
-                Note
-                <textarea
-                  className="field-input"
-                  rows={4}
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  placeholder="Ce qui a été discuté, les besoins et les prochaines étapes…"
-                  required
-                  maxLength={3000}
-                />
-              </label>
-              <label className="form-field" style={{ marginTop: 18 }}>
-                Prochaine action
-                <select
-                  className="field-input"
-                  value={action}
-                  onChange={(event) => setAction(event.target.value)}
-                >
-                  {[
-                    "Appel de suivi",
-                    "Entretien d’orientation",
-                    "Atelier CV",
-                    "Visite de proximité",
-                    "Orientation vers une offre",
-                  ].map((item) => (
-                    <option key={item}>{item}</option>
-                  ))}
-                </select>
-              </label>
-              <button
-                type="submit"
-                className="button button-primary"
-                style={{ marginTop: 20 }}
-              >
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="followup-note">Note</FieldLabel>
+                  <Textarea
+                    id="followup-note"
+                    rows={4}
+                    value={note}
+                    onChange={(event) => setNote(event.target.value)}
+                    placeholder="Ce qui a été discuté, les besoins et les prochaines étapes…"
+                    required
+                    maxLength={3000}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="followup-action">
+                    Prochaine action
+                  </FieldLabel>
+                  <PortalSelect
+                    id="followup-action"
+                    label="Prochaine action"
+                    value={action}
+                    onValueChange={setAction}
+                    options={[
+                      "Appel de suivi",
+                      "Entretien d’orientation",
+                      "Atelier CV",
+                      "Visite de proximité",
+                      "Orientation vers une offre",
+                    ]}
+                  />
+                </Field>
+              </FieldGroup>
+              <Button type="submit" variant="default" style={{ marginTop: 20 }}>
                 Ajouter au suivi de démo
-                <Check size={15} />
-              </button>
+                <Check data-icon="inline-end" />
+              </Button>
               <p className="form-note">
-                Les notes restent dans la page ouverte et ne sont pas
-                enregistrées sur un serveur.
+                Les notes sont enregistrées sur cet appareil dans la
+                démonstration.
               </p>
             </form>
           </Panel>
@@ -394,6 +519,7 @@ export function AppointmentsPage() {
   );
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState("À venir");
+  const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
   function add(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -416,8 +542,10 @@ export function AppointmentsPage() {
   const filtered = appointments
     .filter(
       (item) =>
-        filter === "Tout l’agenda" ||
-        (filter === "Terminés" ? item.done : !item.done),
+        (filter === "Tout l’agenda" ||
+          (filter === "Terminés" ? item.done : !item.done)) &&
+        normalizeSearch(`${item.name} ${item.type} ${item.location}`)
+          .includes(normalizeSearch(query)),
     )
     .sort((a, b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`));
   return (
@@ -427,110 +555,131 @@ export function AppointmentsPage() {
         title="Mon agenda"
         description="Prépare tes entretiens, tes appels et tes visites de terrain."
         action={
-          <button
-            className="button button-primary"
+          <Button
+            variant="default"
             aria-expanded={showForm}
             onClick={() => setShowForm(!showForm)}
           >
-            <Plus size={16} />
+            <Plus data-icon="inline-start" />
             {showForm ? "Fermer le formulaire" : "Ajouter un rendez-vous"}
-          </button>
+          </Button>
         }
       />
-      {showForm && (
-        <Panel title="Un nouveau rendez-vous" className="appointment-form">
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Un nouveau rendez-vous</DialogTitle>
+            <DialogDescription>
+              Prépare une rencontre avec un jeune accompagné.
+            </DialogDescription>
+          </DialogHeader>
           <form onSubmit={add}>
-            <div className="form-grid">
-              <label className="form-field">
-                Jeune accompagné
-                <select name="name" className="field-input">
-                  {youngPeople.map((person) => (
-                    <option key={person.id}>{person.name}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="form-field">
-                Type de rencontre
-                <select name="type" className="field-input">
-                  {[
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="appointment-person">
+                  Jeune accompagné
+                </FieldLabel>
+                <PortalSelect
+                  id="appointment-person"
+                  name="name"
+                  label="Jeune accompagné"
+                  defaultValue={youngPeople[0].name}
+                  options={youngPeople.map((person) => person.name)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="appointment-type">
+                  Type de rencontre
+                </FieldLabel>
+                <PortalSelect
+                  id="appointment-type"
+                  name="type"
+                  label="Type de rencontre"
+                  defaultValue="Entretien d’orientation"
+                  options={[
                     "Entretien d’orientation",
                     "Appel de suivi",
                     "Préparation d’entretien",
                     "Visite de proximité",
-                  ].map((value) => (
-                    <option key={value}>{value}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="form-field">
-                Date
-                <input
+                  ]}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="appointment-date">Date</FieldLabel>
+                <Input
+                  id="appointment-date"
                   type="date"
                   name="date"
-                  className="field-input"
                   required
-                  defaultValue="2026-10-08"
+                  defaultValue={new Date().toLocaleDateString("en-CA")}
                 />
-              </label>
-              <label className="form-field">
-                Heure
-                <input
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="appointment-time">Heure</FieldLabel>
+                <Input
+                  id="appointment-time"
                   type="time"
                   name="time"
-                  className="field-input"
                   required
                   defaultValue="10:00"
                 />
-              </label>
-              <label className="form-field wide">
-                Lieu
-                <input
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="appointment-location">Lieu</FieldLabel>
+                <Input
+                  id="appointment-location"
                   name="location"
-                  className="field-input"
                   required
                   placeholder="Bureau, appel ou adresse de visite…"
                   maxLength={200}
                 />
-              </label>
-            </div>
-            <div className="form-actions">
-              <button className="button button-primary">
-                Ajouter à l’agenda
-                <Check size={15} />
-              </button>
-              <button
+              </Field>
+            </FieldGroup>
+            <DialogFooter className="mediator-dialog-footer">
+              <Button
                 type="button"
-                className="button button-quiet"
+                variant="outline"
                 onClick={() => setShowForm(false)}
               >
                 Annuler
-              </button>
-            </div>
+              </Button>
+              <Button type="submit">
+                Ajouter à l’agenda
+                <Check data-icon="inline-end" />
+              </Button>
+            </DialogFooter>
           </form>
-        </Panel>
-      )}
+        </DialogContent>
+      </Dialog>
       {status && (
-        <div className="inline-alert" role="status">
-          {status}
-        </div>
+        <Alert className="mediator-feedback" role="status">
+          <AlertDescription>{status}</AlertDescription>
+        </Alert>
       )}
-      <div
-        className="filter-tabs"
-        style={{ margin: "22px 0" }}
-        role="group"
-        aria-label="Filtrer les rendez-vous"
-      >
-        {["À venir", "Terminés", "Tout l’agenda"].map((value) => (
-          <button
-            key={value}
-            onClick={() => setFilter(value)}
-            aria-pressed={filter === value}
-            className={filter === value ? "active" : ""}
-          >
-            {value}
-          </button>
-        ))}
+      <div className="filter-bar mediator-agenda-filters">
+        <PortalSearch
+          label="Rechercher un rendez-vous"
+          placeholder="Un jeune, une rencontre, un lieu…"
+          query={query}
+          onChange={setQuery}
+        />
+        <ToggleGroup
+          type="single"
+          value={filter}
+          onValueChange={(value) => {
+            if (value) setFilter(value);
+          }}
+          aria-label="Filtrer les rendez-vous"
+          variant="outline"
+        >
+          {["À venir", "Terminés", "Tout l’agenda"].map((value) => (
+            <ToggleGroupItem key={value} value={value}>
+              {value}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
       </div>
+      <p className="results-count" aria-live="polite">{filtered.length} rendez-vous dans cette sélection</p>
       <div className="appointment-list">
         {filtered.map((appointment) => {
           const date = new Date(`${appointment.date}T12:00:00Z`);
@@ -569,8 +718,9 @@ export function AppointmentsPage() {
                   {appointment.location}
                 </p>
               </div>
-              <button
-                className="button button-secondary button-small"
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   setAppointments((current) =>
                     current.map((item) =>
@@ -583,20 +733,21 @@ export function AppointmentsPage() {
                 }}
               >
                 {appointment.done ? "Remettre à venir" : "Marquer terminé"}
-                <Check size={14} />
-              </button>
+                <Check data-icon="inline-end" />
+              </Button>
             </article>
           );
         })}
       </div>
       {!filtered.length && (
-        <EmptyState
+        <PortalEmpty
           title="Un agenda qui respire"
           description="Aucun rendez-vous dans cette sélection. Tu peux en ajouter un pour préparer la prochaine rencontre."
         />
       )}
       <p className="form-note">
-        Agenda de démonstration. Les changements restent dans la page ouverte.
+        Agenda de démonstration. Les changements sont enregistrés sur cet
+        appareil.
       </p>
     </>
   );
@@ -604,14 +755,21 @@ export function AppointmentsPage() {
 
 export function MediatorOpportunitiesPage() {
   const [query, setQuery] = useState("");
+  const [type, setType] = useState("Tous les types");
+  const [location, setLocation] = useState("Tous les lieux");
   const [referrals, setReferrals] = useSimulatedState<
     { offer: string; person: string }[]
   >("mediator.referrals", []);
   const [selections, setSelections] = useState<Record<string, string>>({});
-  const filtered = opportunities.filter((item) =>
-    `${item.title} ${item.location}`
-      .toLocaleLowerCase("fr")
-      .includes(query.toLocaleLowerCase("fr")),
+  const [detail, setDetail] = useState<(typeof opportunities)[number] | null>(
+    null,
+  );
+  const filtered = opportunities.filter(
+    (item) =>
+      normalizeSearch(`${item.title} ${item.organization} ${item.location}`)
+        .includes(normalizeSearch(query)) &&
+      (type === "Tous les types" || item.type === type) &&
+      (location === "Tous les lieux" || item.location === location),
   );
   return (
     <>
@@ -621,95 +779,165 @@ export function MediatorOpportunitiesPage() {
         description="Repère une offre pertinente et prépare une orientation avec le jeune."
       />
       <div className="filter-bar">
-        <div className="search-field">
-          <Search size={16} />
-          <input
-            aria-label="Rechercher une offre"
-            placeholder="Une formation, un métier, une ville…"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </div>
-        <Tag tone="muted">
-          {referrals.length} orientation{referrals.length > 1 ? "s" : ""}{" "}
-          préparée{referrals.length > 1 ? "s" : ""}
-        </Tag>
+        <PortalSearch
+          label="Rechercher une offre"
+          placeholder="Une formation, un métier, une ville…"
+          query={query}
+          onChange={setQuery}
+        />
+        <PortalSelect
+          label="Type d’opportunité"
+          value={type}
+          onValueChange={setType}
+          options={[
+            "Tous les types",
+            ...new Set(opportunities.map((item) => item.type)),
+          ]}
+        />
+        <PortalSelect
+          label="Lieu de l’opportunité"
+          value={location}
+          onValueChange={setLocation}
+          options={[
+            "Tous les lieux",
+            ...new Set(opportunities.map((item) => item.location)),
+          ]}
+        />
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setQuery("");
+            setType("Tous les types");
+            setLocation("Tous les lieux");
+          }}
+        >
+          Réinitialiser
+        </Button>
       </div>
+      <p className="results-count">
+        {filtered.length} offre{filtered.length > 1 ? "s" : ""} ·{" "}
+        {referrals.length} orientation{referrals.length > 1 ? "s" : ""} préparée
+        {referrals.length > 1 ? "s" : ""}
+      </p>
       <div className="action-grid">
-        {filtered.map((offer) => (
-          <Panel key={offer.id} className="action-card">
-            <div className="action-card-top">
-              <Tag>{offer.type}</Tag>
-              <span className="org-label">{offer.organization}</span>
-            </div>
-            <h3>{offer.title}</h3>
-            <p>{offer.description}</p>
-            <div className="card-meta">
-              <span>
-                <MapPin size={13} />
-                {offer.location}
-              </span>
-              <span>
-                <Clock3 size={13} />
-                {offer.duration}
-              </span>
-            </div>
-            <label className="form-field">
-              Orienter un jeune
-              <select
-                className="field-input"
-                value={selections[offer.id] ?? youngPeople[0].name}
-                onChange={(event) =>
-                  setSelections((current) => ({
-                    ...current,
-                    [offer.id]: event.target.value,
-                  }))
-                }
-              >
-                {youngPeople.map((person) => (
-                  <option key={person.id}>{person.name}</option>
-                ))}
-              </select>
-            </label>
-            <button
-              className="button button-secondary"
-              style={{ width: "100%", marginTop: 15 }}
-              disabled={referrals.some(
-                (item) =>
-                  item.offer === offer.id &&
-                  item.person === (selections[offer.id] ?? youngPeople[0].name),
-              )}
-              onClick={() =>
-                setReferrals((current) => [
-                  ...current,
-                  {
-                    offer: offer.id,
-                    person: selections[offer.id] ?? youngPeople[0].name,
-                  },
-                ])
-              }
-            >
-              Préparer l’orientation
-              <ArrowRight size={14} />
-            </button>
-            {referrals
-              .filter((item) => item.offer === offer.id)
-              .map((item) => (
-                <div key={item.person} className="inline-alert" role="status">
-                  {item.person} · orientation préparée en démo.
+        {filtered.map((offer) => {
+          const person = selections[offer.id] ?? youngPeople[0].name;
+          const prepared = referrals.some(
+            (item) => item.offer === offer.id && item.person === person,
+          );
+          return (
+            <Card key={offer.id} className="mediator-offer-card">
+              <div className="mediator-offer-image">
+                <Image
+                  src={offer.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 760px) 90vw, 40vw"
+                />
+              </div>
+              <CardHeader>
+                <div className="action-card-top">
+                  <Badge variant="secondary">{offer.type}</Badge>
+                  <span className="org-label">{offer.organization}</span>
                 </div>
-              ))}
-          </Panel>
-        ))}
+                <CardTitle><h2>{offer.title}</h2></CardTitle>
+                <CardDescription>{offer.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="mediator-card-content">
+                <div className="card-meta">
+                  <span>
+                    <MapPin size={14} />
+                    {offer.location}
+                  </span>
+                  <span>
+                    <Clock3 size={14} />
+                    {offer.duration}
+                  </span>
+                </div>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`referral-${offer.id}`}>
+                      Orienter un jeune
+                    </FieldLabel>
+                    <PortalSelect
+                      id={`referral-${offer.id}`}
+                      label={`Orienter un jeune vers ${offer.title}`}
+                      value={person}
+                      onValueChange={(value) =>
+                        setSelections((current) => ({
+                          ...current,
+                          [offer.id]: value,
+                        }))
+                      }
+                      options={youngPeople.map((item) => item.name)}
+                    />
+                  </Field>
+                </FieldGroup>
+                {referrals
+                  .filter((item) => item.offer === offer.id)
+                  .map((item) => (
+                    <Alert key={item.person} role="status">
+                      <AlertDescription>
+                        {item.person} · orientation préparée en démo.
+                      </AlertDescription>
+                    </Alert>
+                  ))}
+              </CardContent>
+              <CardFooter className="mediator-card-footer">
+                <Button variant="outline" onClick={() => setDetail(offer)}>
+                  Voir l’offre
+                </Button>
+                <Button
+                  disabled={prepared}
+                  onClick={() =>
+                    setReferrals((current) => [
+                      ...current,
+                      { offer: offer.id, person },
+                    ])
+                  }
+                >
+                  {prepared ? "Orientation préparée" : "Préparer l’orientation"}
+                  <ArrowRight data-icon="inline-end" />
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
       {!filtered.length && (
-        <EmptyState
+        <PortalEmpty
           title="Aucune offre correspondante"
-          description="Essaie une recherche plus large."
+          description="Essaie une recherche plus large ou réinitialise les filtres."
         />
       )}
+      <Dialog
+        open={!!detail}
+        onOpenChange={(open) => {
+          if (!open) setDetail(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{detail?.title}</DialogTitle>
+            <DialogDescription>
+              {detail?.organization} · {detail?.location}
+            </DialogDescription>
+          </DialogHeader>
+          <p>{detail?.details}</p>
+          <p>
+            Durée : {detail?.duration} · Échéance : {detail?.deadline}
+          </p>
+          <div className="skill-list">
+            {detail?.skills.map((skill) => (
+              <Badge key={skill} variant="secondary">
+                {skill}
+              </Badge>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
       <p className="form-note">
-        Les orientations sont locales à la démonstration. Rien n’est transmis
+        Les orientations sont enregistrées sur cet appareil. Rien n’est transmis
         aux organismes partenaires.
       </p>
     </>
@@ -722,113 +950,256 @@ export function MediatorActionsPage() {
     {},
   );
   const [selected, setSelected] = useState<Record<number, string>>({});
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("Toutes les activités");
+  const [location, setLocation] = useState("Tous les lieux");
+  const [detail, setDetail] = useState<(typeof fieldActions)[number] | null>(
+    null,
+  );
+  const [status, setStatus] = useState("");
+  const filtered = fieldActions.filter(
+    (action) =>
+      normalizeSearch(`${action.title} ${action.description} ${action.city}`)
+        .includes(normalizeSearch(query)) &&
+      (category === "Toutes les activités" || category === action.category) &&
+      (location === "Tous les lieux" || action.city === location),
+  );
+  function addParticipant(action: (typeof fieldActions)[number]) {
+    const person = selected[action.id] ?? youngPeople[0].name;
+    setAttendees((current) => ({
+      ...current,
+      [action.id]: [...new Set([...(current[action.id] ?? []), person])],
+    }));
+    setStatus(`${person} ajouté à « ${action.title} » sur cet appareil.`);
+  }
+  function removeParticipant(
+    action: (typeof fieldActions)[number],
+    name: string,
+  ) {
+    setAttendees((current) => ({
+      ...current,
+      [action.id]: (current[action.id] ?? []).filter((item) => item !== name),
+    }));
+    setStatus(`${name} retiré de « ${action.title} ».`);
+  }
   return (
     <>
       <PageIntro
         eyebrow="LE TERRAIN CRÉE LE LIEN"
         title="Actions de terrain"
         description="Prépare les ateliers et aide les jeunes à franchir un premier pas concret."
+        action={
+          <Button
+            variant="outline"
+            onClick={() =>
+              downloadCsv("bidayaneet-participants-demo.csv", [
+                ["Activité", "Date", "Lieu", "Participant"],
+                ...fieldActions.flatMap((action) =>
+                  (attendees[action.id] ?? []).map((name) => [
+                    action.title,
+                    action.date,
+                    action.city,
+                    name,
+                  ]),
+                ),
+              ])
+            }
+          >
+            <Download data-icon="inline-start" />
+            Exporter les participants
+          </Button>
+        }
       />
-      <div className="field-itinerary">
-        {fieldActions.map((action) => (
-          <Panel className="field-action-row" key={action.id}>
-            <div className="field-action-image">
-              <Image
-                src={action.image}
-                alt=""
-                fill
-                sizes="(max-width: 760px) 90vw, 180px"
-              />
-              <span>{String(action.id).padStart(2, "0")}</span>
-            </div>
-            <div className="field-action-body">
-              <div className="action-card-top">
-                <div className="action-icon">
-                  <Zap size={20} />
+      <div className="filter-bar">
+        <PortalSearch
+          label="Rechercher une action de terrain"
+          placeholder="Un atelier, une activité, une ville…"
+          query={query}
+          onChange={setQuery}
+        />
+        <PortalSelect
+          label="Catégorie de l’action"
+          value={category}
+          onValueChange={setCategory}
+          options={[
+            "Toutes les activités",
+            ...new Set(fieldActions.map((action) => action.category)),
+          ]}
+        />
+        <PortalSelect
+          label="Lieu de l’action"
+          value={location}
+          onValueChange={setLocation}
+          options={[
+            "Tous les lieux",
+            ...new Set(fieldActions.map((action) => action.city)),
+          ]}
+        />
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setQuery("");
+            setCategory("Toutes les activités");
+            setLocation("Tous les lieux");
+          }}
+        >
+          Réinitialiser
+        </Button>
+      </div>
+      <p className="results-count">
+        {filtered.length} activité{filtered.length > 1 ? "s" : ""} ·{" "}
+        {Object.values(attendees).reduce((sum, names) => sum + names.length, 0)}{" "}
+        participations
+      </p>
+      {status && (
+        <Alert className="mediator-feedback" role="status">
+          <AlertDescription>{status}</AlertDescription>
+        </Alert>
+      )}
+      <div className="mediator-terrain-grid">
+        {filtered.map((action) => {
+          const names = attendees[action.id] ?? [];
+          const person = selected[action.id] ?? youngPeople[0].name;
+          const added = names.includes(person);
+          return (
+            <Card className="mediator-terrain-card" key={action.id}>
+              <div className="mediator-terrain-image">
+                <Image
+                  src={action.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 760px) 90vw, 40vw"
+                />
+              </div>
+              <CardHeader>
+                <div className="action-card-top">
+                  <Badge variant="secondary">{action.category}</Badge>
+                  <span className="mediator-participant-count">
+                    <Users size={14} />
+                    {names.length} participant{names.length > 1 ? "s" : ""}
+                  </span>
                 </div>
-                <Tag tone="orange">{action.category}</Tag>
-              </div>
-              <h3>{action.title}</h3>
-              <p>{action.description}</p>
-              <div className="card-meta">
-                <span>
-                  <CalendarDays size={13} />
-                  {action.date}
-                </span>
-                <span>
-                  <MapPin size={13} />
-                  {action.city}
-                </span>
-              </div>
-              <label className="form-field">
-                Ajouter un participant
-                <select
-                  className="field-input"
-                  value={selected[action.id] ?? youngPeople[0].name}
-                  onChange={(event) =>
-                    setSelected((current) => ({
-                      ...current,
-                      [action.id]: event.target.value,
-                    }))
-                  }
-                >
-                  {youngPeople.map((person) => (
-                    <option key={person.id}>{person.name}</option>
-                  ))}
-                </select>
-              </label>
-              <button
-                className="button button-secondary"
-                style={{ marginTop: 15 }}
-                disabled={(attendees[action.id] ?? []).includes(
-                  selected[action.id] ?? youngPeople[0].name,
-                )}
-                onClick={() => {
-                  const person = selected[action.id] ?? youngPeople[0].name;
-                  setAttendees((current) => ({
-                    ...current,
-                    [action.id]: [...(current[action.id] ?? []), person],
-                  }));
-                }}
-              >
-                <Plus size={14} />
-                Ajouter à l’atelier de démo
-              </button>
-              {(attendees[action.id] ?? []).length > 0 && (
-                <div className="skill-list">
-                  {attendees[action.id].map((name) => (
-                    <button
-                      key={name}
-                      className="tag tag-teal"
-                      aria-label={`Retirer ${name} de ${action.title}`}
-                      style={{ border: 0, cursor: "pointer" }}
-                      onClick={() =>
-                        setAttendees((current) => ({
+                <CardTitle><h2>{action.title}</h2></CardTitle>
+                <CardDescription>{action.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="mediator-card-content">
+                <div className="card-meta">
+                  <span>
+                    <CalendarDays size={14} />
+                    {action.date}
+                  </span>
+                  <span>
+                    <MapPin size={14} />
+                    {action.city}
+                  </span>
+                </div>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`participant-${action.id}`}>
+                      Ajouter un participant
+                    </FieldLabel>
+                    <PortalSelect
+                      id={`participant-${action.id}`}
+                      label={`Participant pour ${action.title}`}
+                      value={person}
+                      onValueChange={(value) =>
+                        setSelected((current) => ({
                           ...current,
-                          [action.id]: current[action.id].filter(
-                            (item) => item !== name,
-                          ),
+                          [action.id]: value,
                         }))
                       }
-                    >
-                      {name} ×
-                    </button>
-                  ))}
-                </div>
-              )}
-              <p className="form-note">
-                {(attendees[action.id] ?? []).length} participant
-                {(attendees[action.id] ?? []).length > 1 ? "s" : ""} sélectionné
-                {(attendees[action.id] ?? []).length > 1 ? "s" : ""} · Cliquez
-                sur un nom pour le retirer.
-              </p>
-            </div>
-          </Panel>
-        ))}
+                      options={youngPeople.map((item) => item.name)}
+                    />
+                  </Field>
+                </FieldGroup>
+                {names.length > 0 && (
+                  <ul
+                    className="mediator-attendees"
+                    aria-label={`Participants à ${action.title}`}
+                  >
+                    {names.map((name) => (
+                      <li key={name}>
+                        <Badge variant="secondary">{name}</Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={`Retirer ${name} de ${action.title}`}
+                          onClick={() => removeParticipant(action, name)}
+                        >
+                          <X />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+              <CardFooter className="mediator-card-footer">
+                <Button variant="outline" onClick={() => setDetail(action)}>
+                  Voir l’activité
+                </Button>
+                <Button disabled={added} onClick={() => addParticipant(action)}>
+                  {added ? (
+                    <Check data-icon="inline-start" />
+                  ) : (
+                    <Plus data-icon="inline-start" />
+                  )}
+                  {added ? "Participant ajouté" : "Ajouter le participant"}
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
       </div>
+      {!filtered.length && (
+        <PortalEmpty
+          title="Aucune activité correspondante"
+          description="Modifie la recherche ou les filtres pour retrouver tes activités."
+        />
+      )}
+      <Dialog
+        open={!!detail}
+        onOpenChange={(open) => {
+          if (!open) setDetail(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{detail?.title}</DialogTitle>
+            <DialogDescription>
+              {detail?.date} · {detail?.city}
+            </DialogDescription>
+          </DialogHeader>
+          <p>{detail?.description}</p>
+          <p>
+            {detail?.category} · {(attendees[detail?.id ?? -1] ?? []).length}{" "}
+            participant(s)
+          </p>
+          <ul className="mediator-dialog-attendees">
+            {(attendees[detail?.id ?? -1] ?? []).map((name) => (
+              <li key={name}>
+                {name}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (detail) removeParticipant(detail, name);
+                  }}
+                >
+                  Retirer
+                </Button>
+              </li>
+            ))}
+          </ul>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDetail(null)}>
+              Fermer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <p className="form-note">
-        Listes de participants locales à la démonstration. Aucune invitation
-        n’est envoyée.
+        Participants enregistrés sur cet appareil. Aucune invitation n’est
+        envoyée.
       </p>
     </>
   );
@@ -849,18 +1220,18 @@ export function MediatorReportsPage() {
         title="Mon activité"
         description="Une vue claire de tes rencontres, de tes actions et des parcours qui avancent."
         action={
-          <button
-            className="button button-secondary"
+          <Button
+            variant="outline"
             onClick={() =>
-              downloadCsv("bidayaneet-activite-demo.csv", [
+              downloadCsv(`bidayaneet-activite-${period.toLocaleLowerCase("fr")}-demo.csv`, [
                 ["Mois", "Rencontres", "Actions de terrain", "Orientations"],
-                ...activityRows.map((item) => [...item]),
+                [...row],
               ])
             }
           >
-            <Download size={15} />
+            <Download data-icon="inline-start" />
             Télécharger le CSV
-          </button>
+          </Button>
         }
       />
       <div className="filter-bar">
@@ -870,15 +1241,13 @@ export function MediatorReportsPage() {
         >
           Période de démonstration
         </label>
-        <select
+        <PortalSelect
           id="report-period"
+          label="Période de démonstration"
           value={period}
-          onChange={(event) => setPeriod(event.target.value)}
-        >
-          {activityRows.map((item) => (
-            <option key={item[0]}>{item[0]}</option>
-          ))}
-        </select>
+          onValueChange={setPeriod}
+          options={activityRows.map((item) => item[0])}
+        />
         <span className="results-count" style={{ margin: 0 }}>
           2026 · Données d’exemple
         </span>
@@ -985,97 +1354,105 @@ export function MediatorProfilePage() {
               setStatus("Informations enregistrées sur cet appareil.");
             }}
           >
-            <div className="form-grid">
-              <label className="form-field">
-                Prénom
-                <input
-                  className="field-input"
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="mediator-firstname">Prénom</FieldLabel>
+                <Input
+                  id="mediator-firstname"
                   name="firstName"
                   defaultValue={profile.firstName}
                   required
                   autoComplete="given-name"
                 />
-              </label>
-              <label className="form-field">
-                Nom
-                <input
-                  className="field-input"
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="mediator-lastname">Nom</FieldLabel>
+                <Input
+                  id="mediator-lastname"
                   name="lastName"
                   defaultValue={profile.lastName}
                   required
                   autoComplete="family-name"
                 />
-              </label>
-              <label className="form-field wide">
-                Adresse professionnelle
-                <input
-                  className="field-input"
-                  type="email"
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="mediator-email">
+                  Adresse professionnelle
+                </FieldLabel>
+                <Input
+                  id="mediator-email"
                   name="email"
+                  type="email"
                   defaultValue={profile.email}
                   required
                   autoComplete="email"
                 />
-              </label>
-              <label className="form-field">
-                Zone principale
-                <select
-                  className="field-input"
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="mediator-city">Zone principale</FieldLabel>
+                <PortalSelect
+                  id="mediator-city"
                   name="city"
+                  label="Zone principale"
                   defaultValue={profile.city}
-                >
-                  {["Agadir", "Inezgane", "Taroudant", "Tiznit", "Tata"].map(
-                    (city) => (
-                      <option key={city}>{city}</option>
-                    ),
-                  )}
-                </select>
-              </label>
-              <label className="form-field">
-                Langue d’accompagnement
-                <select
-                  className="field-input"
+                  options={[
+                    "Agadir",
+                    "Inezgane",
+                    "Taroudant",
+                    "Tiznit",
+                    "Tata",
+                  ]}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="mediator-language">
+                  Langue d’accompagnement
+                </FieldLabel>
+                <PortalSelect
+                  id="mediator-language"
                   name="language"
+                  label="Langue d’accompagnement"
                   defaultValue={profile.language}
-                >
-                  {[
+                  options={[
                     "Français et darija",
                     "Darija",
                     "Amazigh",
                     "Français",
                     "Arabe",
-                  ].map((language) => (
-                    <option key={language}>{language}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="form-field wide">
-                Présentation
-                <textarea
-                  className="field-input"
+                  ]}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="mediator-presentation">
+                  Présentation
+                </FieldLabel>
+                <Textarea
+                  id="mediator-presentation"
                   name="presentation"
                   defaultValue={profile.presentation}
                   maxLength={2000}
                 />
-              </label>
-              <label className="form-field wide">
-                Disponibilités
-                <input
-                  className="field-input"
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="mediator-availability">
+                  Disponibilités
+                </FieldLabel>
+                <Input
+                  id="mediator-availability"
                   name="availability"
                   defaultValue={profile.availability}
                   maxLength={200}
                 />
-              </label>
-            </div>
-            <button className="button button-primary" style={{ marginTop: 22 }}>
+              </Field>
+            </FieldGroup>
+            <Button variant="default" style={{ marginTop: 22 }}>
               Enregistrer mes informations
-              <Check size={15} />
-            </button>
+              <Check data-icon="inline-end" />
+            </Button>
             {status && (
-              <div className="inline-alert" role="status">
-                {status}
-              </div>
+              <Alert className="mediator-feedback" role="status">
+                <AlertDescription>{status}</AlertDescription>
+              </Alert>
             )}
             <p className="form-note">
               Informations de démonstration enregistrées sur cet appareil.
@@ -1093,7 +1470,7 @@ export function MediatorProfilePage() {
             <h2>
               {profile.firstName} {profile.lastName}
             </h2>
-            <p>Médiatrice · Agadir</p>
+            <p>Médiatrice · {profile.city}</p>
             <Tag>Accompagnement de proximité</Tag>
             <div className="definition-grid" style={{ textAlign: "left" }}>
               <div>
@@ -1111,14 +1488,12 @@ export function MediatorProfilePage() {
               Les écrans de connexion et de récupération de mot de passe sont
               prêts pour ton futur compte.
             </p>
-            <Link
-              href="/auth/mediator/sign-in"
-              className="button button-secondary"
-              style={{ marginTop: 18 }}
-            >
-              Écran de connexion
-              <ArrowRight size={15} />
-            </Link>
+            <Button asChild variant="outline" style={{ marginTop: 18 }}>
+              <Link href="/auth/mediator/sign-in">
+                Écran de connexion
+                <ArrowRight data-icon="inline-end" />
+              </Link>
+            </Button>
           </Panel>
         </div>
       </div>

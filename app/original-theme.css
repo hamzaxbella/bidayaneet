@@ -2,7 +2,7 @@
 :root {
   --font-ui: "Inter", system-ui, sans-serif;
   --ink: #1a2b3c;
-  --muted: #7f8c9a;
+  --text-muted-ui: #7f8c9a;
   --teal: #00b8a9;
   --teal-light: #e0f7f5;
   --canvas: #f4f6f9;

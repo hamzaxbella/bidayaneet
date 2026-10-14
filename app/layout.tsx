@@ -4,6 +4,10 @@ import "./production.css";
 import "./original-youth.css";
 import "./original-theme.css";
 import "./refinement.css";
+import "./run-1.css";
+import "./auth-refactor.css";
+import "./partner-refactor.css";
+import "./youth-refactor.css";
 
 export const metadata: Metadata = {
   title: "BidayaNeet",
@@ -17,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
+    <html lang="fr" data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

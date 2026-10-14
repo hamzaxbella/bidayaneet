@@ -1,3 +1,4 @@
+import "../mediator-refactor.css";
 import WorkspaceShell from "@/components/workspace/WorkspaceShell";
 export const metadata = {
   title: "BidayaNeet · Médiation",

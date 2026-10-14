@@ -1,18 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowRight, CalendarDays, Check, Clock3, MapPin } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Clock3, MapPin } from "lucide-react";
 import { fieldActions } from "@/lib/demo-data";
+import { arabicActions } from "@/lib/youth-ar";
 import { useYouth } from "./YouthProvider";
 
 type Action = (typeof fieldActions)[number];
 export default function MicroActionCard({
-  action,
+  action: source,
   compact = false,
 }: {
   action: Action;
   compact?: boolean;
 }) {
+  const action = arabicActions.find((item) => item.id === source.id) ?? source;
   const { enrolled, toggleEnrolled } = useYouth();
   const chosen = enrolled.includes(action.id);
   return (
@@ -48,25 +50,24 @@ export default function MicroActionCard({
         </div>
         <button
           className="button"
+          aria-label={`${chosen ? "إلغاء اختيار" : "اختيار"} ${action.title}`}
           aria-pressed={chosen}
           onClick={() => toggleEnrolled(action.id)}
         >
           {chosen ? (
             <>
-              <Check size={15} /> Annuler ma sélection
+              <Check size={15} /> إلغاء الاختيار
             </>
           ) : (
             <>
-              {action.category === "À ton rythme"
-                ? "Choisir ce petit pas"
-                : "M’inscrire en démo"}
-              <ArrowRight size={15} />
+              {action.category === "حسب إيقاعك"
+                ? "اختيار هذه الخطوة"
+                : "التسجيل التجريبي"}
+              <ArrowLeft size={15} />
             </>
           )}
         </button>
-        {chosen && (
-          <small role="status">Sélection enregistrée sur cet appareil.</small>
-        )}
+        {chosen && <small role="status">تم حفظ اختيارك على هذا الجهاز.</small>}
       </div>
     </article>
   );
