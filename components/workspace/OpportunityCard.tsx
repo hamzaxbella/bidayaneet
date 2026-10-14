@@ -1,17 +1,30 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { useWorkspaceDatasets } from "./LiveProvider";
+import type {
+  AppointmentView,
+  OpportunityView,
+  FieldActionView,
+} from "@/lib/workspace-data";
 
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Bookmark, MapPin, Clock3 } from "lucide-react";
-import { opportunities } from "@/lib/demo-data";
 import { useYouth } from "./YouthProvider";
 import { Tag } from "./UI";
 
 export default function OpportunityCard({
   opportunity,
 }: {
-  opportunity: (typeof opportunities)[number];
+  opportunity: OpportunityView;
 }) {
+  const { text: uiText } = useUiTranslation();
+
+  const { opportunities } = useWorkspaceDatasets();
+
   const { saved, toggleSaved } = useYouth();
   const isSaved = saved.includes(opportunity.id);
   return (
@@ -19,11 +32,14 @@ export default function OpportunityCard({
       <div className="opportunity-image">
         <Image
           src={opportunity.image}
-          alt=""
+          alt={uiText("")}
           fill
           sizes="(max-width: 650px) 90vw, (max-width: 1100px) 45vw, 30vw"
         />
-        <span className="match-chip">{opportunity.match}% compatible</span>
+        <span className="match-chip">
+          {opportunity.match}
+          <Translated value="% compatible" />
+        </span>
         <button
           className={`save-button ${isSaved ? "is-saved" : ""}`}
           aria-label={`${isSaved ? "Retirer des" : "Ajouter aux"} favoris : ${opportunity.title}`}
@@ -68,7 +84,7 @@ export default function OpportunityCard({
           className="card-action"
           href={`/neet/opportunities/${opportunity.id}`}
         >
-          Découvrir l’opportunité
+          <Translated value="Découvrir l’opportunité" />
           <ArrowRight size={16} />
         </Link>
       </div>

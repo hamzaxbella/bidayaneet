@@ -1,4 +1,9 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import { useState } from "react";
 import {
@@ -27,262 +32,6 @@ import KPICard from "@/components/KPICard";
 import PageHeader from "@/components/PageHeader";
 import PartnerLogo from "@/components/PartnerLogo";
 
-/* ── Mock data ── */
-const spark1 = [40, 55, 45, 60, 58, 72, 68, 80, 75, 88, 84, 92].map((v) => ({
-  v,
-}));
-const spark2 = [30, 42, 38, 55, 50, 62, 58, 70, 68, 78, 74, 85].map((v) => ({
-  v,
-}));
-const spark3 = [20, 28, 25, 35, 32, 40, 38, 48, 46, 55, 52, 60].map((v) => ({
-  v,
-}));
-const spark4 = [8, 12, 10, 15, 14, 18, 17, 22, 20, 26, 24, 30].map((v) => ({
-  v,
-}));
-
-const journeyData = [
-  {
-    month: "Jun'24",
-    detected: 420,
-    activated: 210,
-    integrated: 130,
-    stabilized: 45,
-  },
-  {
-    month: "Jul'24",
-    detected: 490,
-    activated: 260,
-    integrated: 160,
-    stabilized: 60,
-  },
-  {
-    month: "Aug'24",
-    detected: 540,
-    activated: 310,
-    integrated: 195,
-    stabilized: 75,
-  },
-  {
-    month: "Sep'24",
-    detected: 620,
-    activated: 370,
-    integrated: 230,
-    stabilized: 90,
-  },
-  {
-    month: "Oct'24",
-    detected: 710,
-    activated: 430,
-    integrated: 270,
-    stabilized: 105,
-  },
-  {
-    month: "Nov'24",
-    detected: 800,
-    activated: 490,
-    integrated: 310,
-    stabilized: 120,
-  },
-  {
-    month: "Dec'24",
-    detected: 880,
-    activated: 560,
-    integrated: 360,
-    stabilized: 140,
-  },
-  {
-    month: "Jan'25",
-    detected: 960,
-    activated: 640,
-    integrated: 420,
-    stabilized: 170,
-  },
-  {
-    month: "Feb'25",
-    detected: 1100,
-    activated: 720,
-    integrated: 490,
-    stabilized: 200,
-  },
-  {
-    month: "Mar'25",
-    detected: 1300,
-    activated: 830,
-    integrated: 560,
-    stabilized: 240,
-  },
-  {
-    month: "Apr'25",
-    detected: 1560,
-    activated: 960,
-    integrated: 630,
-    stabilized: 280,
-  },
-  {
-    month: "May'25",
-    detected: 1842,
-    activated: 1102,
-    integrated: 682,
-    stabilized: 321,
-  },
-];
-
-const funnelData = [
-  { stage: "Identification", count: 1842, pct: "100%", color: "#00B8A9" },
-  { stage: "Activation", count: 1102, pct: "59.8%", color: "#26C6BA" },
-  { stage: "Classification", count: 892, pct: "48.4%", color: "#4DB6AC" },
-  { stage: "Integration", count: 682, pct: "37.0%", color: "#F5A623" },
-  { stage: "Stabilization (90d)", count: 321, pct: "17.4%", color: "#FF8C42" },
-];
-
-const blockers = [
-  {
-    name: "Trust & Engagement",
-    desc: "Low trust in institutions, previous bad experiences",
-    count: 428,
-    change: 14.5,
-    color: "#E74C3C",
-    icon: <Heart size={16} />,
-  },
-  {
-    name: "Transport & Mobility",
-    desc: "Distance, cost, limited public transport",
-    count: 362,
-    change: 11.2,
-    color: "#F5A623",
-    icon: <Truck size={16} />,
-  },
-  {
-    name: "Family Constraints",
-    desc: "Care responsibilities, family obligations",
-    count: 287,
-    change: 8.7,
-    color: "#8E44AD",
-    icon: <Users size={16} />,
-  },
-  {
-    name: "Dropout Risk",
-    desc: "At risk of disengagement or returning to inactivity",
-    count: 213,
-    change: 4.2,
-    color: "#E67E22",
-    icon: <AlertTriangle size={16} />,
-  },
-];
-
-const recentNEETs = [
-  {
-    name: "Yassine El Amrani",
-    commune: "Agadir",
-    status: "Activated",
-    trust: "High",
-    mediator: "Imane R.",
-    action: "Schedule orientation",
-    date: "May 31, 2025",
-    avatar: "YE",
-  },
-  {
-    name: "Fatima Zahra A.",
-    commune: "Inezgane",
-    status: "Classification",
-    trust: "Medium",
-    mediator: "Khalid B.",
-    action: "Skills assessment",
-    date: "May 30, 2025",
-    avatar: "FZ",
-  },
-  {
-    name: "Omar T.",
-    commune: "Taroudant",
-    status: "Integrated",
-    trust: "High",
-    mediator: "Amina K.",
-    action: "Follow-up call",
-    date: "May 29, 2025",
-    avatar: "OT",
-  },
-  {
-    name: "Saima E.",
-    commune: "Tiznit",
-    status: "Activation",
-    trust: "Medium",
-    mediator: "Imane R.",
-    action: "Home visit",
-    date: "May 29, 2025",
-    avatar: "SE",
-  },
-  {
-    name: "Rachid D.",
-    commune: "Tata",
-    status: "Identified",
-    trust: "Low",
-    mediator: "Youssef M.",
-    action: "Build trust",
-    date: "May 28, 2025",
-    avatar: "RD",
-  },
-];
-
-const programs = [
-  {
-    name: "ANAPEC",
-    desc: "Job placement & career guidance",
-    opportunities: 124,
-    color: "#E74C3C",
-  },
-  {
-    name: "Ministry of Tourism, Handicrafts and SSE",
-    desc: "Tourism and hospitality pathways",
-    opportunities: 74,
-    color: "#1976A3",
-  },
-  {
-    name: "ONMT Tourism Careers",
-    desc: "Visitor services and promotion roles",
-    opportunities: 52,
-    color: "#2E86C1",
-  },
-  {
-    name: "Ministry of Agriculture",
-    desc: "Agriculture and rural development",
-    opportunities: 91,
-    color: "#248A3D",
-  },
-  {
-    name: "ADA Agripreneurship",
-    desc: "Young rural entrepreneur support",
-    opportunities: 68,
-    color: "#6A9F2A",
-  },
-  {
-    name: "Ministry of Economic Inclusion",
-    desc: "Small business and skills pathways",
-    opportunities: 103,
-    color: "#5B4B8A",
-  },
-];
-
-const soussMassaHeatPoints = [
-  { name: "Agadir", lat: 30.4278, lng: -9.5981, neets: 680 },
-  { name: "Inezgane", lat: 30.3563, lng: -9.5364, neets: 420 },
-  { name: "Ait Melloul", lat: 30.3342, lng: -9.4979, neets: 140 },
-  { name: "Aourir", lat: 30.4926, lng: -9.6372, neets: 118 },
-  { name: "Oulad Teima", lat: 30.3947, lng: -9.2089, neets: 210 },
-  { name: "Taroudant", lat: 30.4727, lng: -8.8749, neets: 280 },
-  { name: "Biougra", lat: 30.2144, lng: -9.3711, neets: 87 },
-  { name: "Massa", lat: 29.9457, lng: -9.6334, neets: 94 },
-  { name: "Tiznit", lat: 29.6974, lng: -9.7316, neets: 215 },
-  { name: "Tafraout", lat: 29.7244, lng: -8.9747, neets: 76 },
-  { name: "Tata", lat: 29.7441, lng: -7.9736, neets: 120 },
-  { name: "Akka", lat: 29.4071, lng: -8.2521, neets: 68 },
-];
-
-const mediatorDonut = [
-  { name: "Active", value: 78 },
-  { name: "Inactive", value: 22 },
-];
-
 function TrustDot({ level }: { level: string }) {
   const color =
     level === "High" ? "#27AE60" : level === "Medium" ? "#F5A623" : "#E74C3C";
@@ -307,7 +56,7 @@ function StatusBadge({ status }: { status: string }) {
     Integrated: "status-integrated",
     Activation: "status-activation",
     Identified: "status-identified",
-    "Stabilized (90d)": "status-stabilized",
+    "Maintien confirmé": "status-stabilized",
   };
   return (
     <span className={`status-badge ${map[status] || "status-identified"}`}>
@@ -348,6 +97,8 @@ function Avatar({ initials, size = 32 }: { initials: string; size?: number }) {
 }
 
 function SoussaMassaMap() {
+  const { soussMassaHeatPoints } = useAdminData();
+
   return (
     <MoroccoMap
       height={265}
@@ -395,6 +146,25 @@ function FunnelBar({
 /* ── Footer ── */
 
 export default function DashboardPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const {
+    journeyData,
+    spark1,
+    spark2,
+    spark3,
+    spark4,
+    funnelData,
+    recentNEETs,
+    mediatorDonut,
+    retentionRates,
+    blockers,
+    opportunities,
+    programs,
+    metrics,
+    data,
+  } = useAdminData();
+
   const [query, setQuery] = useState("");
   const filteredNEETs = recentNEETs.filter((person) =>
     Object.values(person).join(" ").toLowerCase().includes(query.toLowerCase()),
@@ -404,7 +174,7 @@ export default function DashboardPage() {
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
     >
       <PageHeader
-        title="Main Dashboard"
+        title={uiText("Main Dashboard")}
         subtitle="Regional monitoring for Souss-Massa"
         actionLabel="Export overview"
         showFilters={true}
@@ -423,10 +193,10 @@ export default function DashboardPage() {
         {/* KPI Row */}
         <div style={{ display: "flex", gap: 16 }}>
           <KPICard
-            title="Detected NEETs"
-            value="1,842"
-            change={12.4}
-            changePeriod="vs Apr 1 – Apr 30"
+            title={uiText("Detected NEETs")}
+            value={String(metrics.identified)}
+            change={0}
+            changePeriod="Données enregistrées"
             icon={
               <svg
                 width="22"
@@ -445,10 +215,10 @@ export default function DashboardPage() {
             sparkColor="#00B8A9"
           />
           <KPICard
-            title="Activated"
-            value="1,102"
-            change={18.7}
-            changePeriod="vs Apr 1 – Apr 30"
+            title={uiText("Activated")}
+            value={String(metrics.activated)}
+            change={0}
+            changePeriod="Données enregistrées"
             icon={
               <svg
                 width="22"
@@ -468,10 +238,10 @@ export default function DashboardPage() {
             sparkColor="#2E86C1"
           />
           <KPICard
-            title="Integrated"
-            value="682"
-            change={15.3}
-            changePeriod="vs Apr 1 – Apr 30"
+            title={uiText("Integrated")}
+            value={String(metrics.integrated)}
+            change={0}
+            changePeriod="Données enregistrées"
             icon={
               <svg
                 width="22"
@@ -490,10 +260,10 @@ export default function DashboardPage() {
             sparkColor="#27AE60"
           />
           <KPICard
-            title="Stabilized at 90 days"
-            value="321"
-            change={9.8}
-            changePeriod="vs Apr 1 – Apr 30"
+            title={uiText("Maintien confirmé")}
+            value={String(metrics.stabilized)}
+            change={0}
+            changePeriod="Données enregistrées"
             icon={
               <svg
                 width="22"
@@ -525,13 +295,15 @@ export default function DashboardPage() {
               }}
             >
               <div>
-                <h2 className="section-title">Journey Progression (Monthly)</h2>
+                <h2 className="section-title">
+                  <Translated value="Journey Progression (Monthly)" />
+                </h2>
                 <div style={{ display: "flex", gap: 14, marginTop: 8 }}>
                   {[
                     { label: "Detected", color: "#00B8A9" },
                     { label: "Activated", color: "#2E86C1" },
                     { label: "Integrated", color: "#27AE60" },
-                    { label: "Stabilized (90d)", color: "#F5A623" },
+                    { label: "Maintien confirmé", color: "#F5A623" },
                   ].map(({ label, color }) => (
                     <div
                       key={label}
@@ -561,7 +333,8 @@ export default function DashboardPage() {
                 className="btn-outline"
                 style={{ fontSize: "0.75rem", padding: "5px 10px" }}
               >
-                Last 12 months <ChevronRight size={12} />
+                <Translated value="Six derniers mois" />
+                <ChevronRight size={12} />
               </button>
             </div>
             <ResponsiveContainer
@@ -627,11 +400,13 @@ export default function DashboardPage() {
           {/* Heatmap */}
           <div className="card" style={{ flex: 1, padding: 20 }}>
             <div style={{ marginBottom: 12 }}>
-              <h2 className="section-title">NEET Density Heatmap</h2>
+              <h2 className="section-title">
+                <Translated value="NEET Density Heatmap" />
+              </h2>
               <p
                 style={{ fontSize: "0.75rem", color: "#7F8C9A", marginTop: 2 }}
               >
-                Souss-Massa Region
+                <Translated value="Souss-Massa Region" />
               </p>
             </div>
             <SoussaMassaMap />
@@ -643,7 +418,7 @@ export default function DashboardPage() {
           {/* Integration Funnel */}
           <div className="card" style={{ flex: 1, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 16 }}>
-              Integration Funnel
+              <Translated value="Integration Funnel" />
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {funnelData.map((f, i) => (
@@ -708,7 +483,11 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <FunnelBar count={f.count} max={1842} color={f.color} />
+                  <FunnelBar
+                    count={f.count}
+                    max={Math.max(1, metrics.identified)}
+                    color={f.color}
+                  />
                 </div>
               ))}
             </div>
@@ -724,7 +503,9 @@ export default function DashboardPage() {
                 marginBottom: 16,
               }}
             >
-              <h2 className="section-title">Top Blockers</h2>
+              <h2 className="section-title">
+                <Translated value="Top Blockers" />
+              </h2>
               <button
                 style={{
                   background: "none",
@@ -735,7 +516,7 @@ export default function DashboardPage() {
                   fontWeight: 600,
                 }}
               >
-                View all
+                <Translated value="View all" />
               </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -790,10 +571,11 @@ export default function DashboardPage() {
                       {b.count}
                     </div>
                     <div className="badge-up" style={{ fontSize: "0.7rem" }}>
-                      <TrendingUp size={10} /> {b.change}%
+                      {b.pct}
+                      <Translated value="% des dossiers" />
                     </div>
                     <div style={{ fontSize: "0.65rem", color: "#7F8C9A" }}>
-                      NEETs
+                      <Translated value="NEETs" />
                     </div>
                   </div>
                 </div>
@@ -812,7 +594,9 @@ export default function DashboardPage() {
               marginBottom: 16,
             }}
           >
-            <h2 className="section-title">Recent NEET Profiles</h2>
+            <h2 className="section-title">
+              <Translated value="Recent NEET Profiles" />
+            </h2>
             <button
               style={{
                 background: "none",
@@ -823,7 +607,7 @@ export default function DashboardPage() {
                 fontWeight: 600,
               }}
             >
-              View all
+              <Translated value="View all" />
             </button>
           </div>
           <table
@@ -873,7 +657,7 @@ export default function DashboardPage() {
                       color: "#7F8C9A",
                     }}
                   >
-                    No profiles match your search.
+                    <Translated value="No profiles match your search." />
                   </td>
                 </tr>
               )}
@@ -961,7 +745,7 @@ export default function DashboardPage() {
               }}
             >
               <h2 className="section-title">
-                Opportunities & Collaborating Programs
+                <Translated value="Opportunities & Collaborating Programs" />
               </h2>
               <button
                 style={{
@@ -973,7 +757,7 @@ export default function DashboardPage() {
                   fontWeight: 600,
                 }}
               >
-                View all
+                <Translated value="View all" />
               </button>
             </div>
             <div
@@ -1023,7 +807,7 @@ export default function DashboardPage() {
                     <strong style={{ color: "#1A2B3C" }}>
                       {p.opportunities}
                     </strong>{" "}
-                    opportunities
+                    <Translated value="opportunities" />
                   </div>
                   <button
                     className="btn-primary"
@@ -1035,7 +819,7 @@ export default function DashboardPage() {
                       background: p.color,
                     }}
                   >
-                    Explore
+                    <Translated value="Explore" />
                   </button>
                 </div>
               ))}
@@ -1060,7 +844,9 @@ export default function DashboardPage() {
                   marginBottom: 14,
                 }}
               >
-                <h2 className="section-title">Mediator Activity</h2>
+                <h2 className="section-title">
+                  <Translated value="Mediator Activity" />
+                </h2>
                 <button
                   style={{
                     background: "none",
@@ -1071,7 +857,7 @@ export default function DashboardPage() {
                     fontWeight: 600,
                   }}
                 >
-                  View all
+                  <Translated value="View all" />
                 </button>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -1104,7 +890,16 @@ export default function DashboardPage() {
                       color: "#1A2B3C",
                     }}
                   >
-                    78%
+                    {metrics.mediators
+                      ? Math.round(
+                          (data.staff.filter(
+                            (u) => u.role === "mediator" && u.active,
+                          ).length /
+                            metrics.mediators) *
+                            100,
+                        )
+                      : 0}
+                    %
                   </div>
                 </div>
                 <div>
@@ -1115,10 +910,15 @@ export default function DashboardPage() {
                       color: "#1A2B3C",
                     }}
                   >
-                    Active Mediators
+                    <Translated value="Active Mediators" />
                   </div>
                   <div style={{ fontSize: "0.8125rem", color: "#7F8C9A" }}>
-                    36 / 46
+                    {
+                      data.staff.filter(
+                        (u) => u.role === "mediator" && u.active,
+                      ).length
+                    }{" "}
+                    / {metrics.mediators}
                   </div>
                   <div
                     style={{
@@ -1127,13 +927,14 @@ export default function DashboardPage() {
                       marginTop: 2,
                     }}
                   >
-                    active this month
+                    <Translated value="comptes actifs" />
                   </div>
                   <div
                     className="badge-up"
                     style={{ marginTop: 4, fontSize: "0.72rem" }}
                   >
-                    <TrendingUp size={10} /> +8% vs last month
+                    <TrendingUp size={10} />
+                    <Translated value="Données enregistrées" />
                   </div>
                 </div>
               </div>
@@ -1149,7 +950,9 @@ export default function DashboardPage() {
                   marginBottom: 14,
                 }}
               >
-                <h2 className="section-title">Retention Rates</h2>
+                <h2 className="section-title">
+                  <Translated value="Retention Rates" />
+                </h2>
                 <button
                   style={{
                     background: "none",
@@ -1160,7 +963,7 @@ export default function DashboardPage() {
                     fontWeight: 600,
                   }}
                 >
-                  View all
+                  <Translated value="View all" />
                 </button>
               </div>
               <div
@@ -1170,11 +973,7 @@ export default function DashboardPage() {
                   justifyContent: "space-between",
                 }}
               >
-                {[
-                  { label: "30 Days", pct: 78, change: 4, color: "#00B8A9" },
-                  { label: "60 Days", pct: 62, change: 5, color: "#2E86C1" },
-                  { label: "90 Days", pct: 48, change: 4, color: "#8E44AD" },
-                ].map(({ label, pct, change, color }) => (
+                {retentionRates.map(({ label, pct, change, color, cohort }) => (
                   <div key={label} style={{ textAlign: "center", flex: 1 }}>
                     <div
                       style={{
@@ -1212,7 +1011,7 @@ export default function DashboardPage() {
                           color: "#1A2B3C",
                         }}
                       >
-                        {pct}%
+                        {cohort ? pct + "%" : "—"}
                       </div>
                     </div>
                     <div
@@ -1228,7 +1027,8 @@ export default function DashboardPage() {
                       className="badge-up"
                       style={{ fontSize: "0.7rem", justifyContent: "center" }}
                     >
-                      <TrendingUp size={10} /> +{change}%
+                      {cohort}
+                      <Translated value="dossiers à échéance" />
                     </div>
                   </div>
                 ))}

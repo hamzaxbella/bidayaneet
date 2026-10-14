@@ -1,111 +1,19 @@
 "use client";
+import Translated from "@/components/Translated";
+
+import Link from "next/link";
+import { useWorkspace } from "@/components/workspace/LiveProvider";
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import { AlertTriangle, Info, CheckCircle, X, Settings } from "lucide-react";
 import { useState } from "react";
 
-const allAlerts = [
-  {
-    id: 1,
-    severity: "critical",
-    title: "High-Risk NEET Dropout Detected",
-    desc: "12 NEETs in Agadir showed dropout signals this week. Immediate follow-up needed.",
-    time: "2 hours ago",
-    neets: 12,
-    action: "View Profiles",
-    read: false,
-  },
-  {
-    id: 2,
-    severity: "critical",
-    title: "Mediator Coverage Gap — Tata Commune",
-    desc: "No active mediator assigned to 38 NEETs in Tata. Last visit was 15 days ago.",
-    time: "5 hours ago",
-    neets: 38,
-    action: "Assign Mediator",
-    read: false,
-  },
-  {
-    id: 3,
-    severity: "warning",
-    title: "Low Trust Score Cluster Detected",
-    desc: "24 NEETs with trust score below 40% in Tiznit — needs engagement boost.",
-    time: "1 day ago",
-    neets: 24,
-    action: "View NEETs",
-    read: false,
-  },
-  {
-    id: 4,
-    severity: "warning",
-    title: "ANAPEC Enrollment Capacity at 90%",
-    desc: "ANAPEC program is almost at full capacity (540/600). Prioritize referrals.",
-    time: "2 days ago",
-    neets: null,
-    action: "Manage Program",
-    read: true,
-  },
-  {
-    id: 5,
-    severity: "info",
-    title: "Monthly Report Ready",
-    desc: "The April 2025 monthly performance report has been generated and is ready for review.",
-    time: "3 days ago",
-    neets: null,
-    action: "View Report",
-    read: true,
-  },
-  {
-    id: 6,
-    severity: "info",
-    title: "50 New NEETs Profiled — Taroudant",
-    desc: "Field team completed profiling of 50 new NEETs in Taroudant this week.",
-    time: "4 days ago",
-    neets: 50,
-    action: "Review Profiles",
-    read: true,
-  },
-  {
-    id: 7,
-    severity: "success",
-    title: "30 NEETs Reached Stabilization (90d)",
-    desc: "30 NEETs have successfully passed the 90-day stability mark this month. Great progress!",
-    time: "5 days ago",
-    neets: 30,
-    action: "View Stats",
-    read: true,
-  },
-];
-
 const alertRules = [
   {
-    name: "Dropout Risk Detection",
-    trigger: "NEET inactivity > 14 days",
-    severity: "critical",
-    enabled: true,
-  },
-  {
-    name: "Mediator Coverage Gap",
-    trigger: "Commune with 0 active mediators",
-    severity: "critical",
-    enabled: true,
-  },
-  {
-    name: "Enrollment Capacity Alert",
-    trigger: "Program capacity > 85%",
+    name: "Suivis en retard",
+    trigger: "Échéance dépassée et suivi non clôturé",
     severity: "warning",
     enabled: true,
-  },
-  {
-    name: "New NEET Batch",
-    trigger: "10+ new NEETs added in 24h",
-    severity: "info",
-    enabled: true,
-  },
-  {
-    name: "Low Trust Cluster",
-    trigger: "Cluster of 20+ NEETs with trust < 40%",
-    severity: "warning",
-    enabled: false,
   },
 ];
 
@@ -142,6 +50,9 @@ const severityConfig: Record<
 };
 
 export default function AlertsPage() {
+  const { allAlerts, metrics, data } = useAdminData();
+  const { command } = useWorkspace();
+
   const [activeTab, setActiveTab] = useState("All");
 
   const filtered =
@@ -174,7 +85,7 @@ export default function AlertsPage() {
                   color: "#1A2B3C",
                 }}
               >
-                Alerts
+                <Translated value="Alerts" />
               </h1>
               {unread > 0 && (
                 <span
@@ -196,16 +107,27 @@ export default function AlertsPage() {
               )}
             </div>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Monitor system alerts, risk signals, and program notifications
+              <Translated value="Monitor system alerts, risk signals, and program notifications" />
             </p>
           </div>
           <button
             className="btn-outline"
             style={{ fontSize: "0.78rem", padding: "7px 14px" }}
           >
-            <Settings size={13} /> Manage Rules
+            <Settings size={13} />
+            <Translated value="Manage Rules" />
           </button>
-          <button className="btn-primary">Mark All Read</button>
+          <button
+            className="btn-primary"
+            onClick={() =>
+              void command({
+                action: "alert-read",
+                payload: allAlerts.map((a) => a.id),
+              })
+            }
+          >
+            <Translated value="Mark All Read" />
+          </button>
         </div>
         {/* Tabs */}
         <div
@@ -374,7 +296,8 @@ export default function AlertsPage() {
                             padding: "2px 8px",
                           }}
                         >
-                          {alert.neets} NEETs affected
+                          {alert.neets}
+                          <Translated value="NEETs affected" />
                         </span>
                       )}
                       <button
@@ -413,7 +336,7 @@ export default function AlertsPage() {
         {/* Alert Rules */}
         <div className="card" style={{ padding: 20 }}>
           <h2 className="section-title" style={{ marginBottom: 16 }}>
-            Alert Rules
+            <Translated value="Alert Rules" />
           </h2>
           <table
             style={{

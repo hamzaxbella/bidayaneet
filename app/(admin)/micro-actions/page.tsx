@@ -1,4 +1,10 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import BusinessAction from "@/components/workspace/BusinessAction";
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import {
   Plus,
@@ -17,84 +23,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-const actions = [
-  {
-    title: "CV Workshop",
-    type: "Workshop",
-    commune: "Agadir",
-    organizer: "ANAPEC",
-    date: "Jun 3, 2025",
-    capacity: 30,
-    enrolled: 24,
-    color: "#00B8A9",
-    icon: "📄",
-  },
-  {
-    title: "Local Recruiter Fair",
-    type: "Event",
-    commune: "Inezgane",
-    organizer: "Chambre Commerce",
-    date: "Jun 6, 2025",
-    capacity: 60,
-    enrolled: 38,
-    color: "#2E86C1",
-    icon: "🤝",
-  },
-  {
-    title: "Skills Assessment Day",
-    type: "Assessment",
-    commune: "Taroudant",
-    organizer: "AMAL Asso.",
-    date: "Jun 10, 2025",
-    capacity: 20,
-    enrolled: 18,
-    color: "#8E44AD",
-    icon: "📊",
-  },
-  {
-    title: "Digital Literacy Session",
-    type: "Training",
-    commune: "Tiznit",
-    organizer: "Volunteer",
-    date: "Jun 12, 2025",
-    capacity: 25,
-    enrolled: 15,
-    color: "#F5A623",
-    icon: "💻",
-  },
-  {
-    title: "Quick Paid Internship",
-    type: "Internship",
-    commune: "Agadir",
-    organizer: "Local SME",
-    date: "Jun 15, 2025",
-    capacity: 10,
-    enrolled: 10,
-    color: "#27AE60",
-    icon: "💼",
-  },
-  {
-    title: "Trust Building Circle",
-    type: "Social",
-    commune: "Tata",
-    organizer: "Bader ONG",
-    date: "Jun 18, 2025",
-    capacity: 15,
-    enrolled: 7,
-    color: "#E74C3C",
-    icon: "💚",
-  },
-];
-
-const impactData = [
-  { type: "Workshop", reached: 186 },
-  { type: "Event", reached: 142 },
-  { type: "Training", reached: 210 },
-  { type: "Assessment", reached: 95 },
-  { type: "Internship", reached: 68 },
-  { type: "Social", reached: 124 },
-];
 
 const calendarDays = Array.from({ length: 30 }, (_, i) => ({
   day: i + 1,
@@ -166,17 +94,25 @@ function KPISimple({
         </div>
       </div>
       <div className={up ? "badge-up" : "badge-down"}>
-        {up ? <TrendingUp size={12} /> : null} {up ? "+" : ""}
-        {change}%
-        <span style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}>
-          vs last month
-        </span>
+        {up ? <TrendingUp size={12} /> : null} {change !== 0 && up ? "+" : ""}
+        {change !== 0 ? (
+          change + "%"
+        ) : (
+          <Translated value="Données enregistrées" />
+        )}
+        <span
+          style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}
+        ></span>
       </div>
     </div>
   );
 }
 
 export default function MicroActionsPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { actions, impactData, metrics, data } = useAdminData();
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
@@ -200,15 +136,16 @@ export default function MicroActionsPage() {
                 color: "#1A2B3C",
               }}
             >
-              Micro-actions
+              <Translated value="Micro-actions" />
             </h1>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Schedule and track local micro-activities for NEET engagement
+              <Translated value="Schedule and track local micro-activities for NEET engagement" />
             </p>
           </div>
-          <button className="btn-primary">
-            <Plus size={15} /> Add Action
-          </button>
+          <BusinessAction kind="activity">
+            <Plus size={15} />
+            <Translated value="Add Action" />
+          </BusinessAction>
         </div>
       </div>
 
@@ -223,30 +160,40 @@ export default function MicroActionsPage() {
       >
         <div style={{ display: "flex", gap: 16 }}>
           <KPISimple
-            title="Total Actions"
-            value="124"
-            change={28.4}
+            title={uiText("Total Actions")}
+            value={String(metrics.activities)}
+            change={0}
             color="#00B8A9"
             bg="#E0F7F5"
           />
           <KPISimple
-            title="Scheduled"
-            value="38"
-            change={14.2}
+            title={uiText("Scheduled")}
+            value={String(
+              data.activities.filter(
+                (a) => a.data.date >= new Date().toISOString().slice(0, 10),
+              ).length,
+            )}
+            change={0}
             color="#2E86C1"
             bg="#EBF5FB"
           />
           <KPISimple
-            title="Completed"
-            value="86"
-            change={32.6}
+            title={uiText("Présences enregistrées")}
+            value={String(data.participations.filter((p) => p.attended).length)}
+            change={0}
             color="#27AE60"
             bg="#EAFAF1"
           />
           <KPISimple
-            title="NEETs Reached"
-            value="825"
-            change={19.4}
+            title={uiText("NEETs Reached")}
+            value={String(
+              new Set(
+                data.participations
+                  .filter((p) => p.attended)
+                  .map((p) => p.youth_id),
+              ).size,
+            )}
+            change={0}
             color="#8E44AD"
             bg="#F5EEF8"
           />
@@ -280,7 +227,7 @@ export default function MicroActionsPage() {
                   color: "#1A2B3C",
                 }}
               >
-                June 2025
+                <Translated value="June 2025" />
               </h2>
               <button
                 style={{
@@ -336,7 +283,7 @@ export default function MicroActionsPage() {
           {/* Upcoming Actions */}
           <div className="card" style={{ flex: 1, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 16 }}>
-              Upcoming Actions
+              <Translated value="Upcoming Actions" />
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {actions.map((a, i) => (
@@ -398,7 +345,8 @@ export default function MicroActionsPage() {
                         {a.date}
                       </span>
                       <span style={{ fontSize: "0.72rem", color: "#7F8C9A" }}>
-                        By {a.organizer}
+                        <Translated value="By" />
+                        {a.organizer}
                       </span>
                     </div>
                   </div>
@@ -413,7 +361,7 @@ export default function MicroActionsPage() {
                       {a.enrolled}/{a.capacity}
                     </div>
                     <div style={{ fontSize: "0.65rem", color: "#7F8C9A" }}>
-                      enrolled
+                      <Translated value="enrolled" />
                     </div>
                     <span
                       style={{
@@ -437,7 +385,7 @@ export default function MicroActionsPage() {
         {/* Impact chart */}
         <div className="card" style={{ padding: 20 }}>
           <h2 className="section-title" style={{ marginBottom: 16 }}>
-            NEETs Reached by Action Type
+            <Translated value="NEETs Reached by Action Type" />
           </h2>
           <ResponsiveContainer
             width="100%"

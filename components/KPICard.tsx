@@ -67,15 +67,16 @@ export default function KPICard({
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        {isUp ? (
-          <span className="badge-up">
-            <TrendingUp size={12} /> +{change}%
-          </span>
-        ) : (
-          <span className="badge-down">
-            <TrendingDown size={12} /> {change}%
-          </span>
-        )}
+        {change !== 0 &&
+          (isUp ? (
+            <span className="badge-up">
+              <TrendingUp size={12} /> +{change}%
+            </span>
+          ) : (
+            <span className="badge-down">
+              <TrendingDown size={12} /> {change}%
+            </span>
+          ))}
         <span style={{ fontSize: "0.72rem", color: "#7F8C9A" }}>
           {changePeriod}
         </span>

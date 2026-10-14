@@ -1,5 +1,10 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
 import { CalendarDays, Download, MapPin, Search } from "lucide-react";
+import { useAdminData } from "@/components/workspace/AdminData";
 import { downloadCsv } from "@/lib/export-csv";
 interface PageHeaderProps {
   title: string;
@@ -19,6 +24,10 @@ export default function PageHeader({
   searchPlaceholder = "Search NEET profiles...",
   onSearch,
 }: PageHeaderProps) {
+  const { text: uiText } = useUiTranslation();
+
+  const { metrics, data } = useAdminData();
+  const today = new Date(data.now).toLocaleDateString("fr-MA",{timeZone:"Africa/Casablanca"});
   return (
     <div className="admin-header">
       <div className="admin-header-main">
@@ -34,7 +43,7 @@ export default function PageHeader({
               <Search size={15} />
               <input
                 type="search"
-                aria-label="Search NEET profiles"
+                aria-label={uiText("Search NEET profiles")}
                 placeholder={searchPlaceholder}
                 onChange={(event) => onSearch(event.target.value)}
               />
@@ -43,12 +52,12 @@ export default function PageHeader({
           <button
             className="btn-primary"
             onClick={() =>
-              downloadCsv("bidayaneet-regional-overview-demo.csv", [
-                ["Metric", "Value", "Period", "Source"],
-                ["Identified young people", 1842, "May 2025", "Demonstration"],
-                ["Activated", 1102, "May 2025", "Demonstration"],
-                ["Integrated", 682, "May 2025", "Demonstration"],
-                ["Stabilized", 321, "May 2025", "Demonstration"],
+              downloadCsv("bidayaneet-region.csv", [
+                ["Indicateur", "Valeur", "Date"],
+                ["Dossiers identifiés", metrics.identified, today],
+                ["Activation confirmée", metrics.activated, today],
+                ["Insertion constatée", metrics.integrated, today],
+                ["Maintien confirmé", metrics.stabilized, today],
               ])
             }
           >
@@ -59,10 +68,14 @@ export default function PageHeader({
       {showFilters && (
         <div className="admin-period">
           <span className="original-period">
-            <CalendarDays size={13} /> May 1 – May 31, 2025
+            <CalendarDays size={13} /> {today}
           </span>
-          <span className="original-period">Souss-Massa</span>
-          <span>Sample reporting period</span>
+          <span className="original-period">
+            {String(data.settings.region || "Souss-Massa")}
+          </span>
+          <span>
+            <Translated value="Données enregistrées" />
+          </span>
         </div>
       )}
     </div>

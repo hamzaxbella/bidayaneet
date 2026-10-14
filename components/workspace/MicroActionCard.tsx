@@ -1,11 +1,20 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { useWorkspaceDatasets } from "./LiveProvider";
+import type {
+  AppointmentView,
+  OpportunityView,
+  FieldActionView,
+} from "@/lib/workspace-data";
 
 import Image from "next/image";
 import { ArrowRight, CalendarDays, Check, Clock3, MapPin } from "lucide-react";
-import { fieldActions } from "@/lib/demo-data";
 import { useYouth } from "./YouthProvider";
 
-type Action = (typeof fieldActions)[number];
+type Action = FieldActionView;
 export default function MicroActionCard({
   action,
   compact = false,
@@ -13,6 +22,8 @@ export default function MicroActionCard({
   action: Action;
   compact?: boolean;
 }) {
+  const { text: uiText } = useUiTranslation();
+
   const { enrolled, toggleEnrolled } = useYouth();
   const chosen = enrolled.includes(action.id);
   return (
@@ -21,7 +32,7 @@ export default function MicroActionCard({
     >
       <Image
         src={action.image}
-        alt=""
+        alt={uiText("")}
         fill
         sizes={
           compact
@@ -53,19 +64,22 @@ export default function MicroActionCard({
         >
           {chosen ? (
             <>
-              <Check size={15} /> Annuler ma sélection
+              <Check size={15} />
+              <Translated value="Annuler ma sélection" />
             </>
           ) : (
             <>
               {action.category === "À ton rythme"
                 ? "Choisir ce petit pas"
-                : "M’inscrire en démo"}
+                : "M’inscrire"}
               <ArrowRight size={15} />
             </>
           )}
         </button>
         {chosen && (
-          <small role="status">Sélection enregistrée sur cet appareil.</small>
+          <small role="status">
+            <Translated value="Sélection enregistrée sur cet appareil." />
+          </small>
         )}
       </div>
     </article>

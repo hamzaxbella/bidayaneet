@@ -1,4 +1,10 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { reportSummary } from "@/lib/reporting";
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import { Download, TrendingUp, TrendingDown } from "lucide-react";
 import {
@@ -13,71 +19,6 @@ import {
 import { useState } from "react";
 
 const tabs = ["Monthly", "Quarterly", "Custom"];
-
-const trendData = [
-  {
-    month: "Jan",
-    detected: 420,
-    activated: 210,
-    integrated: 130,
-    stabilized: 45,
-  },
-  {
-    month: "Feb",
-    detected: 490,
-    activated: 260,
-    integrated: 160,
-    stabilized: 60,
-  },
-  {
-    month: "Mar",
-    detected: 620,
-    activated: 370,
-    integrated: 230,
-    stabilized: 90,
-  },
-  {
-    month: "Apr",
-    detected: 800,
-    activated: 490,
-    integrated: 310,
-    stabilized: 120,
-  },
-  {
-    month: "May",
-    detected: 1100,
-    activated: 640,
-    integrated: 420,
-    stabilized: 170,
-  },
-];
-
-const savedReports = [
-  {
-    name: "April 2025 Monthly Report",
-    date: "May 1, 2025",
-    type: "PDF",
-    size: "2.4 MB",
-  },
-  {
-    name: "Q1 2025 Quarterly Summary",
-    date: "Apr 1, 2025",
-    type: "PDF",
-    size: "5.8 MB",
-  },
-  {
-    name: "NEET Profiles Export - May",
-    date: "May 31, 2025",
-    type: "CSV",
-    size: "1.2 MB",
-  },
-  {
-    name: "Mediator Activity Report",
-    date: "May 15, 2025",
-    type: "XLSX",
-    size: "890 KB",
-  },
-];
 
 function KPISimple({
   title,
@@ -147,19 +88,75 @@ function KPISimple({
         </div>
       </div>
       <div className={up ? "badge-up" : "badge-down"}>
-        {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}{" "}
-        {up ? "+" : ""}
-        {change}%
-        <span style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}>
-          vs last period
-        </span>
+        {change !== 0 &&
+          (up ? <TrendingUp size={12} /> : <TrendingDown size={12} />)}{" "}
+        {change !== 0 && up ? "+" : ""}
+        {change !== 0 ? (
+          change + "%"
+        ) : (
+          <Translated value="Données enregistrées" />
+        )}
+        <span
+          style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}
+        ></span>
       </div>
     </div>
   );
 }
 
 export default function ReportsPage() {
-  const [activeTab, setActiveTab] = useState("Monthly");
+  const { text: uiText } = useUiTranslation();
+
+  const { trendData, savedReports, metrics, data } = useAdminData();
+
+  const [activeTab, setActiveTab] = useState("Monthly"),
+    [customStart, setCustomStart] = useState(
+      new Date().toISOString().slice(0, 10),
+    ),
+    [customEnd, setCustomEnd] = useState(new Date().toISOString().slice(0, 10)),
+    [exporting, setExporting] = useState(false),
+    [error, setError] = useState("");
+  const today = new Date(),
+    end = activeTab === "Custom" ? customEnd : today.toISOString().slice(0, 10),
+    start =
+      activeTab === "Custom"
+        ? customStart
+        : new Date(
+            Date.UTC(
+              today.getUTCFullYear(),
+              activeTab === "Quarterly"
+                ? Math.floor(today.getUTCMonth() / 3) * 3
+                : today.getUTCMonth(),
+              1,
+            ),
+          )
+            .toISOString()
+            .slice(0, 10);
+  const summary = reportSummary(data, start, end);
+  async function exportReport() {
+    setExporting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "report-export",
+          payload: { start, end },
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw Error(result.error || "Export indisponible.");
+      const a = document.createElement("a");
+      a.href = result.url;
+      a.download = "";
+      a.click();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Export indisponible.");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
     <div
@@ -184,10 +181,10 @@ export default function ReportsPage() {
                 color: "#1A2B3C",
               }}
             >
-              Reports
+              <Translated value="Reports" />
             </h1>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Generate and export regional performance reports
+              <Translated value="Generate and export regional performance reports" />
             </p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -195,13 +192,22 @@ export default function ReportsPage() {
               className="btn-outline"
               style={{ fontSize: "0.78rem", padding: "7px 14px" }}
             >
-              <Download size={13} /> Export PDF
+              <span onClick={() => window.print()}>
+                <Download size={13} />
+                <Translated value="Imprimer / PDF" />
+              </span>
             </button>
             <button
               className="btn-outline"
               style={{ fontSize: "0.78rem", padding: "7px 14px" }}
             >
-              <Download size={13} /> Export CSV
+              <span
+                onClick={() => {
+                  if (!exporting) void exportReport();
+                }}
+              >
+                <Download size={13} /> {exporting ? "Export…" : "Export CSV"}
+              </span>
             </button>
           </div>
         </div>
@@ -250,35 +256,68 @@ export default function ReportsPage() {
       >
         <div style={{ display: "flex", gap: 16 }}>
           <KPISimple
-            title="Total NEETs Detected"
-            value="1,842"
-            change={12.4}
+            title={uiText("Total NEETs Detected")}
+            value={String(summary.identified)}
+            change={0}
             color="#00B8A9"
             bg="#E0F7F5"
           />
           <KPISimple
-            title="Integration Rate"
-            value="37.0%"
-            change={5.8}
+            title={uiText("Integration Rate")}
+            value={`${summary.integrationRate}%`}
+            change={0}
             color="#27AE60"
             bg="#EAFAF1"
           />
           <KPISimple
-            title="Stabilization Rate"
-            value="17.4%"
-            change={9.8}
+            title={uiText("Stabilization Rate")}
+            value={`${summary.stabilizationRate}%`}
+            change={0}
             color="#F5A623"
             bg="#FEF9E7"
           />
           <KPISimple
-            title="Active Programs"
-            value="5"
-            change={25.0}
+            title={uiText("Active Programs")}
+            value={String(data.programs.filter((p) => p.published).length)}
+            change={0}
             color="#8E44AD"
             bg="#F5EEF8"
           />
         </div>
 
+        {error && (
+          <p role="alert" style={{ color: "#AD2F2F" }}>
+            {error}
+          </p>
+        )}
+        <p>
+          <Translated value="Rapport des dossiers reçus du" />
+          {start}
+          <Translated value="au" />
+          {end}
+          <Translated value=". Les taux concernent cette même cohorte." />
+        </p>
+        {activeTab === "Custom" && (
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <label>
+              <Translated value="Début" />{" "}
+              <input
+                type="date"
+                value={customStart}
+                onChange={(e) => setCustomStart(e.target.value)}
+              />
+            </label>
+            <label>
+              <Translated value="Fin" />{" "}
+              <input
+                type="date"
+                min={customStart}
+                value={customEnd}
+                onChange={(e) => setCustomEnd(e.target.value)}
+              />
+            </label>
+          </div>
+        )}
         {/* Main Chart */}
         <div className="card" style={{ padding: 20 }}>
           <div
@@ -290,13 +329,15 @@ export default function ReportsPage() {
             }}
           >
             <h2 className="section-title">
-              Journey Progression — {activeTab} View
+              <Translated value="Historique des événements — six derniers mois" />
             </h2>
             <button
               className="btn-outline"
               style={{ fontSize: "0.75rem", padding: "5px 10px" }}
             >
-              Customize
+              <span onClick={() => setActiveTab("Custom")}>
+                <Translated value="Customize" />
+              </span>
             </button>
           </div>
           <ResponsiveContainer
@@ -370,7 +411,7 @@ export default function ReportsPage() {
         {/* Saved Reports */}
         <div className="card" style={{ padding: 20 }}>
           <h2 className="section-title" style={{ marginBottom: 16 }}>
-            Saved Reports
+            <Translated value="Saved Reports" />
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
             {savedReports.map((r, i) => (
@@ -440,7 +481,8 @@ export default function ReportsPage() {
                     gap: 4,
                   }}
                 >
-                  <Download size={12} /> Download
+                  <Download size={12} />
+                  <Translated value="Download" />
                 </button>
               </div>
             ))}

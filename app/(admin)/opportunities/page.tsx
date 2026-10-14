@@ -1,4 +1,10 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import BusinessAction from "@/components/workspace/BusinessAction";
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import { Plus, TrendingUp, TrendingDown, MapPin, Clock } from "lucide-react";
 import PartnerLogo from "@/components/PartnerLogo";
@@ -11,104 +17,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-const opportunities = [
-  {
-    title: "Auto Mechanics Training",
-    type: "Training",
-    program: "OFPPT",
-    commune: "Agadir",
-    deadline: "Jun 15, 2025",
-    matches: 48,
-    status: "active",
-    color: "#00B8A9",
-  },
-  {
-    title: "Digital Marketing Bootcamp",
-    type: "Internship",
-    program: "StartUp",
-    commune: "Agadir",
-    deadline: "Jun 10, 2025",
-    matches: 32,
-    status: "active",
-    color: "#2E86C1",
-  },
-  {
-    title: "Entrepreneurship Program",
-    type: "Program",
-    program: "INDH",
-    commune: "Inezgane",
-    deadline: "Jun 20, 2025",
-    matches: 25,
-    status: "active",
-    color: "#8E44AD",
-  },
-  {
-    title: "Welding Certification",
-    type: "Training",
-    program: "OFPPT",
-    commune: "Taroudant",
-    deadline: "Jun 8, 2025",
-    matches: 18,
-    status: "active",
-    color: "#F5A623",
-  },
-  {
-    title: "Retail Sales Internship",
-    type: "Internship",
-    program: "Local",
-    commune: "Agadir",
-    deadline: "Jun 5, 2025",
-    matches: 41,
-    status: "closing",
-    color: "#E74C3C",
-  },
-  {
-    title: "CV & Job Readiness Workshop",
-    type: "Micro",
-    program: "ANAPEC",
-    commune: "Tiznit",
-    deadline: "May 30, 2025",
-    matches: 64,
-    status: "active",
-    color: "#27AE60",
-  },
-];
-
-const byType = [
-  { type: "Training", count: 42 },
-  { type: "Internship", count: 38 },
-  { type: "Program", count: 29 },
-  { type: "Micro-action", count: 75 },
-  { type: "Workshop", count: 24 },
-];
-
-const recentMatches = [
-  {
-    neet: "Yassine El Amrani",
-    opp: "Auto Mechanics Training",
-    match: 92,
-    date: "May 31",
-  },
-  {
-    neet: "Fatima Zahra A.",
-    opp: "Digital Marketing Bootcamp",
-    match: 86,
-    date: "May 30",
-  },
-  {
-    neet: "Omar T.",
-    opp: "Entrepreneurship Program",
-    match: 78,
-    date: "May 29",
-  },
-  {
-    neet: "Hassan A.",
-    opp: "Welding Certification",
-    match: 74,
-    date: "May 27",
-  },
-];
 
 type KPISimpleProps = {
   title: string;
@@ -171,18 +79,28 @@ function KPISimple({ title, value, change, color, bg }: KPISimpleProps) {
         </div>
       </div>
       <div className={up ? "badge-up" : "badge-down"}>
-        {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}{" "}
-        {up ? "+" : ""}
-        {change}%
-        <span style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}>
-          vs last month
-        </span>
+        {change !== 0 &&
+          (up ? <TrendingUp size={12} /> : <TrendingDown size={12} />)}{" "}
+        {change !== 0 && up ? "+" : ""}
+        {change !== 0 ? (
+          change + "%"
+        ) : (
+          <Translated value="Données enregistrées" />
+        )}
+        <span
+          style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}
+        ></span>
       </div>
     </div>
   );
 }
 
 export default function OpportunitiesPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { opportunities, byType, recentMatches, metrics, data } =
+    useAdminData();
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
@@ -206,16 +124,16 @@ export default function OpportunitiesPage() {
                 color: "#1A2B3C",
               }}
             >
-              Opportunities
+              <Translated value="Opportunities" />
             </h1>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Track and manage matched opportunities for NEETs across
-              Souss-Massa
+              <Translated value="Track and manage matched opportunities for NEETs across Souss-Massa" />
             </p>
           </div>
-          <button className="btn-primary">
-            <Plus size={15} /> Add Opportunity
-          </button>
+          <BusinessAction kind="offer">
+            <Plus size={15} />
+            <Translated value="Add Opportunity" />
+          </BusinessAction>
         </div>
       </div>
 
@@ -230,29 +148,41 @@ export default function OpportunitiesPage() {
       >
         <div style={{ display: "flex", gap: 16 }}>
           <KPISimple
-            title="Total Opportunities"
-            value="208"
-            change={22.4}
+            title={uiText("Total Opportunities")}
+            value={String(metrics.offers)}
+            change={0}
             color="#00B8A9"
             bg="#E0F7F5"
           />
           <KPISimple
-            title="Active"
-            value="186"
-            change={18.3}
+            title={uiText("Active")}
+            value={String(
+              opportunities.filter((o) => o.status === "active").length,
+            )}
+            change={0}
             color="#27AE60"
             bg="#EAFAF1"
           />
           <KPISimple
-            title="Total Matches"
-            value="1,284"
-            change={31.6}
+            title={uiText("Total Matches")}
+            value={String(metrics.referrals)}
+            change={0}
             color="#2E86C1"
             bg="#EBF5FB"
           />
           <KPISimple
-            title="Filled / Closed"
-            value="22"
+            title={uiText("Filled / Closed")}
+            value={String(
+              data.offers.filter(
+                (o) =>
+                  !o.active ||
+                  data.referrals.filter(
+                    (r) =>
+                      r.offer_id === o.id &&
+                      ["accepted", "proposed"].includes(r.status),
+                  ).length >= o.data.capacity,
+              ).length,
+            )}
             change={-4.2}
             color="#E74C3C"
             bg="#FDEDEC"
@@ -262,7 +192,7 @@ export default function OpportunitiesPage() {
         {/* Table */}
         <div className="card" style={{ padding: 20 }}>
           <h2 className="section-title" style={{ marginBottom: 16 }}>
-            Opportunities Directory
+            <Translated value="Opportunities Directory" />
           </h2>
           <table
             style={{
@@ -326,6 +256,13 @@ export default function OpportunitiesPage() {
                       <span style={{ fontWeight: 600, color: "#1A2B3C" }}>
                         {o.title}
                       </span>
+                      <BusinessAction
+                        kind="offer"
+                        id={o.id}
+                        className="btn-secondary"
+                      >
+                        <Translated value="Modifier" />
+                      </BusinessAction>
                     </div>
                   </td>
                   <td style={{ padding: "10px 12px" }}>
@@ -416,7 +353,7 @@ export default function OpportunitiesPage() {
           {/* By Type chart */}
           <div className="card" style={{ flex: 2, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 16 }}>
-              Opportunities by Type
+              <Translated value="Opportunities by Type" />
             </h2>
             <ResponsiveContainer
               width="100%"
@@ -458,7 +395,7 @@ export default function OpportunitiesPage() {
           {/* Recent Matches */}
           <div className="card" style={{ flex: 1, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 14 }}>
-              Recent Matches
+              <Translated value="Recent Matches" />
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {recentMatches.map((m, i) => (

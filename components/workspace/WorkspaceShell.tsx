@@ -1,4 +1,17 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import LanguageSwitcher, {
+  useTranslation,
+} from "@/components/LanguageProvider";
+import { useWorkspaceDatasets } from "./LiveProvider";
+import type {
+  AppointmentView,
+  OpportunityView,
+  FieldActionView,
+} from "@/lib/workspace-data";
 
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
@@ -30,8 +43,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Brand from "@/components/Brand";
-import { useSimulatedState } from "@/lib/simulated-backend";
-import { profileFixtures } from "@/lib/demo-data";
+import { useWorkspaceState as useSimulatedState } from "./LiveProvider";
 
 export type WorkspaceRole = "neet" | "mediator" | "admin" | "partner";
 const navigation = {
@@ -124,11 +136,16 @@ export default function WorkspaceShell({
   role: WorkspaceRole;
   children: ReactNode;
 }) {
+  const { text: uiText } = useUiTranslation();
+
+  const { locale, text } = useTranslation();
+  const { profileFixtures } = useWorkspaceDatasets();
+
   const path = usePathname();
   const hash = useSyncExternalStore(subscribeToHash, getHash, getServerHash);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useSimulatedState(
-    `navigation.${role}.collapsed`,
+    `ui.navigation.${role}.collapsed`,
     false,
   );
   const sidebarRef = useRef<HTMLElement>(null);
@@ -188,17 +205,17 @@ export default function WorkspaceShell({
   return (
     <div
       className={`workspace workspace-${role} ${path === prefix ? "workspace-home" : ""} ${collapsed ? "workspace-collapsed" : ""}`}
-      lang={role === "admin" || role === "partner" ? "en" : "fr"}
+      lang={locale}
     >
       <a className="skip-link" href="#workspace-content">
         {role === "admin" || role === "partner"
-          ? "Skip to content"
+          ? text("Skip to content")
           : "Aller au contenu"}
       </a>
       {open && (
         <button
           className="sidebar-backdrop"
-          aria-label="Fermer le menu"
+          aria-label={uiText("Fermer le menu")}
           tabIndex={-1}
           onClick={() => setOpen(false)}
         />
@@ -207,7 +224,7 @@ export default function WorkspaceShell({
         ref={sidebarRef}
         id={`navigation-${role}`}
         className={`workspace-sidebar ${open ? "is-open" : ""}`}
-        aria-label="Navigation principale"
+        aria-label={uiText("Navigation principale")}
       >
         <div className="workspace-brand">
           <div className="expanded-brand">
@@ -218,9 +235,7 @@ export default function WorkspaceShell({
           </div>
           <button
             className="sidebar-collapse icon-button"
-            aria-label={
-              collapsed ? "Développer la navigation" : "Réduire la navigation"
-            }
+            aria-label={collapsed ? "Développer la navigation" : "Réduire la navigation"}
             aria-expanded={!collapsed}
             aria-controls={`navigation-${role}`}
             onClick={() => setCollapsed((value) => !value)}
@@ -233,13 +248,28 @@ export default function WorkspaceShell({
           </button>
           <button
             className="mobile-close icon-button"
-            aria-label="Fermer le menu"
+            aria-label={uiText("Fermer le menu")}
             onClick={() => setOpen(false)}
           >
             <X size={20} />
           </button>
         </div>
-        <div className="workspace-label">{identity.label}</div>
+        <div className="workspace-label">{text(identity.label)}</div>
+        <div style={{ padding: "8px 16px" }}>
+          <LanguageSwitcher />
+          <button
+            type="button"
+            className="text-link"
+            onClick={async () => {
+              const response = await fetch("/api/auth/logout", {
+                method: "POST",
+              });
+              if (response.ok) location.assign(`/auth/${role}/sign-in`);
+            }}
+          >
+            {text("Se déconnecter")}
+          </button>
+        </div>
         <nav>
           {navigation[role].map(([suffix, label, Icon]) => {
             const href = `${prefix}${suffix}`;
@@ -252,7 +282,7 @@ export default function WorkspaceShell({
                 href={href}
                 className={`workspace-nav ${active ? "active" : ""}`}
                 aria-current={active ? "page" : undefined}
-                aria-label={label}
+                aria-label={text(label)}
                 title={collapsed ? label : undefined}
                 onClick={(event) => {
                   if (role === "partner") {
@@ -263,7 +293,7 @@ export default function WorkspaceShell({
                 }}
               >
                 <Icon size={18} strokeWidth={1.8} />
-                <span>{label}</span>
+                <span>{text(label)}</span>
                 {label === "Messages" && <span className="nav-count">2</span>}
               </Link>
             );
@@ -282,15 +312,18 @@ export default function WorkspaceShell({
           }
         >
           {identity.photo ? (
-            <Image src={identity.photo} alt="" width={38} height={38} />
+            <Image
+              src={identity.photo}
+              alt={uiText("")}
+              width={38}
+              height={38}
+            />
           ) : (
             <span className="avatar">{identity.initials}</span>
           )}
           <span>
             <b>{identity.name}</b>
-            <small>
-              {role === "neet" ? "Agadir · Mon profil" : identity.label}
-            </small>
+            <small>{role === "neet" ? "Mon profil" : identity.label}</small>
           </span>
           <ArrowUpRight size={15} />
         </Link>
@@ -298,7 +331,7 @@ export default function WorkspaceShell({
           {role === "neet" ? (
             <Image
               src="/editorial/mountain-progress.webp"
-              alt=""
+              alt={uiText("")}
               width={94}
               height={50}
             />
@@ -307,7 +340,7 @@ export default function WorkspaceShell({
           )}
           <b>
             {role === "admin" || role === "partner"
-              ? "Need help?"
+              ? text("Need help?")
               : "Besoin d’aide ?"}
           </b>
           <p>
@@ -315,11 +348,11 @@ export default function WorkspaceShell({
               ? "Ton médiateur est là pour t’accompagner."
               : role === "mediator"
                 ? "Ensemble, rapprochons les jeunes de leurs ambitions."
-                : "Working together for youth integration."}
+                : text("Working together for youth integration.")}
           </p>
           <Link href={help}>
             {role === "admin" || role === "partner"
-              ? "Help Center"
+              ? text("Help Center")
               : "Centre d’aide"}
             <ArrowUpRight size={14} />
           </Link>
@@ -329,7 +362,7 @@ export default function WorkspaceShell({
         <header className="workspace-topbar">
           <button
             className="mobile-menu icon-button"
-            aria-label="Ouvrir le menu"
+            aria-label={uiText("Ouvrir le menu")}
             aria-expanded={open}
             aria-controls={`navigation-${role}`}
             onClick={() => setOpen(true)}
@@ -339,17 +372,17 @@ export default function WorkspaceShell({
           <div className="breadcrumb">
             <House size={15} />
             <span>/</span>
-            <span>{current}</span>
+            <span>{text(current)}</span>
           </div>
           <div className="topbar-end">
             <span className="demo-label">
-              {role === "admin" || role === "partner"
-                ? "Demo workspace"
-                : "Espace de démonstration"}
+              <Translated value={role === "admin" || role === "partner"
+                ? "Espace BidayaNeet"
+                : "Espace BidayaNeet"} />
             </span>
             <span className="topbar-location">
               <MapPin size={14} />
-              Souss-Massa
+              <Translated value="Souss-Massa" />
             </span>
             <Link
               href={
@@ -360,18 +393,26 @@ export default function WorkspaceShell({
                     : `${prefix}/messages`
               }
               className="icon-button"
-              aria-label={
-                role === "admin" ? "View alerts" : "Voir les notifications"
-              }
+              aria-label={role === "admin" ? "View alerts" : "Voir les notifications"}
             >
               <Bell size={19} />
             </Link>
-            <Link href={`/auth/${role}/sign-in`} className="account-link">
-              {role === "admin" || role === "partner"
-                ? "Sign in"
-                : "Se connecter"}
+            <LanguageSwitcher />
+            <button
+              type="button"
+              onClick={async () => {
+                const response = await fetch("/api/auth/logout", {
+                  method: "POST",
+                });
+                if (response.ok) location.assign(`/auth/${role}/sign-in`);
+              }}
+              className="account-link"
+            >
+              <Translated value={role === "admin" || role === "partner"
+                ? "Log out"
+                : "Se déconnecter"} />
               <ArrowUpRight size={13} />
-            </Link>
+            </button>
           </div>
         </header>
         <main
@@ -382,11 +423,13 @@ export default function WorkspaceShell({
           {children}
         </main>
         <footer className="workspace-footer">
-          <span>© 2026 BidayaNeet</span>
           <span>
-            {role === "admin" || role === "partner"
+            <Translated value="© 2026 BidayaNeet" />
+          </span>
+          <span>
+            <Translated value={role === "admin" || role === "partner"
               ? "First step. Brighter future."
-              : "Premier pas. Un avenir meilleur."}
+              : "Premier pas. Un avenir meilleur."} />
           </span>
         </footer>
       </div>

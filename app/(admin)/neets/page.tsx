@@ -1,4 +1,12 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { useState } from "react";
+import BusinessAction from "@/components/workspace/BusinessAction";
+import { downloadCsv } from "@/lib/export-csv";
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import {
   Plus,
@@ -9,194 +17,6 @@ import {
 } from "lucide-react";
 import { PieChart, Pie, Cell } from "recharts";
 import KPICard from "@/components/KPICard";
-
-const spark1 = [40, 55, 45, 60, 58, 72, 68, 80, 75, 88, 84, 92].map((v) => ({
-  v,
-}));
-const spark2 = [12, 18, 14, 20, 17, 24, 21, 28, 25, 32, 30, 38].map((v) => ({
-  v,
-}));
-const spark3 = [50, 60, 55, 70, 65, 80, 75, 88, 82, 92, 88, 96].map((v) => ({
-  v,
-}));
-const spark4 = [8, 12, 10, 15, 14, 18, 17, 22, 20, 26, 24, 30].map((v) => ({
-  v,
-}));
-
-const neetDirectory = [
-  {
-    name: "Yassine El Amrani",
-    avatar: "YE",
-    commune: "Agadir",
-    status: "Activated",
-    trust: "High",
-    blocker: "Transport & Mobility",
-    mediator: "Imane R.",
-    action: "Home visit",
-    date: "May 31, 2025",
-  },
-  {
-    name: "Fatima Zahra A.",
-    avatar: "FZ",
-    commune: "Inezgane",
-    status: "Classification",
-    trust: "Medium",
-    blocker: "Trust & Engagement",
-    mediator: "Khalid B.",
-    action: "Skills assessment",
-    date: "May 30, 2025",
-  },
-  {
-    name: "Omar T.",
-    avatar: "OT",
-    commune: "Taroudant",
-    status: "Integrated",
-    trust: "High",
-    blocker: "Skills & Training",
-    mediator: "Amina K.",
-    action: "Follow-up call",
-    date: "May 29, 2025",
-  },
-  {
-    name: "Saima E.",
-    avatar: "SE",
-    commune: "Tiznit",
-    status: "Activation",
-    trust: "Medium",
-    blocker: "Family Constraints",
-    mediator: "Imane R.",
-    action: "Home visit",
-    date: "May 29, 2025",
-  },
-  {
-    name: "Rachid D.",
-    avatar: "RD",
-    commune: "Tata",
-    status: "Identified",
-    trust: "Low",
-    blocker: "Dropout Risk",
-    mediator: "Youssef M.",
-    action: "Build trust",
-    date: "May 28, 2025",
-  },
-  {
-    name: "Laila B.",
-    avatar: "LB",
-    commune: "Agadir",
-    status: "Stabilized (90d)",
-    trust: "High",
-    blocker: "Economic Constraints",
-    mediator: "Khalid B.",
-    action: "Job placement",
-    date: "May 27, 2025",
-  },
-  {
-    name: "Hassan A.",
-    avatar: "HA",
-    commune: "Guelmim",
-    status: "Classification",
-    trust: "Medium",
-    blocker: "Skills & Training",
-    mediator: "Amina K.",
-    action: "Skills assessment",
-    date: "May 27, 2025",
-  },
-  {
-    name: "Maryem H.",
-    avatar: "MH",
-    commune: "Tata",
-    status: "Integrated",
-    trust: "High",
-    blocker: "Transport & Mobility",
-    mediator: "Youssef M.",
-    action: "Employer match",
-    date: "May 26, 2025",
-  },
-];
-
-const pipelineData = [
-  { stage: "Identified", count: 502, pct: 27.2, color: "#4A5568" },
-  { stage: "Activated", count: 412, pct: 22.4, color: "#2E86C1" },
-  { stage: "Classified", count: 386, pct: 21.0, color: "#8E44AD" },
-  { stage: "Integrated", count: 347, pct: 18.8, color: "#00B8A9" },
-  { stage: "Stabilized (90d)", count: 195, pct: 10.6, color: "#27AE60" },
-];
-
-const commonBlockers = [
-  { name: "Trust & Engagement", pct: 24.6, count: 453, color: "#E74C3C" },
-  { name: "Transport & Mobility", pct: 21.3, count: 392, color: "#F5A623" },
-  { name: "Skills & Training", pct: 19.8, count: 365, color: "#8E44AD" },
-  { name: "Family Constraints", pct: 14.2, count: 261, color: "#2E86C1" },
-  { name: "Economic Constraints", pct: 11.1, count: 204, color: "#27AE60" },
-  { name: "Dropout Risk", pct: 8.7, count: 160, color: "#E67E22" },
-];
-
-const recentActivity = [
-  {
-    neet: "Yassine El Amrani",
-    action: "Home visit completed",
-    by: "Imane R.",
-    date: "May 21, 2025",
-    time: "10:30 AM",
-    icon: "🏠",
-  },
-  {
-    neet: "Fatima Zahra A.",
-    action: "Skills assessment done",
-    by: "Khalid B.",
-    date: "May 30, 2025",
-    time: "02:15 PM",
-    icon: "📊",
-  },
-  {
-    neet: "Omar T.",
-    action: "Follow-up call",
-    by: "Amina K.",
-    date: "May 29, 2025",
-    time: "11:45 AM",
-    icon: "📞",
-  },
-  {
-    neet: "Saima E.",
-    action: "Referred to training program",
-    by: "Imane R.",
-    date: "May 29, 2025",
-    time: "09:20 AM",
-    icon: "🎓",
-  },
-  {
-    neet: "Rachid D.",
-    action: "Initial contact made",
-    by: "Youssef M.",
-    date: "May 28, 2025",
-    time: "04:00 PM",
-    icon: "👋",
-  },
-];
-
-const localOpportunities = [
-  {
-    title: "Auto Mechanics Training",
-    org: "OFPPT - Agadir",
-    match: 92,
-    matchColor: "#27AE60",
-    tag: "Agadir",
-  },
-  {
-    title: "Digital Marketing Bootcamp",
-    org: "StartUp Maroc",
-    match: 86,
-    matchColor: "#2E86C1",
-    tag: "Agadir",
-  },
-  {
-    title: "Entrepreneurship Program",
-    org: "INDH - Souss-Massa",
-    match: 78,
-    matchColor: "#F5A623",
-    tag: "Inezgane",
-  },
-];
 
 function Avatar({ initials, size = 32 }: { initials: string; size?: number }) {
   const colors = [
@@ -286,6 +106,34 @@ function FunnelBar({ pct, color }: { pct: number; color: string }) {
 }
 
 export default function NEETsPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const {
+    spark1,
+    spark2,
+    spark3,
+    spark4,
+    pipelineData,
+    neetDirectory,
+    commonBlockers,
+    recentActivity,
+    actions,
+    localOpportunities,
+    metrics,
+    data,
+  } = useAdminData();
+
+  const [query, setQuery] = useState(""),
+    [commune, setCommune] = useState(""),
+    [status, setStatus] = useState("");
+  const filtered = neetDirectory.filter(
+    (n) =>
+      (!commune || n.commune === commune) &&
+      (!status || n.status === status) &&
+      `${n.name} ${n.commune} ${n.status}`
+        .toLocaleLowerCase()
+        .includes(query.toLocaleLowerCase()),
+  );
   return (
     <div
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
@@ -317,16 +165,18 @@ export default function NEETsPage() {
                 color: "#1A2B3C",
               }}
             >
-              NEETs
+              <Translated value="NEETs" />
             </h1>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Manage, track, and follow youth profiles across Souss-Massa
+              <Translated value="Manage, track, and follow youth profiles across Souss-Massa" />
             </p>
           </div>
           <div style={{ position: "relative" }}>
             <input
               type="search"
-              placeholder="Search by name, phone, status..."
+              placeholder={uiText("Rechercher un dossier…")}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               style={{
                 paddingLeft: 36,
                 paddingRight: 14,
@@ -359,27 +209,38 @@ export default function NEETsPage() {
               <path d="m21 21-4.35-4.35" />
             </svg>
           </div>
-          <button className="btn-primary">
-            <Plus size={15} /> Add NEET
-          </button>
+          <span style={{ fontSize: 12, color: "#7F8C9A" }}>
+            <Translated value="Les nouveaux dossiers arrivent depuis l’application de terrain." />
+          </span>
         </div>
         {/* Filters */}
         <div style={{ display: "flex", gap: 10 }}>
-          {[
-            "All Communes",
-            "All Statuses",
-            "All Trust Levels",
-            "Date Added",
-          ].map((f) => (
-            <button
-              key={f}
-              className="btn-outline"
-              style={{ fontSize: "0.78rem", padding: "6px 12px" }}
-            >
-              {f}{" "}
-              <ChevronRight size={12} style={{ transform: "rotate(90deg)" }} />
-            </button>
-          ))}
+          <select
+            className="btn-outline"
+            aria-label={uiText("Commune")}
+            value={commune}
+            onChange={(e) => setCommune(e.target.value)}
+          >
+            <option value="">
+              <Translated value="Toutes les communes" />
+            </option>
+            {[...new Set(neetDirectory.map((n) => n.commune))].map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+          <select
+            className="btn-outline"
+            aria-label={uiText("État du dossier")}
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="">
+              <Translated value="Tous les états" />
+            </option>
+            {[...new Set(neetDirectory.map((n) => n.status))].map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -395,9 +256,9 @@ export default function NEETsPage() {
         {/* KPI Row */}
         <div style={{ display: "flex", gap: 16 }}>
           <KPICard
-            title="Total NEETs"
-            value="1,842"
-            change={12.4}
+            title={uiText("Total NEETs")}
+            value={String(metrics.identified)}
+            change={0}
             changePeriod="vs Apr 1 – Apr 30"
             icon={
               <svg
@@ -417,9 +278,13 @@ export default function NEETsPage() {
             sparkColor="#00B8A9"
           />
           <KPICard
-            title="Newly Identified"
-            value="186"
-            change={18.7}
+            title={uiText("Newly Identified")}
+            value={String(
+              data.people.filter((p) =>
+                p.created_at.startsWith(new Date().toISOString().slice(0, 7)),
+              ).length,
+            )}
+            change={0}
             changePeriod="vs Apr 1 – Apr 30"
             icon={
               <svg
@@ -439,9 +304,15 @@ export default function NEETsPage() {
             sparkColor="#2E86C1"
           />
           <KPICard
-            title="In Follow-up"
-            value="612"
-            change={15.3}
+            title={uiText("Suivis planifiés")}
+            value={String(
+              new Set(
+                data.followups
+                  .filter((f) => f.outcome === "planned")
+                  .map((f) => f.youth_id),
+              ).size,
+            )}
+            change={0}
             changePeriod="vs Apr 1 – Apr 30"
             icon={
               <svg
@@ -461,8 +332,18 @@ export default function NEETsPage() {
             sparkColor="#F5A623"
           />
           <KPICard
-            title="High-Risk Cases"
-            value="145"
+            title={uiText("Suivis en retard")}
+            value={String(
+              new Set(
+                data.followups
+                  .filter(
+                    (f) =>
+                      f.outcome === "planned" &&
+                      f.due_date < new Date().toISOString().slice(0, 10),
+                  )
+                  .map((f) => f.youth_id),
+              ).size,
+            )}
             change={-9.8}
             changePeriod="vs Apr 1 – Apr 30"
             icon={
@@ -496,9 +377,12 @@ export default function NEETsPage() {
             }}
           >
             <div>
-              <h2 className="section-title">NEET Directory</h2>
+              <h2 className="section-title">
+                <Translated value="NEET Directory" />
+              </h2>
               <span style={{ fontSize: "0.75rem", color: "#7F8C9A" }}>
-                1,842 profiles
+                {filtered.length}
+                <Translated value="dossiers" />
               </span>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
@@ -506,7 +390,8 @@ export default function NEETsPage() {
                 className="btn-outline"
                 style={{ fontSize: "0.78rem", padding: "6px 12px" }}
               >
-                <Download size={13} /> Export
+                <Download size={13} />
+                <Translated value="Export" />
               </button>
               <button
                 className="btn-outline"
@@ -555,7 +440,7 @@ export default function NEETsPage() {
               </tr>
             </thead>
             <tbody>
-              {neetDirectory.map((n, i) => (
+              {filtered.map((n, i) => (
                 <tr
                   key={i}
                   style={{
@@ -646,103 +531,30 @@ export default function NEETsPage() {
                     {n.date}
                   </td>
                   <td style={{ padding: "10px 10px" }}>
-                    <MoreVertical
-                      size={14}
-                      color="#A0ADB8"
-                      style={{ cursor: "pointer" }}
-                    />
+                    <BusinessAction
+                      kind="review"
+                      id={n.id}
+                      className="btn-secondary"
+                    >
+                      <Translated value="Vérifier" />
+                    </BusinessAction>
+                    <BusinessAction
+                      kind="link-account"
+                      id={n.id}
+                      className="btn-secondary"
+                    >
+                      <Translated value="Relier le compte" />
+                    </BusinessAction>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {/* Pagination */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: 14,
-              paddingTop: 12,
-              borderTop: "1px solid #F4F6F9",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: "0.78rem",
-                color: "#7F8C9A",
-              }}
-            >
-              Rows per page:
-              <select
-                style={{
-                  border: "1px solid #E8ECF0",
-                  borderRadius: 6,
-                  padding: "3px 6px",
-                  fontSize: "0.78rem",
-                  color: "#4A5568",
-                  background: "white",
-                }}
-              >
-                <option>10</option>
-                <option>25</option>
-                <option>50</option>
-              </select>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: "0.78rem",
-                color: "#4A5568",
-              }}
-            >
-              <button
-                style={{
-                  border: "1px solid #E8ECF0",
-                  borderRadius: 6,
-                  padding: "4px 8px",
-                  background: "white",
-                  cursor: "pointer",
-                }}
-              >
-                <ChevronLeft size={13} />
-              </button>
-              {[1, 2, 3, 4, 5].map((p) => (
-                <button
-                  key={p}
-                  style={{
-                    border: p === 1 ? "1px solid #00B8A9" : "1px solid #E8ECF0",
-                    borderRadius: 6,
-                    padding: "4px 9px",
-                    background: p === 1 ? "#E0F7F5" : "white",
-                    color: p === 1 ? "#00B8A9" : "#4A5568",
-                    cursor: "pointer",
-                    fontWeight: p === 1 ? 700 : 400,
-                  }}
-                >
-                  {p}
-                </button>
-              ))}
-              <span>... 185</span>
-              <button
-                style={{
-                  border: "1px solid #E8ECF0",
-                  borderRadius: 6,
-                  padding: "4px 8px",
-                  background: "white",
-                  cursor: "pointer",
-                }}
-              >
-                <ChevronRight size={13} />
-              </button>
-            </div>
-          </div>
+          <p style={{ padding: 14, color: "#7F8C9A" }}>
+            {filtered.length}
+            <Translated value="dossier(s) affiché(s)" />
+          </p>
         </div>
 
         {/* Pipeline + Blockers */}
@@ -750,7 +562,7 @@ export default function NEETsPage() {
           {/* NEET Pipeline */}
           <div className="card" style={{ flex: 1, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 4 }}>
-              NEET Pipeline (Status Distribution)
+              <Translated value="NEET Pipeline (Status Distribution)" />
             </h2>
             <div
               style={{
@@ -760,9 +572,13 @@ export default function NEETsPage() {
                 marginBottom: 16,
               }}
             >
-              Conversion Identified → Integrated: 69.1%{" "}
+              <Translated value="Insertion constatée :" />{" "}
+              {metrics.identified
+                ? Math.round((metrics.integrated / metrics.identified) * 100)
+                : 0}
+              %{" "}
               <span style={{ color: "#E74C3C", marginLeft: 6 }}>
-                ↓ 6.3% vs last month
+                <Translated value="Données enregistrées" />
               </span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
@@ -839,7 +655,9 @@ export default function NEETsPage() {
                 marginBottom: 16,
               }}
             >
-              <h2 className="section-title">Common Blockers</h2>
+              <h2 className="section-title">
+                <Translated value="Common Blockers" />
+              </h2>
               <button
                 style={{
                   background: "none",
@@ -850,7 +668,7 @@ export default function NEETsPage() {
                   fontWeight: 600,
                 }}
               >
-                View all
+                <Translated value="View all" />
               </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -914,350 +732,12 @@ export default function NEETsPage() {
           </div>
         </div>
 
-        {/* Profile Spotlight */}
-        <div className="card" style={{ padding: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
-            <h2 className="section-title">Profile Spotlight</h2>
-            <button
-              style={{
-                background: "none",
-                border: "none",
-                color: "#00B8A9",
-                fontSize: "0.78rem",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              View Full Profile
-            </button>
-          </div>
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            {/* Profile info */}
-            <div style={{ display: "flex", gap: 16, flex: "1 1 300px" }}>
-              <div style={{ position: "relative", flexShrink: 0 }}>
-                <div
-                  style={{
-                    width: 70,
-                    height: 70,
-                    borderRadius: "50%",
-                    background: "linear-gradient(135deg, #00B8A9, #1B4F72)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
-                    fontWeight: 800,
-                    fontSize: "1.25rem",
-                  }}
-                >
-                  YE
-                </div>
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: 0,
-                    right: -4,
-                    background: "#00B8A9",
-                    borderRadius: "50%",
-                    width: 18,
-                    height: 18,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                </div>
-              </div>
-              <div>
-                <div
-                  style={{
-                    fontWeight: 800,
-                    fontSize: "1rem",
-                    color: "#1A2B3C",
-                  }}
-                >
-                  Yassine El Amrani
-                </div>
-                <span
-                  className="status-badge status-activated"
-                  style={{ marginTop: 4, display: "inline-block" }}
-                >
-                  Activated
-                </span>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 4,
-                    marginTop: 8,
-                  }}
-                >
-                  <div style={{ fontSize: "0.78rem", color: "#7F8C9A" }}>
-                    📍 Agadir
-                  </div>
-                  <div style={{ fontSize: "0.78rem", color: "#7F8C9A" }}>
-                    👤 21 years old
-                  </div>
-                  <div style={{ fontSize: "0.78rem", color: "#7F8C9A" }}>
-                    📞 06 12 34 56 78
-                  </div>
-                  <div style={{ fontSize: "0.72rem", color: "#A0ADB8" }}>
-                    Added on May 10, 2025
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Trust Meter */}
-            <div style={{ flex: "0 0 140px", textAlign: "center" }}>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "#7F8C9A",
-                  marginBottom: 8,
-                }}
-              >
-                Trust Level
-              </div>
-              <div
-                style={{
-                  position: "relative",
-                  width: 80,
-                  height: 80,
-                  margin: "0 auto 6px",
-                }}
-              >
-                <PieChart width={80} height={80}>
-                  <Pie
-                    data={[{ v: 78 }, { v: 22 }]}
-                    cx={35}
-                    cy={35}
-                    innerRadius={24}
-                    outerRadius={36}
-                    startAngle={90}
-                    endAngle={-270}
-                    dataKey="v"
-                    strokeWidth={0}
-                  >
-                    <Cell fill="#27AE60" />
-                    <Cell fill="#E8ECF0" />
-                  </Pie>
-                </PieChart>
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "1rem",
-                    fontWeight: 800,
-                    color: "#1A2B3C",
-                  }}
-                >
-                  78%
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "#27AE60",
-                }}
-              >
-                ● High
-              </div>
-            </div>
-
-            {/* Main Blockers */}
-            <div style={{ flex: "1 1 160px" }}>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "#7F8C9A",
-                  marginBottom: 8,
-                }}
-              >
-                Main Blockers
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                {[
-                  { label: "Transport & Mobility", color: "#F5A623" },
-                  { label: "Skills & Training", color: "#8E44AD" },
-                ].map((b) => (
-                  <div
-                    key={b.label}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      fontSize: "0.78rem",
-                      color: "#4A5568",
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: b.color,
-                        flexShrink: 0,
-                        display: "inline-block",
-                      }}
-                    />
-                    {b.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Interests */}
-            <div style={{ flex: "1 1 120px" }}>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "#7F8C9A",
-                  marginBottom: 8,
-                }}
-              >
-                Interests
-              </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {["Automotive", "Digital", "Entrepreneurship"].map((tag) => (
-                  <span
-                    key={tag}
-                    style={{
-                      background: "#E0F7F5",
-                      color: "#00B8A9",
-                      borderRadius: 20,
-                      padding: "3px 10px",
-                      fontSize: "0.72rem",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Micro-actions */}
-            <div style={{ flex: "1 1 180px" }}>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "#7F8C9A",
-                  marginBottom: 8,
-                }}
-              >
-                Recent Micro-actions
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {[
-                  { action: "Home visit completed", date: "May 31" },
-                  { action: "Skills assessment done", date: "May 30" },
-                  { action: "Follow-up call", date: "May 29" },
-                ].map((a) => (
-                  <div
-                    key={a.action}
-                    style={{
-                      fontSize: "0.78rem",
-                      color: "#4A5568",
-                      display: "flex",
-                      gap: 6,
-                    }}
-                  >
-                    <span style={{ color: "#00B8A9" }}>✓</span>
-                    <span>{a.action}</span>
-                    <span
-                      style={{
-                        color: "#A0ADB8",
-                        fontSize: "0.7rem",
-                        marginLeft: "auto",
-                      }}
-                    >
-                      {a.date}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recommended Next Step */}
-            <div style={{ flex: "0 0 200px" }}>
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "#7F8C9A",
-                  marginBottom: 8,
-                }}
-              >
-                Recommended Next Step
-              </div>
-              <div
-                style={{
-                  border: "1px solid #E8ECF0",
-                  borderRadius: 12,
-                  padding: 14,
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ fontSize: "1.5rem", marginBottom: 6 }}>🏠</div>
-                <div
-                  style={{
-                    fontWeight: 700,
-                    fontSize: "0.875rem",
-                    color: "#1A2B3C",
-                    marginBottom: 4,
-                  }}
-                >
-                  Schedule home visit
-                </div>
-                <div
-                  style={{
-                    fontSize: "0.72rem",
-                    color: "#7F8C9A",
-                    marginBottom: 10,
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Build trust and explore mobility options.
-                </div>
-                <button
-                  className="btn-primary"
-                  style={{
-                    width: "100%",
-                    justifyContent: "center",
-                    padding: "8px",
-                  }}
-                >
-                  Schedule Visit
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Activity + Local Opportunities */}
         <div style={{ display: "flex", gap: 20 }}>
           {/* Recent Activity */}
           <div className="card" style={{ flex: 1, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 16 }}>
-              Recent Activity & Follow-ups
+              <Translated value="Recent Activity & Follow-ups" />
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {recentActivity.map((a, i) => (
@@ -1301,7 +781,10 @@ export default function NEETsPage() {
                     </div>
                     <div style={{ fontSize: "0.78rem", color: "#4A5568" }}>
                       {a.action}{" "}
-                      <span style={{ color: "#7F8C9A" }}>by {a.by}</span>
+                      <span style={{ color: "#7F8C9A" }}>
+                        <Translated value="by" />
+                        {a.by}
+                      </span>
                     </div>
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -1329,7 +812,7 @@ export default function NEETsPage() {
                 cursor: "pointer",
               }}
             >
-              View All Activities
+              <Translated value="View All Activities" />
             </button>
           </div>
 
@@ -1343,7 +826,9 @@ export default function NEETsPage() {
                 marginBottom: 16,
               }}
             >
-              <h2 className="section-title">Local Opportunities Matching</h2>
+              <h2 className="section-title">
+                <Translated value="Local Opportunities Matching" />
+              </h2>
               <button
                 style={{
                   background: "none",
@@ -1354,7 +839,7 @@ export default function NEETsPage() {
                   fontWeight: 600,
                 }}
               >
-                View all
+                <Translated value="View all" />
               </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1417,7 +902,7 @@ export default function NEETsPage() {
                     >
                       <PieChart width={48} height={48}>
                         <Pie
-                          data={[{ v: o.match }, { v: 100 - o.match }]}
+                          data={[{ v: 0 }, { v: 100 }]}
                           cx={20}
                           cy={20}
                           innerRadius={14}
@@ -1447,7 +932,7 @@ export default function NEETsPage() {
                       </div>
                     </div>
                     <div style={{ fontSize: "0.65rem", color: "#7F8C9A" }}>
-                      match
+                      <Translated value="match" />
                     </div>
                   </div>
                 </div>
@@ -1467,7 +952,7 @@ export default function NEETsPage() {
                 cursor: "pointer",
               }}
             >
-              View All Opportunities
+              <Translated value="View All Opportunities" />
             </button>
           </div>
         </div>

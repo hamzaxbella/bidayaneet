@@ -1,4 +1,10 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import BusinessAction from "@/components/workspace/BusinessAction";
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import { Plus, TrendingUp, TrendingDown, ExternalLink } from "lucide-react";
 import PartnerLogo from "@/components/PartnerLogo";
@@ -11,161 +17,6 @@ import {
   LineChart,
   Line,
 } from "recharts";
-
-const programs = [
-  {
-    name: "ANAPEC",
-    desc: "National employment agency — job placement & career guidance",
-    enrolled: 412,
-    capacity: 600,
-    completed: 289,
-    dropout: 8.2,
-    color: "#E74C3C",
-    status: "active",
-  },
-  {
-    name: "INDH Programs",
-    desc: "National Human Development Initiative — local projects",
-    enrolled: 286,
-    capacity: 400,
-    completed: 180,
-    dropout: 6.5,
-    color: "#1B8A5A",
-    status: "active",
-  },
-  {
-    name: "Local Internships",
-    desc: "Partnerships with local businesses for work experience",
-    enrolled: 213,
-    capacity: 300,
-    completed: 145,
-    dropout: 11.4,
-    color: "#F5A623",
-    status: "active",
-  },
-  {
-    name: "Micro-actions",
-    desc: "Quick skill-building actions and micro-engagements",
-    enrolled: 342,
-    capacity: 500,
-    completed: 220,
-    dropout: 4.3,
-    color: "#00B8A9",
-    status: "active",
-  },
-  {
-    name: "OFPPT Training",
-    desc: "Vocational training programs across Souss-Massa",
-    enrolled: 178,
-    capacity: 250,
-    completed: 102,
-    dropout: 9.8,
-    color: "#8E44AD",
-    status: "active",
-  },
-  {
-    name: "Ministry of Tourism, Handicrafts and SSE",
-    desc: "Tourism, handicrafts, and social economy employment pathways",
-    enrolled: 164,
-    capacity: 220,
-    completed: 116,
-    dropout: 5.7,
-    color: "#1976A3",
-    status: "active",
-  },
-  {
-    name: "ONMT Tourism Careers",
-    desc: "Regional tourism promotion, hospitality jobs, and guided visitor services",
-    enrolled: 132,
-    capacity: 180,
-    completed: 91,
-    dropout: 6.1,
-    color: "#2E86C1",
-    status: "active",
-  },
-  {
-    name: "Hospitality Training Hub",
-    desc: "Hotel operations, guest relations, and restaurant service tracks",
-    enrolled: 118,
-    capacity: 160,
-    completed: 83,
-    dropout: 7.4,
-    color: "#00A3A3",
-    status: "active",
-  },
-  {
-    name: "Ministry of Agriculture",
-    desc: "Agriculture, fisheries, rural development, water, and forests programs",
-    enrolled: 205,
-    capacity: 300,
-    completed: 151,
-    dropout: 5.9,
-    color: "#248A3D",
-    status: "active",
-  },
-  {
-    name: "ADA Agripreneurship",
-    desc: "Agricultural Development Agency support for young rural entrepreneurs",
-    enrolled: 156,
-    capacity: 220,
-    completed: 112,
-    dropout: 6.8,
-    color: "#6A9F2A",
-    status: "active",
-  },
-  {
-    name: "ORMVA Souss-Massa",
-    desc: "Irrigation, orchard, and cooperative training for rural youth",
-    enrolled: 139,
-    capacity: 180,
-    completed: 99,
-    dropout: 7.1,
-    color: "#4C9A2A",
-    status: "active",
-  },
-  {
-    name: "Ministry of Economic Inclusion",
-    desc: "Small business, employment, skills, and self-employment pathways",
-    enrolled: 241,
-    capacity: 320,
-    completed: 174,
-    dropout: 6.2,
-    color: "#5B4B8A",
-    status: "active",
-  },
-  {
-    name: "Ministry of Youth, Culture and Communication",
-    desc: "Youth centers, civic engagement, culture, and communication activation",
-    enrolled: 127,
-    capacity: 180,
-    completed: 88,
-    dropout: 8.0,
-    color: "#C0392B",
-    status: "active",
-  },
-];
-
-const totalPrograms = programs.length;
-const activePrograms = programs.filter(
-  (program) => program.status === "active",
-).length;
-const totalEnrolled = programs.reduce(
-  (sum, program) => sum + program.enrolled,
-  0,
-);
-const totalCompleted = programs.reduce(
-  (sum, program) => sum + program.completed,
-  0,
-);
-const completionRate = Math.round((totalCompleted / totalEnrolled) * 100);
-
-const enrollmentTrend = [
-  { month: "Jan", enrolled: 1620 },
-  { month: "Feb", enrolled: 1785 },
-  { month: "Mar", enrolled: 2050 },
-  { month: "Apr", enrolled: 2362 },
-  { month: "May", enrolled: totalEnrolled },
-];
 
 type KPISimpleProps = {
   title: string;
@@ -229,18 +80,36 @@ function KPISimple({ title, value, change, color, bg }: KPISimpleProps) {
         </div>
       </div>
       <div className={up ? "badge-up" : "badge-down"}>
-        {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}{" "}
-        {up ? "+" : ""}
-        {change}%
-        <span style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}>
-          vs last month
-        </span>
+        {change !== 0 &&
+          (up ? <TrendingUp size={12} /> : <TrendingDown size={12} />)}{" "}
+        {change !== 0 && up ? "+" : ""}
+        {change !== 0 ? (
+          change + "%"
+        ) : (
+          <Translated value="Données enregistrées" />
+        )}
+        <span
+          style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}
+        ></span>
       </div>
     </div>
   );
 }
 
 export default function ProgramsPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const {
+    programs,
+    totalPrograms,
+    activePrograms,
+    totalEnrolled,
+    completionRate,
+    enrollmentTrend,
+    metrics,
+    data,
+  } = useAdminData();
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
@@ -264,16 +133,16 @@ export default function ProgramsPage() {
                 color: "#1A2B3C",
               }}
             >
-              Programs
+              <Translated value="Programs" />
             </h1>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Manage collaborating programs and track NEET enrollment across
-              partners
+              <Translated value="Manage collaborating programs and track NEET enrollment across partners" />
             </p>
           </div>
-          <button className="btn-primary">
-            <Plus size={15} /> Add Program
-          </button>
+          <BusinessAction kind="program">
+            <Plus size={15} />
+            <Translated value="Add Program" />
+          </BusinessAction>
         </div>
       </div>
 
@@ -289,30 +158,30 @@ export default function ProgramsPage() {
         {/* KPIs */}
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           <KPISimple
-            title="Total Programs"
+            title={uiText("Total Programs")}
             value={String(totalPrograms)}
-            change={160.0}
+            change={0}
             color="#8E44AD"
             bg="#F5EEF8"
           />
           <KPISimple
-            title="Active Programs"
+            title={uiText("Active Programs")}
             value={String(activePrograms)}
-            change={160.0}
+            change={0}
             color="#27AE60"
             bg="#EAFAF1"
           />
           <KPISimple
-            title="NEETs Enrolled"
+            title={uiText("NEETs Enrolled")}
             value={totalEnrolled.toLocaleString()}
-            change={89.6}
+            change={0}
             color="#00B8A9"
             bg="#E0F7F5"
           />
           <KPISimple
-            title="Avg Completion Rate"
+            title={uiText("Avg Completion Rate")}
             value={`${completionRate}%`}
-            change={5.8}
+            change={0}
             color="#F5A623"
             bg="#FEF9E7"
           />
@@ -321,7 +190,7 @@ export default function ProgramsPage() {
         {/* Program Cards */}
         <div>
           <h2 className="section-title" style={{ marginBottom: 16 }}>
-            Collaborating Programs
+            <Translated value="Collaborating Programs" />
           </h2>
           <div
             style={{
@@ -363,15 +232,24 @@ export default function ProgramsPage() {
                           fontWeight: 600,
                         }}
                       >
-                        Active
+                        <Translated value="Active" />
                       </span>
                     </div>
-                    <ExternalLink
-                      size={14}
-                      color="#A0ADB8"
-                      style={{ cursor: "pointer", flexShrink: 0 }}
-                    />
+                    <BusinessAction
+                      kind="program"
+                      id={p.id}
+                      className="btn-secondary"
+                    >
+                      <Translated value="Modifier" />
+                    </BusinessAction>
                   </div>
+                  <BusinessAction
+                    kind="membership"
+                    id={p.id}
+                    className="btn-secondary"
+                  >
+                    <Translated value="Gérer les inscriptions" />
+                  </BusinessAction>
                   <p
                     style={{
                       fontSize: "0.75rem",
@@ -392,7 +270,9 @@ export default function ProgramsPage() {
                         marginBottom: 5,
                       }}
                     >
-                      <span>Enrollment</span>
+                      <span>
+                        <Translated value="Enrollment" />
+                      </span>
                       <span style={{ fontWeight: 700 }}>
                         {p.enrolled} / {p.capacity}
                       </span>
@@ -422,13 +302,17 @@ export default function ProgramsPage() {
                     }}
                   >
                     <div>
-                      <span style={{ color: "#7F8C9A" }}>Completed </span>
+                      <span style={{ color: "#7F8C9A" }}>
+                        <Translated value="Completed" />
+                      </span>
                       <strong style={{ color: "#1A2B3C" }}>
                         {p.completed}
                       </strong>
                     </div>
                     <div>
-                      <span style={{ color: "#7F8C9A" }}>Dropout </span>
+                      <span style={{ color: "#7F8C9A" }}>
+                        <Translated value="Dropout" />
+                      </span>
                       <strong style={{ color: "#E74C3C" }}>{p.dropout}%</strong>
                     </div>
                   </div>
@@ -441,7 +325,7 @@ export default function ProgramsPage() {
         {/* Enrollment Trend */}
         <div className="card" style={{ padding: 20 }}>
           <h2 className="section-title" style={{ marginBottom: 16 }}>
-            Enrollment Trend (2025)
+            <Translated value="Enrollment Trend (2025)" />
           </h2>
           <ResponsiveContainer
             width="100%"

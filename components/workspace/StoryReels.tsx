@@ -1,4 +1,14 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { useWorkspaceDatasets } from "./LiveProvider";
+import type {
+  AppointmentView,
+  OpportunityView,
+  FieldActionView,
+} from "@/lib/workspace-data";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -12,9 +22,12 @@ import {
   MapPin,
   X,
 } from "lucide-react";
-import { stories } from "@/lib/demo-data";
 
 export default function StoryReels({ compact = false }: { compact?: boolean }) {
+  const { text: uiText } = useUiTranslation();
+
+  const { stories } = useWorkspaceDatasets();
+
   const [selected, setSelected] = useState<number | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const rail = useRef<HTMLDivElement>(null);
@@ -58,7 +71,7 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
           >
             <Image
               src={item.image}
-              alt=""
+              alt={uiText("")}
               fill
               sizes={
                 compact
@@ -67,7 +80,8 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
               }
             />
             <span className="reel-reading">
-              <BookOpen size={12} /> 45 s de lecture
+              <BookOpen size={12} />
+              <Translated value="45 s de lecture" />
             </span>
             <span className="reel-open">
               <ArrowUpRight size={22} />
@@ -85,11 +99,13 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
       </div>
       {compact && (
         <div className="reels-navigation">
-          <span>Un parcours. Un déclic. Un nouveau départ.</span>
+          <span>
+            <Translated value="Un parcours. Un déclic. Un nouveau départ." />
+          </span>
           <div>
             <button
               className="icon-button"
-              aria-label="Histoires précédentes"
+              aria-label={uiText("Histoires précédentes")}
               onClick={() =>
                 rail.current?.scrollBy({ left: -260, behavior: "smooth" })
               }
@@ -98,7 +114,7 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
             </button>
             <button
               className="icon-button"
-              aria-label="Histoires suivantes"
+              aria-label={uiText("Histoires suivantes")}
               onClick={() =>
                 rail.current?.scrollBy({ left: 260, behavior: "smooth" })
               }
@@ -150,34 +166,37 @@ export default function StoryReels({ compact = false }: { compact?: boolean }) {
               </span>
             </div>
             <div className="story-viewer-content">
-              <span className="eyebrow">UN PARCOURS INSPIRANT</span>
+              <span className="eyebrow">
+                <Translated value="UN PARCOURS INSPIRANT" />
+              </span>
               <h2 id="story-viewer-title">
                 {story.name}, {story.role.toLocaleLowerCase("fr")}
               </h2>
               <blockquote>« {story.quote} »</blockquote>
               <p>{story.text}</p>
               <p className="story-disclosure">
-                Récit de démonstration · portrait créé pour illustrer ce
-                parcours.
+                <Translated value="Récit de démonstration · portrait créé pour illustrer ce parcours." />
               </p>
               <div className="story-viewer-navigation">
                 <button
                   className="button button-secondary"
                   onClick={() => move(-1)}
                 >
-                  <ArrowUp size={16} /> Précédent
+                  <ArrowUp size={16} />
+                  <Translated value="Précédent" />
                 </button>
                 <button
                   className="button button-primary"
                   onClick={() => move(1)}
                 >
-                  Suivant <ArrowDown size={16} />
+                  <Translated value="Suivant" />
+                  <ArrowDown size={16} />
                 </button>
               </div>
             </div>
             <button
               className="story-viewer-close icon-button"
-              aria-label="Fermer l’histoire"
+              aria-label={uiText("Fermer l’histoire")}
               onClick={() => setSelected(null)}
             >
               <X size={20} />

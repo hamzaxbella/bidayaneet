@@ -253,7 +253,7 @@ export default function MoroccoMap({
         <span>
           {provider === "google"
             ? "Google Maps · région MA"
-            : "Aperçu géographique · Natural Earth · données démo"}
+            : "Aperçu géographique · Natural Earth · diagnostics GPS enregistrés"}
         </span>
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(scope === "national" ? "Morocco" : "Souss-Massa Morocco")}`}

@@ -1,6 +1,18 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
 
-import { useState, type FormEvent } from "react";
+import Translated from "@/components/Translated";
+
+import BusinessAction from "./BusinessAction";
+import JourneyPanel from "@/components/platform/JourneyPanel";
+import { useWorkspace, useWorkspaceDatasets } from "./LiveProvider";
+import type {
+  AppointmentView,
+  OpportunityView,
+  FieldActionView,
+} from "@/lib/workspace-data";
+
+import { useState,useRef, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -17,21 +29,17 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import {
-  appointmentFixtures,
-  profileFixtures,
-  type DemoAppointment,
-  fieldActions,
-  opportunities,
-  youngPeople,
-} from "@/lib/demo-data";
 import { downloadCsv } from "@/lib/export-csv";
-import { useSimulatedState } from "@/lib/simulated-backend";
+import { useWorkspaceState as useSimulatedState } from "./LiveProvider";
 import { EmptyState, Metric, PageIntro, Panel, Tag } from "./UI";
 
 export { default as MediatorDashboard } from "./MediatorOverview";
 
 export function CaseloadPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { youngPeople } = useWorkspaceDatasets();
+
   const [query, setQuery] = useState("");
   const [stage, setStage] = useState("Tous les parcours");
   const [priority, setPriority] = useState("Tous les suivis");
@@ -46,9 +54,11 @@ export function CaseloadPage() {
   return (
     <>
       <PageIntro
-        eyebrow="DES PERSONNES, DES POSSIBILITÉS"
-        title="Mes jeunes accompagnés"
-        description="Garde le lien avec chaque jeune et prépare la prochaine étape de son parcours."
+        eyebrow={uiText("DES PERSONNES, DES POSSIBILITÉS")}
+        title={uiText("Mes jeunes accompagnés")}
+        description={uiText(
+          "Garde le lien avec chaque jeune et prépare la prochaine étape de son parcours.",
+        )}
         action={
           <button
             className="button button-secondary"
@@ -66,7 +76,7 @@ export function CaseloadPage() {
             }
           >
             <Download size={15} />
-            Exporter la sélection
+            <Translated value="Exporter la sélection" />
           </button>
         }
       />
@@ -74,14 +84,14 @@ export function CaseloadPage() {
         <div className="search-field">
           <Search size={16} />
           <input
-            aria-label="Rechercher un jeune"
-            placeholder="Un nom, une ville, un projet…"
+            aria-label={uiText("Rechercher un jeune")}
+            placeholder={uiText("Un nom, une ville, un projet…")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
         <select
-          aria-label="Étape du parcours"
+          aria-label={uiText("Étape du parcours")}
           value={stage}
           onChange={(event) => setStage(event.target.value)}
         >
@@ -96,7 +106,7 @@ export function CaseloadPage() {
           ))}
         </select>
         <select
-          aria-label="Priorité du suivi"
+          aria-label={uiText("Priorité du suivi")}
           value={priority}
           onChange={(event) => setPriority(event.target.value)}
         >
@@ -106,8 +116,10 @@ export function CaseloadPage() {
         </select>
       </div>
       <p className="results-count">
-        {filtered.length} jeune{filtered.length > 1 ? "s" : ""} dans cette
-        sélection
+        {filtered.length}
+        <Translated value="jeune" />
+        {filtered.length > 1 ? "s" : ""}
+        <Translated value="dans cette sélection" />
       </p>
       {filtered.length ? (
         <div className="table-wrap">
@@ -136,11 +148,18 @@ export function CaseloadPage() {
                       className="table-person"
                       href={`/mediator/caseload/${person.id}`}
                     >
-                      <Image src={person.photo} alt="" width={38} height={38} />
+                      <Image
+                        src={person.photo}
+                        alt={uiText("")}
+                        width={38}
+                        height={38}
+                      />
                       <span>
                         <b>{person.name}</b>
                         <small>
-                          {person.age} ans · {person.city}
+                          {person.age}
+                          <Translated value="ans ·" />
+                          {person.city}
                         </small>
                       </span>
                     </Link>
@@ -161,7 +180,10 @@ export function CaseloadPage() {
                   <td>
                     <div className="table-progress">
                       <progress value={person.progress} max={100} />
-                      <span>{person.progress}% du profil</span>
+                      <span>
+                        {person.progress}
+                        <Translated value="% du profil" />
+                      </span>
                     </div>
                   </td>
                   <td>
@@ -191,7 +213,7 @@ export function CaseloadPage() {
                       className="text-link"
                       href={`/mediator/caseload/${person.id}`}
                     >
-                      Ouvrir
+                      <Translated value="Ouvrir" />
                       <ArrowRight size={14} />
                     </Link>
                   </td>
@@ -202,8 +224,10 @@ export function CaseloadPage() {
         </div>
       ) : (
         <EmptyState
-          title="Aucun dossier dans cette sélection"
-          description="Modifie tes filtres ou recherche une autre ville."
+          title={uiText("Aucun dossier dans cette sélection")}
+          description={uiText(
+            "Modifie tes filtres ou recherche une autre ville.",
+          )}
         />
       )}
     </>
@@ -211,92 +235,127 @@ export function CaseloadPage() {
 }
 
 export function CaseloadDetail({ id }: { id: string }) {
+  const { text: uiText } = useUiTranslation();
+
+  const { data, command } = useWorkspace();
+  const original = data.people.find((p) => p.id === id)!;
+  const { opportunities, youngPeople } = useWorkspaceDatasets();
+
   const person = youngPeople.find((item) => item.id === id)!;
-  const [notes, setNotes] = useSimulatedState<
+  const [notes] = useSimulatedState<
     { text: string; action: string }[]
   >(`mediator.notes.${id}`, []);
   const [note, setNote] = useState("");
   const [action, setAction] = useState("Appel de suivi");
-  function save(event: FormEvent) {
-    event.preventDefault();
-    if (!note.trim()) return;
-    setNotes((current) => [{ text: note.trim(), action }, ...current]);
-    setNote("");
-  }
+  const noteId=useRef<string|undefined>(undefined);
+  async function save(event:FormEvent){event.preventDefault();if(!note.trim())return;const value=note.trim();noteId.current??=crypto.randomUUID();if(await command({action:'case-note',payload:{id:noteId.current,youthId:id,body:value,nextAction:action}})){setNote('');noteId.current=undefined;}}
+
   return (
     <>
       <Link href="/mediator/caseload" className="back-link">
         <ArrowLeft size={15} />
-        Mes jeunes accompagnés
+        <Translated value="Mes jeunes accompagnés" />
       </Link>
       <div className="page-intro">
         <div className="caseload-detail-header">
-          <Image src={person.photo} alt="" width={75} height={75} />
+          <Image src={person.photo} alt={uiText("")} width={75} height={75} />
           <div>
             <h1>{person.name}</h1>
             <p>
-              {person.age} ans · {person.city} · Dossier de démonstration{" "}
+              {person.age}
+              <Translated value="ans ·" />
+              {person.city}
+              <Translated value="· Dossier" />
               {person.id}
             </p>
             <Tag>{person.stage}</Tag>
             {person.priority === "Prioritaire" && (
               <span style={{ marginLeft: 7 }}>
-                <Tag tone="orange">Suivi prioritaire</Tag>
+                <Tag tone="orange">
+                  <Translated value="Suivi prioritaire" />
+                </Tag>
               </span>
             )}
           </div>
         </div>
         <Link href="/mediator/appointments" className="button button-primary">
           <CalendarDays size={15} />
-          Préparer un rendez-vous
+          <Translated value="Préparer un rendez-vous" />
         </Link>
+      </div>
+      <div className="nominal-panel" style={{ marginBottom: 24 }}>
+        <JourneyPanel
+          youth={original}
+          data={data}
+          editable={original.status === "validated"}
+          mutate={(action, payload) => command({ action, payload })}
+        />
+        <div style={{ marginTop: 16 }}>
+          <BusinessAction kind="referral" id={id}>
+            <Translated value="Transmettre une orientation" />
+          </BusinessAction>
+        </div>
       </div>
       <div className="two-column">
         <div className="stack">
-          <Panel title="Ce qui compte pour ce parcours">
+          <Panel title={uiText("Ce qui compte pour ce parcours")}>
             <dl className="definition-grid">
               <div>
-                <dt>Projet</dt>
+                <dt>
+                  <Translated value="Projet" />
+                </dt>
                 <dd>{person.goal}</dd>
               </div>
               <div>
-                <dt>Compétences</dt>
+                <dt>
+                  <Translated value="Compétences" />
+                </dt>
                 <dd>{person.skills}</dd>
               </div>
               <div>
-                <dt>Confiance</dt>
+                <dt>
+                  <Translated value="Confiance" />
+                </dt>
                 <dd>{person.trust}</dd>
               </div>
               <div>
-                <dt>Frein à accompagner</dt>
+                <dt>
+                  <Translated value="Frein à accompagner" />
+                </dt>
                 <dd>{person.blocker}</dd>
               </div>
             </dl>
             <div className="progress-caption">
-              <span>Profil complété</span>
+              <span>
+                <Translated value="Profil complété" />
+              </span>
               <span>{person.progress}%</span>
             </div>
             <progress value={person.progress} max={100} />
           </Panel>
           <Panel
-            title="Ajouter une note de suivi"
-            note="Une trace claire pour préparer la prochaine rencontre."
+            title={uiText("Ajouter une note de suivi")}
+            note={uiText(
+              "Une trace claire pour préparer la prochaine rencontre.",
+            )}
           >
             <form onSubmit={save}>
               <label className="form-field">
-                Note
+                <Translated value="Note" />
                 <textarea
                   className="field-input"
                   rows={4}
                   value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  placeholder="Ce qui a été discuté, les besoins et les prochaines étapes…"
+                  onChange={(event) => { noteId.current=undefined; setNote(event.target.value); }}
+                  placeholder={uiText(
+                    "Ce qui a été discuté, les besoins et les prochaines étapes…",
+                  )}
                   required
                   maxLength={3000}
                 />
               </label>
               <label className="form-field" style={{ marginTop: 18 }}>
-                Prochaine action
+                <Translated value="Prochaine action" />
                 <select
                   className="field-input"
                   value={action}
@@ -318,35 +377,36 @@ export function CaseloadDetail({ id }: { id: string }) {
                 className="button button-primary"
                 style={{ marginTop: 20 }}
               >
-                Ajouter au suivi de démo
+                <Translated value="Enregistrer la note" />
                 <Check size={15} />
               </button>
               <p className="form-note">
-                Les notes restent dans la page ouverte et ne sont pas
-                enregistrées sur un serveur.
+                <Translated value="La note est enregistrée dans le dossier et accessible aux professionnels autorisés." />
               </p>
             </form>
           </Panel>
         </div>
         <div className="stack">
-          <Panel title="Prochaine rencontre">
+          <Panel title={uiText("Prochaine rencontre")}>
             <Tag tone="blue">{person.date}</Tag>
             <h3 style={{ fontSize: 16, margin: "14px 0 8px", fontWeight: 500 }}>
               {person.next}
             </h3>
             <p className="detail-text">
-              Préparer le point sur : {person.blocker.toLowerCase()}.
+              <Translated value="Préparer le point sur :" />
+              {person.blocker.toLowerCase()}.
             </p>
             <Link
               href="/mediator/opportunities"
               className="text-link"
               style={{ marginTop: 20 }}
             >
-              Explorer les orientations
+              <Translated value="Explorer les orientations" />
               <ArrowRight size={15} />
             </Link>
           </Panel>
-          <Panel title="Historique du suivi">
+          <Panel title={uiText('Suivis programmés')}>{data.followups.filter(f=>f.youth_id===id).map(f=><div key={f.id} style={{padding:'12px 0',borderBottom:'1px solid #E8ECF0'}}><Tag>{f.outcome}</Tag><p>{f.due_date.slice(0,10)} · {f.note}</p>{f.outcome==='planned'&&<BusinessAction kind="followup-result" id={f.id}>Enregistrer le constat</BusinessAction>}</div>)}</Panel>
+          <Panel title={uiText("Historique du suivi")}>
             <div className="timeline">
               {notes.map((item, index) => (
                 <div className="timeline-item done" key={index}>
@@ -356,26 +416,21 @@ export function CaseloadDetail({ id }: { id: string }) {
                   <div>
                     <h3>{item.action}</h3>
                     <p>{item.text}</p>
-                    <small>Suivi enregistré sur cet appareil</small>
+                    <small>
+                      <Translated value="Note enregistrée dans le dossier" />
+                    </small>
                   </div>
                 </div>
               ))}
-              <div className="timeline-item done">
-                <div className="timeline-marker">
-                  <Check size={13} />
-                </div>
-                <div>
-                  <h3>Premier échange</h3>
-                  <p>
-                    Projet et besoins identifiés lors de la rencontre initiale.
-                  </p>
-                  <small>22 septembre 2026 · Exemple</small>
-                </div>
-              </div>
+              {!notes.length && (
+                <p>
+                  <Translated value="Aucune note de suivi enregistrée." />
+                </p>
+              )}
             </div>
             {notes.length > 0 && (
               <p className="form-note" role="status">
-                Note ajoutée au suivi de démonstration.
+                <Translated value="Note enregistrée au dossier." />
               </p>
             )}
           </Panel>
@@ -385,12 +440,18 @@ export function CaseloadDetail({ id }: { id: string }) {
   );
 }
 
-type Appointment = DemoAppointment;
-const initialAppointments = appointmentFixtures;
+type Appointment = AppointmentView;
+
 export function AppointmentsPage() {
+  const { data } = useWorkspace();
+  const { text: uiText } = useUiTranslation();
+
+  const { appointmentFixtures } = useWorkspaceDatasets();
+  const { youngPeople } = useWorkspaceDatasets();
+
   const [appointments, setAppointments] = useSimulatedState(
     "mediator.appointments",
-    initialAppointments,
+    appointmentFixtures,
   );
   const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState("À venir");
@@ -400,7 +461,9 @@ export function AppointmentsPage() {
     const data = new FormData(event.currentTarget);
     const appointment: Appointment = {
       id: crypto.randomUUID(),
-      name: String(data.get("name")),
+      name:
+        youngPeople.find((p) => p.id === String(data.get("name")))?.name || "",
+      youthId: String(data.get("name")),
       type: String(data.get("type")),
       date: String(data.get("date")),
       time: String(data.get("time")),
@@ -409,9 +472,7 @@ export function AppointmentsPage() {
     };
     setAppointments((current) => [...current, appointment]);
     setShowForm(false);
-    setStatus(
-      "Rendez-vous ajouté à l’agenda de démonstration. Aucune invitation n’a été envoyée.",
-    );
+    setStatus("Demande d’enregistrement du rendez-vous envoyée.");
   }
   const filtered = appointments
     .filter(
@@ -423,9 +484,11 @@ export function AppointmentsPage() {
   return (
     <>
       <PageIntro
-        eyebrow="FAIRE DE LA PLACE AUX RENCONTRES"
-        title="Mon agenda"
-        description="Prépare tes entretiens, tes appels et tes visites de terrain."
+        eyebrow={uiText("FAIRE DE LA PLACE AUX RENCONTRES")}
+        title={uiText("Mon agenda")}
+        description={uiText(
+          "Prépare tes entretiens, tes appels et tes visites de terrain.",
+        )}
         action={
           <button
             className="button button-primary"
@@ -438,19 +501,24 @@ export function AppointmentsPage() {
         }
       />
       {showForm && (
-        <Panel title="Un nouveau rendez-vous" className="appointment-form">
+        <Panel
+          title={uiText("Un nouveau rendez-vous")}
+          className="appointment-form"
+        >
           <form onSubmit={add}>
             <div className="form-grid">
               <label className="form-field">
-                Jeune accompagné
+                <Translated value="Jeune accompagné" />
                 <select name="name" className="field-input">
                   {youngPeople.map((person) => (
-                    <option key={person.id}>{person.name}</option>
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
                   ))}
                 </select>
               </label>
               <label className="form-field">
-                Type de rencontre
+                <Translated value="Type de rencontre" />
                 <select name="type" className="field-input">
                   {[
                     "Entretien d’orientation",
@@ -463,17 +531,17 @@ export function AppointmentsPage() {
                 </select>
               </label>
               <label className="form-field">
-                Date
+                <Translated value="Date" />
                 <input
                   type="date"
                   name="date"
                   className="field-input"
                   required
-                  defaultValue="2026-10-08"
+                  defaultValue={new Intl.DateTimeFormat("en-CA", {timeZone:"Africa/Casablanca",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date(data.now))}
                 />
               </label>
               <label className="form-field">
-                Heure
+                <Translated value="Heure" />
                 <input
                   type="time"
                   name="time"
@@ -483,19 +551,19 @@ export function AppointmentsPage() {
                 />
               </label>
               <label className="form-field wide">
-                Lieu
+                <Translated value="Lieu" />
                 <input
                   name="location"
                   className="field-input"
                   required
-                  placeholder="Bureau, appel ou adresse de visite…"
+                  placeholder={uiText("Bureau, appel ou adresse de visite…")}
                   maxLength={200}
                 />
               </label>
             </div>
             <div className="form-actions">
               <button className="button button-primary">
-                Ajouter à l’agenda
+                <Translated value="Ajouter à l’agenda" />
                 <Check size={15} />
               </button>
               <button
@@ -503,7 +571,7 @@ export function AppointmentsPage() {
                 className="button button-quiet"
                 onClick={() => setShowForm(false)}
               >
-                Annuler
+                <Translated value="Annuler" />
               </button>
             </div>
           </form>
@@ -518,7 +586,7 @@ export function AppointmentsPage() {
         className="filter-tabs"
         style={{ margin: "22px 0" }}
         role="group"
-        aria-label="Filtrer les rendez-vous"
+        aria-label={uiText("Filtrer les rendez-vous")}
       >
         {["À venir", "Terminés", "Tout l’agenda"].map((value) => (
           <button
@@ -579,7 +647,7 @@ export function AppointmentsPage() {
                         : item,
                     ),
                   );
-                  setStatus("Statut mis à jour dans la démonstration.");
+                  setStatus("Demande de mise à jour envoyée.");
                 }}
               >
                 {appointment.done ? "Remettre à venir" : "Marquer terminé"}
@@ -591,18 +659,24 @@ export function AppointmentsPage() {
       </div>
       {!filtered.length && (
         <EmptyState
-          title="Un agenda qui respire"
-          description="Aucun rendez-vous dans cette sélection. Tu peux en ajouter un pour préparer la prochaine rencontre."
+          title={uiText("Un agenda qui respire")}
+          description={uiText(
+            "Aucun rendez-vous dans cette sélection. Tu peux en ajouter un pour préparer la prochaine rencontre.",
+          )}
         />
       )}
       <p className="form-note">
-        Agenda de démonstration. Les changements restent dans la page ouverte.
+        <Translated value="Les rendez-vous sont conservés dans la base et visibles dans le parcours du jeune." />
       </p>
     </>
   );
 }
 
 export function MediatorOpportunitiesPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { opportunities, youngPeople } = useWorkspaceDatasets();
+
   const [query, setQuery] = useState("");
   const [referrals, setReferrals] = useSimulatedState<
     { offer: string; person: string }[]
@@ -616,23 +690,27 @@ export function MediatorOpportunitiesPage() {
   return (
     <>
       <PageIntro
-        eyebrow="FAIRE LE LIEN AVEC LES POSSIBILITÉS"
-        title="Opportunités & orientations"
-        description="Repère une offre pertinente et prépare une orientation avec le jeune."
+        eyebrow={uiText("FAIRE LE LIEN AVEC LES POSSIBILITÉS")}
+        title={uiText("Opportunités & orientations")}
+        description={uiText(
+          "Repère une offre pertinente et prépare une orientation avec le jeune.",
+        )}
       />
       <div className="filter-bar">
         <div className="search-field">
           <Search size={16} />
           <input
-            aria-label="Rechercher une offre"
-            placeholder="Une formation, un métier, une ville…"
+            aria-label={uiText("Rechercher une offre")}
+            placeholder={uiText("Une formation, un métier, une ville…")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
         <Tag tone="muted">
-          {referrals.length} orientation{referrals.length > 1 ? "s" : ""}{" "}
-          préparée{referrals.length > 1 ? "s" : ""}
+          {referrals.length}
+          <Translated value="orientation" />
+          {referrals.length > 1 ? "s" : ""} <Translated value="préparée" />
+          {referrals.length > 1 ? "s" : ""}
         </Tag>
       </div>
       <div className="action-grid">
@@ -655,10 +733,10 @@ export function MediatorOpportunitiesPage() {
               </span>
             </div>
             <label className="form-field">
-              Orienter un jeune
+              <Translated value="Orienter un jeune" />
               <select
                 className="field-input"
-                value={selections[offer.id] ?? youngPeople[0].name}
+                value={selections[offer.id] ?? (youngPeople[0]?.id || "")}
                 onChange={(event) =>
                   setSelections((current) => ({
                     ...current,
@@ -667,7 +745,9 @@ export function MediatorOpportunitiesPage() {
                 }
               >
                 {youngPeople.map((person) => (
-                  <option key={person.id}>{person.name}</option>
+                  <option key={person.id} value={person.id}>
+                    {person.name}
+                  </option>
                 ))}
               </select>
             </label>
@@ -677,26 +757,28 @@ export function MediatorOpportunitiesPage() {
               disabled={referrals.some(
                 (item) =>
                   item.offer === offer.id &&
-                  item.person === (selections[offer.id] ?? youngPeople[0].name),
+                  item.person ===
+                    (selections[offer.id] ?? (youngPeople[0]?.id || "")),
               )}
               onClick={() =>
                 setReferrals((current) => [
                   ...current,
                   {
                     offer: offer.id,
-                    person: selections[offer.id] ?? youngPeople[0].name,
+                    person: selections[offer.id] ?? (youngPeople[0]?.id || ""),
                   },
                 ])
               }
             >
-              Préparer l’orientation
+              <Translated value="Préparer l’orientation" />
               <ArrowRight size={14} />
             </button>
             {referrals
               .filter((item) => item.offer === offer.id)
               .map((item) => (
                 <div key={item.person} className="inline-alert" role="status">
-                  {item.person} · orientation préparée en démo.
+                  {item.person}
+                  <Translated value="· orientation préparée." />
                 </div>
               ))}
           </Panel>
@@ -704,30 +786,35 @@ export function MediatorOpportunitiesPage() {
       </div>
       {!filtered.length && (
         <EmptyState
-          title="Aucune offre correspondante"
-          description="Essaie une recherche plus large."
+          title={uiText("Aucune offre correspondante")}
+          description={uiText("Essaie une recherche plus large.")}
         />
       )}
       <p className="form-note">
-        Les orientations sont locales à la démonstration. Rien n’est transmis
-        aux organismes partenaires.
+        <Translated value="Les sélections préparent une orientation. La transmission se fait depuis le dossier, après validation et accord du jeune." />
       </p>
     </>
   );
 }
 
 export function MediatorActionsPage() {
-  const [attendees, setAttendees] = useSimulatedState<Record<number, string[]>>(
+  const { text: uiText } = useUiTranslation();
+
+  const { fieldActions, youngPeople } = useWorkspaceDatasets();
+
+  const [attendees, setAttendees] = useSimulatedState<Record<string, string[]>>(
     "mediator.attendees",
     {},
   );
-  const [selected, setSelected] = useState<Record<number, string>>({});
+  const [selected, setSelected] = useState<Record<string, string>>({});
   return (
     <>
       <PageIntro
-        eyebrow="LE TERRAIN CRÉE LE LIEN"
-        title="Actions de terrain"
-        description="Prépare les ateliers et aide les jeunes à franchir un premier pas concret."
+        eyebrow={uiText("LE TERRAIN CRÉE LE LIEN")}
+        title={uiText("Actions de terrain")}
+        description={uiText(
+          "Prépare les ateliers et aide les jeunes à franchir un premier pas concret.",
+        )}
       />
       <div className="field-itinerary">
         {fieldActions.map((action) => (
@@ -735,7 +822,7 @@ export function MediatorActionsPage() {
             <div className="field-action-image">
               <Image
                 src={action.image}
-                alt=""
+                alt={uiText("")}
                 fill
                 sizes="(max-width: 760px) 90vw, 180px"
               />
@@ -761,10 +848,10 @@ export function MediatorActionsPage() {
                 </span>
               </div>
               <label className="form-field">
-                Ajouter un participant
+                <Translated value="Ajouter un participant" />
                 <select
                   className="field-input"
-                  value={selected[action.id] ?? youngPeople[0].name}
+                  value={selected[action.id] ?? (youngPeople[0]?.id || "")}
                   onChange={(event) =>
                     setSelected((current) => ({
                       ...current,
@@ -773,7 +860,9 @@ export function MediatorActionsPage() {
                   }
                 >
                   {youngPeople.map((person) => (
-                    <option key={person.id}>{person.name}</option>
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -781,10 +870,11 @@ export function MediatorActionsPage() {
                 className="button button-secondary"
                 style={{ marginTop: 15 }}
                 disabled={(attendees[action.id] ?? []).includes(
-                  selected[action.id] ?? youngPeople[0].name,
+                  selected[action.id] ?? (youngPeople[0]?.id || ""),
                 )}
                 onClick={() => {
-                  const person = selected[action.id] ?? youngPeople[0].name;
+                  const person =
+                    selected[action.id] ?? (youngPeople[0]?.id || "");
                   setAttendees((current) => ({
                     ...current,
                     [action.id]: [...(current[action.id] ?? []), person],
@@ -792,13 +882,13 @@ export function MediatorActionsPage() {
                 }}
               >
                 <Plus size={14} />
-                Ajouter à l’atelier de démo
+                <Translated value="Confirmer la participation" />
               </button>
               {(attendees[action.id] ?? []).length > 0 && (
                 <div className="skill-list">
                   {attendees[action.id].map((name) => (
                     <button
-                      key={name}
+                      key={youngPeople.find((p) => p.id === name)?.name || name}
                       className="tag tag-teal"
                       aria-label={`Retirer ${name} de ${action.title}`}
                       style={{ border: 0, cursor: "pointer" }}
@@ -811,43 +901,65 @@ export function MediatorActionsPage() {
                         }))
                       }
                     >
-                      {name} ×
+                      {name}
+                      <Translated value="×" />
                     </button>
                   ))}
                 </div>
               )}
               <p className="form-note">
-                {(attendees[action.id] ?? []).length} participant
-                {(attendees[action.id] ?? []).length > 1 ? "s" : ""} sélectionné
-                {(attendees[action.id] ?? []).length > 1 ? "s" : ""} · Cliquez
-                sur un nom pour le retirer.
+                {(attendees[action.id] ?? []).length}
+                <Translated value="participant" />
+                {(attendees[action.id] ?? []).length > 1 ? "s" : ""}
+                <Translated value="sélectionné" />
+                {(attendees[action.id] ?? []).length > 1 ? "s" : ""}
+                <Translated value="· Cliquez sur un nom pour le retirer." />
               </p>
             </div>
           </Panel>
         ))}
       </div>
       <p className="form-note">
-        Listes de participants locales à la démonstration. Aucune invitation
-        n’est envoyée.
+        <Translated value="Les présences sont enregistrées dans les dossiers." />
       </p>
     </>
   );
 }
 
-const activityRows = [
-  ["Juillet", 12, 8, 3],
-  ["Août", 15, 10, 4],
-  ["Septembre", 22, 14, 6],
-] as const;
 export function MediatorReportsPage() {
-  const [period, setPeriod] = useState("Septembre");
+  const { text: uiText } = useUiTranslation();
+
+  const { data } = useWorkspace();
+  const activityRows = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date();
+    d.setUTCDate(1);
+    d.setUTCMonth(d.getUTCMonth() - 5 + i);
+    const key = d.toISOString().slice(0, 7);
+    return [
+      key,
+      data.appointments.filter((a) => a.starts_at.startsWith(key)).length,
+      data.participations.filter(
+        (p) =>
+          p.attended &&
+          data.activities.some(
+            (a) => a.id === p.activity_id && a.data.date.startsWith(key),
+          ),
+      ).length,
+      data.referrals.filter((r) => r.created_at.startsWith(key)).length,
+    ] as const;
+  });
+  const [period, setPeriod] = useState(() =>
+    new Date().toISOString().slice(0, 7),
+  );
   const row = activityRows.find((item) => item[0] === period)!;
   return (
     <>
       <PageIntro
-        eyebrow="VOIR L’EFFET DE CHAQUE ACTION"
-        title="Mon activité"
-        description="Une vue claire de tes rencontres, de tes actions et des parcours qui avancent."
+        eyebrow={uiText("VOIR L’EFFET DE CHAQUE ACTION")}
+        title={uiText("Mon activité")}
+        description={uiText(
+          "Une vue claire de tes rencontres, de tes actions et des parcours qui avancent.",
+        )}
         action={
           <button
             className="button button-secondary"
@@ -859,7 +971,7 @@ export function MediatorReportsPage() {
             }
           >
             <Download size={15} />
-            Télécharger le CSV
+            <Translated value="Télécharger le CSV" />
           </button>
         }
       />
@@ -868,7 +980,7 @@ export function MediatorReportsPage() {
           htmlFor="report-period"
           style={{ fontSize: 12, color: "var(--muted)" }}
         >
-          Période de démonstration
+          <Translated value="Période enregistrée" />
         </label>
         <select
           id="report-period"
@@ -880,38 +992,38 @@ export function MediatorReportsPage() {
           ))}
         </select>
         <span className="results-count" style={{ margin: 0 }}>
-          2026 · Données d’exemple
+          <Translated value="Activité enregistrée" />
         </span>
       </div>
       <div className="metrics-row">
         <Metric
-          label="Rencontres"
+          label={uiText("Rencontres")}
           value={row[1]}
-          note={`${period} · exemples`}
+          note={period}
           icon={<Users size={19} />}
         />
         <Metric
-          label="Actions de terrain"
+          label={uiText("Actions de terrain")}
           value={row[2]}
-          note="Ateliers & visites"
+          note={uiText("Ateliers & visites")}
           icon={<Zap size={19} />}
         />
         <Metric
-          label="Orientations"
+          label={uiText("Orientations")}
           value={row[3]}
-          note="Parcours préparés"
+          note={uiText("Parcours préparés")}
           icon={<Target size={19} />}
         />
       </div>
       <div className="two-column" style={{ marginTop: 25 }}>
         <Panel
-          title="Les rencontres au fil des mois"
-          note="Illustration de l’activité de juillet à septembre."
+          title={uiText("Les rencontres au fil des mois")}
+          note={uiText("Activité enregistrée au fil des six derniers mois.")}
         >
           <div
             className="report-chart"
             role="img"
-            aria-label="Rencontres : juillet 12, août 15, septembre 22"
+            aria-label={uiText("Rendez-vous enregistrés par mois")}
           >
             {activityRows.map((item) => (
               <div className="report-chart-column" key={item[0]}>
@@ -928,8 +1040,8 @@ export function MediatorReportsPage() {
           </div>
         </Panel>
         <Panel
-          title="Répartition des parcours"
-          note="Ton portefeuille de démonstration."
+          title={uiText("Répartition des parcours")}
+          note={uiText("Les dossiers qui te sont attribués.")}
         >
           {[
             ["Identifiés", 2],
@@ -954,6 +1066,10 @@ export function MediatorReportsPage() {
 }
 
 export function MediatorProfilePage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { profileFixtures } = useWorkspaceDatasets();
+
   const [status, setStatus] = useState("");
   const [profile, setProfile] = useSimulatedState(
     "mediator.profile",
@@ -962,12 +1078,14 @@ export function MediatorProfilePage() {
   return (
     <>
       <PageIntro
-        eyebrow="UNE PRÉSENCE QUI COMPTE"
-        title="Mon profil médiateur"
-        description="Présente ton rôle et tes disponibilités pour faciliter l’accompagnement."
+        eyebrow={uiText("UNE PRÉSENCE QUI COMPTE")}
+        title={uiText("Mon profil médiateur")}
+        description={uiText(
+          "Présente ton rôle et tes disponibilités pour faciliter l’accompagnement.",
+        )}
       />
       <div className="two-column">
-        <Panel title="Informations professionnelles">
+        <Panel title={uiText("Informations professionnelles")}>
           <form
             key={JSON.stringify(profile)}
             onSubmit={(event) => {
@@ -982,12 +1100,12 @@ export function MediatorProfilePage() {
                   ),
                 ),
               }));
-              setStatus("Informations enregistrées sur cet appareil.");
+              setStatus("Demande d’enregistrement envoyée.");
             }}
           >
             <div className="form-grid">
               <label className="form-field">
-                Prénom
+                <Translated value="Prénom" />
                 <input
                   className="field-input"
                   name="firstName"
@@ -997,7 +1115,7 @@ export function MediatorProfilePage() {
                 />
               </label>
               <label className="form-field">
-                Nom
+                <Translated value="Nom" />
                 <input
                   className="field-input"
                   name="lastName"
@@ -1007,10 +1125,11 @@ export function MediatorProfilePage() {
                 />
               </label>
               <label className="form-field wide">
-                Adresse professionnelle
+                <Translated value="Adresse professionnelle" />
                 <input
                   className="field-input"
                   type="email"
+                  readOnly
                   name="email"
                   defaultValue={profile.email}
                   required
@@ -1018,7 +1137,7 @@ export function MediatorProfilePage() {
                 />
               </label>
               <label className="form-field">
-                Zone principale
+                <Translated value="Zone principale" />
                 <select
                   className="field-input"
                   name="city"
@@ -1032,7 +1151,7 @@ export function MediatorProfilePage() {
                 </select>
               </label>
               <label className="form-field">
-                Langue d’accompagnement
+                <Translated value="Langue d’accompagnement" />
                 <select
                   className="field-input"
                   name="language"
@@ -1050,7 +1169,7 @@ export function MediatorProfilePage() {
                 </select>
               </label>
               <label className="form-field wide">
-                Présentation
+                <Translated value="Présentation" />
                 <textarea
                   className="field-input"
                   name="presentation"
@@ -1059,7 +1178,7 @@ export function MediatorProfilePage() {
                 />
               </label>
               <label className="form-field wide">
-                Disponibilités
+                <Translated value="Disponibilités" />
                 <input
                   className="field-input"
                   name="availability"
@@ -1069,7 +1188,7 @@ export function MediatorProfilePage() {
               </label>
             </div>
             <button className="button button-primary" style={{ marginTop: 22 }}>
-              Enregistrer mes informations
+              <Translated value="Enregistrer mes informations" />
               <Check size={15} />
             </button>
             {status && (
@@ -1078,7 +1197,7 @@ export function MediatorProfilePage() {
               </div>
             )}
             <p className="form-note">
-              Informations de démonstration enregistrées sur cet appareil.
+              <Translated value="Le profil est conservé dans la base de données." />
             </p>
           </form>
         </Panel>
@@ -1086,37 +1205,48 @@ export function MediatorProfilePage() {
           <Panel className="profile-summary">
             <Image
               src="/editorial/story-amina.webp"
-              alt=""
+              alt={uiText("")}
               width={90}
               height={90}
             />
             <h2>
               {profile.firstName} {profile.lastName}
             </h2>
-            <p>Médiatrice · Agadir</p>
-            <Tag>Accompagnement de proximité</Tag>
+            <p>
+              <Translated value="Médiatrice · Agadir" />
+            </p>
+            <Tag>
+              <Translated value="Accompagnement de proximité" />
+            </Tag>
             <div className="definition-grid" style={{ textAlign: "left" }}>
               <div>
-                <span className="form-note">Zone d’intervention</span>
-                <p style={{ fontSize: 12 }}>Souss-Massa</p>
+                <span className="form-note">
+                  <Translated value="Zone d’intervention" />
+                </span>
+                <p style={{ fontSize: 12 }}>
+                  <Translated value="Souss-Massa" />
+                </p>
               </div>
               <div>
-                <span className="form-note">Portefeuille démo</span>
-                <p style={{ fontSize: 12 }}>5 jeunes</p>
+                <span className="form-note">
+                  <Translated value="Dossiers accompagnés" />
+                </span>
+                <p style={{ fontSize: 12 }}>
+                  <Translated value="5 jeunes" />
+                </p>
               </div>
             </div>
           </Panel>
-          <Panel title="Accès à ton compte">
+          <Panel title={uiText("Accès à ton compte")}>
             <p className="detail-text">
-              Les écrans de connexion et de récupération de mot de passe sont
-              prêts pour ton futur compte.
+              <Translated value="Pour retrouver ton accès, demande un lien personnel à l’administration." />
             </p>
             <Link
               href="/auth/mediator/sign-in"
               className="button button-secondary"
               style={{ marginTop: 18 }}
             >
-              Écran de connexion
+              <Translated value="Écran de connexion" />
               <ArrowRight size={15} />
             </Link>
           </Panel>

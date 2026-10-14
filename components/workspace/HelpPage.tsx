@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -6,6 +7,8 @@ import { ArrowRight, MessageCircle, Search } from "lucide-react";
 import { EmptyState, PageIntro } from "./UI";
 
 export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
+  const { text: uiText } = useUiTranslation();
+
   const [query, setQuery] = useState("");
   const questions =
     role === "neet"
@@ -28,7 +31,7 @@ export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
           ],
           [
             "Comment gérer mes informations ?",
-            "Dans Mon profil, tu peux revoir tes informations et sélectionner ton CV. Dans cette version de démonstration, les changements restent dans ton navigateur et aucun fichier n’est transmis.",
+            "Dans Mon profil, tu peux revoir tes informations et sélectionner ton CV. Les informations sont enregistrées dans la base de données et ton CV PDF est conservé dans ton espace privé.",
           ],
           [
             "Puis-je utiliser le site sur mon téléphone ?",
@@ -42,23 +45,23 @@ export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
           ],
           [
             "Comment préparer une orientation ?",
-            "Ouvre Opportunités & orientations, choisis une offre puis un jeune. La sélection est ajoutée au suivi de démonstration. La transmission à un partenaire nécessitera la connexion au service métier.",
+            "Ouvre Opportunités & orientations, choisis une offre puis un jeune. La sélection prépare une orientation. Depuis le dossier, confirme les étapes d’activation et l’accord du jeune avant de transmettre au partenaire.",
           ],
           [
             "Comment organiser un rendez-vous ?",
-            "Depuis Mon agenda, ajoute un rendez-vous en indiquant le jeune, la date, l’heure, le lieu et le type de rencontre. La confirmation est locale à la démonstration.",
+            "Depuis Mon agenda, ajoute un rendez-vous en indiquant le jeune, la date, l’heure, le lieu et le type de rencontre. Le rendez-vous est enregistré dans l’agenda du dossier.",
           ],
           [
             "Que contiennent les rapports ?",
-            "Mon activité présente les suivis, les actions de terrain et les orientations de la période de démonstration. Le téléchargement CSV permet de vérifier le format avant la connexion aux données réelles.",
+            "Mon activité présente les suivis, les actions de terrain et les orientations de la période sélectionnée. Le téléchargement CSV contient ces données enregistrées.",
           ],
           [
             "Comment enregistrer une note de suivi ?",
-            "Ouvre le dossier d’un jeune, puis saisis une note dans le formulaire de suivi. Cette version ne sauvegarde pas de données sur un serveur.",
+            "Ouvre le dossier d’un jeune, puis saisis une note dans le formulaire de suivi. La note est enregistrée dans le dossier et visible par les professionnels autorisés.",
           ],
           [
             "Les comptes et données sont-ils réels ?",
-            "Cet espace contient uniquement des exemples. Le service d’authentification et les données métier seront connectés séparément.",
+            "Les comptes utilisent une authentification réelle. Les dossiers ajoutés depuis le mobile sont enregistrés dans la base, à côté des profils fictifs du catalogue de démonstration.",
           ],
         ];
   const filtered = questions.filter(([title, text]) =>
@@ -69,9 +72,11 @@ export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
   return (
     <>
       <PageIntro
-        eyebrow="ON EST LÀ POUR TOI"
-        title="Comment peut-on t’aider ?"
-        description="Des réponses simples pour avancer sereinement dans ton espace."
+        eyebrow={uiText("ON EST LÀ POUR TOI")}
+        title={uiText("Comment peut-on t’aider ?")}
+        description={uiText(
+          "Des réponses simples pour avancer sereinement dans ton espace.",
+        )}
       />
       <section className="help-header">
         <h2>
@@ -96,8 +101,8 @@ export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
         <div className="search-field">
           <Search size={16} />
           <input
-            aria-label="Rechercher dans l’aide"
-            placeholder="Une question sur ton espace…"
+            aria-label={uiText("Rechercher dans l’aide")}
+            placeholder={uiText("Une question sur ton espace…")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -113,8 +118,10 @@ export default function HelpPage({ role }: { role: "neet" | "mediator" }) {
       </div>
       {!filtered.length && (
         <EmptyState
-          title="Essayons autrement"
-          description="Utilise un autre mot-clé ou ouvre une conversation pour demander de l’aide."
+          title={uiText("Essayons autrement")}
+          description={uiText(
+            "Utilise un autre mot-clé ou ouvre une conversation pour demander de l’aide.",
+          )}
         />
       )}
     </>

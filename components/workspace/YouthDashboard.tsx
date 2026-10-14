@@ -1,14 +1,24 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { journeyState } from "@/lib/journey";
+import { useWorkspace, useWorkspaceDatasets } from "./LiveProvider";
+import type {
+  AppointmentView,
+  OpportunityView,
+  FieldActionView,
+} from "@/lib/workspace-data";
 
 import Image from "next/image";
 import Link from "next/link";
 import { type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useYouth } from "./YouthProvider";
-import { useSimulatedState } from "@/lib/simulated-backend";
+import { useWorkspaceState as useSimulatedState } from "./LiveProvider";
 import StoryReels from "./StoryReels";
 import MicroActionCard from "./MicroActionCard";
-import { fieldActions, profileFixtures } from "@/lib/demo-data";
 import {
   Bell,
   BriefcaseBusiness,
@@ -25,121 +35,11 @@ import {
   User,
 } from "lucide-react";
 
-const opportunities = [
-  {
-    tag: "Formation",
-    match: "92%",
-    title: "Développement Web Full Stack",
-    org: "GOMYCODE",
-    place: "Agadir",
-    desc: "Formation intensive de 6 mois avec certification et stage inclus.",
-    cta: "Voir les détails",
-    image: "/editorial/opp-web-dev.webp",
-    tone: "#00B8A9",
-  },
-  {
-    tag: "Stage",
-    match: "88%",
-    title: "Stage Marketing Digital",
-    org: "StartUp Maroc",
-    place: "Casablanca",
-    desc: "Stage de 3 mois pour renforcer vos compétences en marketing digital.",
-    cta: "Postuler maintenant",
-    image: "/editorial/opp-marketing.webp",
-    tone: "#2E86C1",
-  },
-  {
-    tag: "Emploi",
-    match: "85%",
-    title: "Conseiller Client",
-    org: "Marjane",
-    place: "Agadir",
-    desc: "Poste en CDI avec opportunités d’évolution et accompagnement.",
-    cta: "Voir l'offre",
-    image: "/editorial/opp-retail.webp",
-    tone: "#FF6B2C",
-  },
-  {
-    tag: "Programme",
-    match: "82%",
-    title: "Programme Injaz - Entreprendre",
-    org: "INJAZH Maroc",
-    place: "En ligne",
-    desc: "Accompagnement pour lancer votre projet entrepreneurial.",
-    cta: "En savoir plus",
-    image: "/editorial/opp-entrepreneur.webp",
-    tone: "#8E44AD",
-  },
-];
-
-const nextActions = [
-  {
-    icon: User,
-    title: "Complète ton profil",
-    note: "Ajoute tes compétences et expériences.",
-    status: "75%",
-    action: "Continuer",
-    color: "#00B8A9",
-  },
-  {
-    icon: FileText,
-    title: "Assiste à la session d'orientation",
-    note: "Mercredi 21 mai à 15h00",
-    status: "Bientôt",
-    action: "Voir détails",
-    color: "#F5A623",
-  },
-  {
-    icon: CalendarDays,
-    title: "Confirme ton entretien",
-    note: "Entretien avec Marjane",
-    status: "À faire",
-    action: "Confirmer",
-    color: "#FF6B2C",
-  },
-  {
-    icon: Play,
-    title: "Regarde la formation recommandée",
-    note: "Marketing digital - 15 min",
-    status: "Nouveau",
-    action: "Regarder",
-    color: "#2E86C1",
-  },
-  {
-    icon: ClipboardList,
-    title: "Téléverse ton CV",
-    note: "Ajoute ton CV pour plus d’opportunités",
-    status: "À faire",
-    action: "Téléverser",
-    color: "#00B8A9",
-  },
-];
-
-const notifications = [
-  {
-    icon: BriefcaseBusiness,
-    title: "Nouvelle opportunité pour toi !",
-    note: "Stage Marketing Digital chez StartUp Maroc.",
-    time: "2h",
-    color: "#00B8A9",
-  },
-  {
-    icon: Bell,
-    title: "Rappel : session d'orientation",
-    note: "N’oublie pas notre session mercredi à 15h00.",
-    time: "1j",
-    color: "#FF6B2C",
-  },
-  {
-    icon: Star,
-    title: "Félicitations !",
-    note: "Ton profil est 78% complété. Continue comme ça !",
-    time: "2j",
-    color: "#F5A623",
-  },
-];
-
 function Topbar() {
+  const { text: uiText } = useUiTranslation();
+
+  const { profileFixtures } = useWorkspaceDatasets();
+
   const [profile] = useSimulatedState("neet.profile", profileFixtures.neet);
   const router = useRouter();
   function search(event: FormEvent<HTMLFormElement>) {
@@ -151,9 +51,12 @@ function Topbar() {
     <header className="portal-topbar">
       <div>
         <h1>
-          Bonjour {profile.firstName} <span>👋</span>
+          <Translated value="Bonjour" />
+          {profile.firstName} <span>👋</span>
         </h1>
-        <p>Voici les meilleures opportunités et prochaines étapes pour toi.</p>
+        <p>
+          <Translated value="Voici les meilleures opportunités et prochaines étapes pour toi." />
+        </p>
       </div>
       <form
         className="portal-search"
@@ -164,23 +67,41 @@ function Topbar() {
         <Search size={18} />
         <input
           name="q"
-          aria-label="Rechercher des opportunités, programmes"
-          placeholder="Rechercher des opportunités, programmes..."
+          aria-label={uiText("Rechercher des opportunités, programmes")}
+          placeholder={uiText("Rechercher des opportunités, programmes...")}
         />
       </form>
       <Link
         href="/neet/messages"
         className="icon-bell"
-        aria-label="Notifications"
+        aria-label={uiText("Notifications")}
       >
         <Bell size={20} />
-        <span>2</span>
       </Link>
     </header>
   );
 }
 
 function ProfileCard() {
+  const { text: uiText } = useUiTranslation();
+
+  const { data } = useWorkspace(),
+    { opportunities, profileFixtures } = useWorkspaceDatasets();
+  const state = journeyState(data.journeys || []),
+    profile = profileFixtures.neet;
+  const fields = [
+      profile.firstName,
+      profile.lastName,
+      profile.phone,
+      profile.city,
+      profile.goal,
+      profile.skills,
+      profile.interests,
+      data.document?.filename,
+    ],
+    progress = Math.round(
+      (fields.filter(Boolean).length / fields.length) * 100,
+    );
   const { applications, saved, completed } = useYouth();
   return (
     <section className="portal-card profile-card">
@@ -188,26 +109,33 @@ function ProfileCard() {
         <div className="avatar-ring">
           <Image
             src="/editorial/story-khalid.webp"
-            alt="Yassine El Amrani"
+            alt={uiText("Illustration du profil")}
             width={118}
             height={118}
           />
         </div>
         <div className="profile-copy">
           <div className="profile-status">
-            <b>Statut actuel</b>
-            <span>● Activé</span>
+            <b>
+              <Translated value="Statut actuel" />
+            </b>
+            <span>{state.label}</span>
           </div>
-          <p>Ton parcours progresse, continue ainsi !</p>
+          <p>
+            <Translated value="Ton parcours progresse, continue ainsi !" />
+          </p>
           <div className="progress-line">
-            <i style={{ width: "78%" }} />
+            <i style={{ width: `${progress}%` }} />
           </div>
-          <small>78% complété</small>
+          <small>
+            {progress}
+            <Translated value="% des informations renseignées" />
+          </small>
         </div>
       </div>
       <div className="profile-stats">
         {[
-          ["4", "Opportunités disponibles"],
+          [String(opportunities.length), "Opportunités disponibles"],
           [String(applications.length), "Candidatures préparées"],
           [String(saved.length), "Favoris enregistrés"],
           [String(completed.length), "Action complétée"],
@@ -224,35 +152,46 @@ function ProfileCard() {
 }
 
 function AssistantCard() {
+  const { text: uiText } = useUiTranslation();
+
   return (
     <section className="portal-card assistant-card">
-      <b>Bidaya Assistant</b>
+      <b>
+        <Translated value="Bidaya · Accompagnement" />
+      </b>
       <div>
         <Image
           src="/editorial/assistant-bot.webp"
-          alt="Bidaya Assistant"
+          alt={uiText("Bidaya · Accompagnement")}
           width={96}
           height={86}
         />
-        <p>Besoin d’aide ou d’un conseil personnalisé ? Je suis là pour toi.</p>
+        <p>
+          <Translated value="Besoin d’aide ou d’un conseil personnalisé ? Je suis là pour toi." />
+        </p>
       </div>
       <Link className="assistant-action" href="/neet/messages">
-        Chat maintenant <MessageCircle size={16} />
+        <Translated value="Contacter mon médiateur" />
+        <MessageCircle size={16} />
       </Link>
     </section>
   );
 }
 
 function QuoteCard() {
+  const { text: uiText } = useUiTranslation();
+
   return (
     <section className="portal-card quote-card">
       <blockquote>
-        “Chaque petit pas aujourd’hui te rapproche de ton avenir.”
+        <Translated value="“Chaque petit pas aujourd’hui te rapproche de ton avenir.”" />
       </blockquote>
-      <p>Reste motivé, on croit en toi !</p>
+      <p>
+        <Translated value="Reste motivé, on croit en toi !" />
+      </p>
       <Image
         src="/editorial/mountain-progress.webp"
-        alt="Progression vers un objectif"
+        alt={uiText("Progression vers un objectif")}
         width={220}
         height={140}
       />
@@ -275,17 +214,37 @@ function SectionHeader({
         <h2>{title}</h2>
         <p>{subtitle}</p>
       </div>
-      <Link href={href}>Voir toutes</Link>
+      <Link href={href}>
+        <Translated value="Voir toutes" />
+      </Link>
     </div>
   );
 }
 
 function Opportunities() {
-  const opportunityIds = ["web", "marketing", "retail", "enterprise"];
+  const { text: uiText } = useUiTranslation();
+
+  const { opportunities: actual } = useWorkspaceDatasets();
+  const opportunities = actual
+    .slice()
+    .sort((a, b) => b.match - a.match)
+    .slice(0, 4)
+    .map((o) => ({
+      id: o.id,
+      tag: o.type,
+      match: o.match + "%",
+      title: o.title,
+      org: o.organization,
+      place: o.location,
+      desc: o.description,
+      cta: "Voir les détails",
+      image: o.image,
+      tone: "#00B8A9",
+    }));
   return (
     <section className="portal-panel">
       <SectionHeader
-        title="Opportunités pour toi"
+        title={uiText("Opportunités pour toi")}
         subtitle="Sélectionnées en fonction de ton profil et de tes intérêts"
         href="/neet/opportunities"
       />
@@ -320,7 +279,7 @@ function Opportunities() {
               <p>{item.desc}</p>
               <Link
                 className="opportunity-action"
-                href={`/neet/opportunities/${opportunityIds[index]}`}
+                href={`/neet/opportunities/${item.id}`}
               >
                 {item.cta}
               </Link>
@@ -333,10 +292,12 @@ function Opportunities() {
 }
 
 function Stories() {
+  const { text: uiText } = useUiTranslation();
+
   return (
     <section className="portal-panel youth-stories-panel">
       <SectionHeader
-        title="Histoires inspirantes"
+        title={uiText("Histoires inspirantes")}
         subtitle="Un nouveau départ, raconté en quelques instants"
         href="/neet/stories"
       />
@@ -346,10 +307,48 @@ function Stories() {
 }
 
 function NextActions() {
+  const { text: uiText } = useUiTranslation();
+
+  const { data } = useWorkspace();
+  const nextActions = [
+    {
+      icon: User,
+      title: "Compléter mon profil",
+      note: "Vérifier mes informations et mes envies",
+      status: "À préparer",
+      action: "Ouvrir",
+      color: "#00B8A9",
+    },
+    ...(!data.document
+      ? [
+          {
+            icon: ClipboardList,
+            title: "Téléverser mon CV",
+            note: "Ajouter un PDF privé à mon profil",
+            status: "À préparer",
+            action: "Ouvrir",
+            color: "#2E86C1",
+          },
+        ]
+      : []),
+    ...data.appointments
+      .filter((a) => !(a as typeof a & { completed?: boolean }).completed)
+      .slice(0, 2)
+      .map((a) => ({
+        icon: CalendarDays,
+        title: a.title,
+        note: new Date(a.starts_at).toLocaleString("fr-MA", {
+          timeZone: "Africa/Casablanca",
+        }),
+        status: "Rendez-vous",
+        action: "Contacter",
+        color: "#FF6B2C",
+      })),
+  ];
   return (
     <section className="portal-card task-card">
       <SectionHeader
-        title="Tes prochaines actions"
+        title={uiText("Tes prochaines actions")}
         subtitle=""
         href="/neet/journey"
       />
@@ -388,23 +387,36 @@ function NextActions() {
         })}
       </div>
       <Link className="wide-link" href="/neet/journey">
-        Voir toutes mes actions
+        <Translated value="Voir toutes mes actions" />
       </Link>
     </section>
   );
 }
 
 function Journey() {
-  const steps = ["Identifié", "Activé", "Classé", "Intégré", "Stabilisé"];
+  const { data } = useWorkspace(),
+    state = journeyState(data.journeys || []);
+  const steps = ["Entrée au programme", "Activation", "Insertion", "Maintien"],
+    done = [
+      !!state.onboarding,
+      !!state.activation,
+      !!state.insertion,
+      state.stabilized,
+    ],
+    count = done.filter(Boolean).length;
   return (
     <section className="portal-card journey-card">
-      <h2>Ton parcours</h2>
-      <p>Ton évolution vers l’intégration professionnelle</p>
+      <h2>
+        <Translated value="Ton parcours" />
+      </h2>
+      <p>
+        <Translated value="Ton évolution vers l’intégration professionnelle" />
+      </p>
       <div className="journey-line">
         {steps.map((step, index) => (
-          <div key={step} className={index < 2 ? "done" : ""}>
+          <div key={step} className={done[index] ? "done" : ""}>
             <span>
-              {index < 4 ? <Check size={17} /> : <Settings size={17} />}
+              {done[index] ? <Check size={17} /> : <Settings size={17} />}
             </span>
             <b>{step}</b>
           </div>
@@ -412,14 +424,16 @@ function Journey() {
       </div>
       <div className="journey-summary">
         <div>
-          <b>Étape actuelle : Activé</b>
+          <b>{state.label}</b>
           <p>
-            Tu renforces tes compétences et tu te prépares pour ton intégration
-            durable.
+            <Translated value="Tu renforces tes compétences et tu te prépares pour ton intégration durable." />
           </p>
         </div>
         <strong>
-          78% <span>du parcours complété</span>
+          {count}/4{" "}
+          <span>
+            <Translated value="étapes confirmées" />
+          </span>
         </strong>
       </div>
     </section>
@@ -427,10 +441,14 @@ function Journey() {
 }
 
 function MicroActions() {
+  const { text: uiText } = useUiTranslation();
+
+  const { fieldActions } = useWorkspaceDatasets();
+
   return (
     <section className="portal-card micro-card">
       <SectionHeader
-        title="Micro-actions cette semaine"
+        title={uiText("Micro-actions cette semaine")}
         subtitle="Petites actions, grands impacts"
         href="/neet/micro-actions"
       />
@@ -444,10 +462,22 @@ function MicroActions() {
 }
 
 function Notifications() {
+  const { text: uiText } = useUiTranslation();
+
+  const { data } = useWorkspace();
+  const notifications = data.messages
+    .slice(0, 3)
+    .map((m) => ({
+      icon: Bell,
+      title: data.contacts.find((c) => c.id === m.sender_id)?.name || "Message",
+      note: m.body,
+      time: new Date(m.created_at).toLocaleDateString("fr-MA"),
+      color: "#00B8A9",
+    }));
   return (
     <section className="portal-card notif-card">
       <SectionHeader
-        title="Messages & notifications"
+        title={uiText("Messages & notifications")}
         subtitle=""
         href="/neet/messages"
       />
@@ -473,35 +503,43 @@ function Notifications() {
 }
 
 function Mediator() {
+  const { text: uiText } = useUiTranslation();
+
+  const { data } = useWorkspace(),
+    mediator = data.contacts.find((c) => c.role === "mediator");
   return (
     <section className="portal-card mediator-card">
-      <SectionHeader title="Ton médiateur" subtitle="" href="/neet/messages" />
+      <SectionHeader
+        title={uiText("Ton médiateur")}
+        subtitle=""
+        href="/neet/messages"
+      />
       <div className="mediator-body">
         <Image
           src="/editorial/story-amina.webp"
-          alt="Imane R."
+          alt={uiText("Imane R.")}
           width={74}
           height={74}
         />
         <div>
-          <h3>Imane R.</h3>
-          <b>Médiateur</b>
+          <h3>{mediator?.name || "Médiateur à affecter"}</h3>
+          <b>
+            <Translated value="Médiateur" />
+          </b>
           <span>
-            <MapPin size={13} /> Agadir
+            <MapPin size={13} /> {mediator?.organization || "BidayaNeet"}
           </span>
-          <em>● En ligne</em>
         </div>
         <p>
-          Je suis là pour t’accompagner à chaque étape de ton parcours. N’hésite
-          pas à me contacter !
+          <Translated value="Je suis là pour t’accompagner à chaque étape de ton parcours. N’hésite pas à me contacter !" />
         </p>
       </div>
       <div className="mediator-actions">
         <Link className="mediator-message" href="/neet/messages">
-          Envoyer un message
+          <Translated value="Envoyer un message" />
         </Link>
         <Link className="mediator-appointment" href="/neet/messages">
-          Prendre rendez-vous
+          <Translated value="Prendre rendez-vous" />
         </Link>
       </div>
     </section>
@@ -513,9 +551,7 @@ export default function YouthDashboard() {
     <div className="original-youth-dashboard">
       <div className="portal-main">
         <Topbar />
-        <p className="dashboard-demo-note">
-          Espace de démonstration · les candidatures et messages restent locaux.
-        </p>
+
         <div className="hero-grid">
           <ProfileCard />
           <AssistantCard />

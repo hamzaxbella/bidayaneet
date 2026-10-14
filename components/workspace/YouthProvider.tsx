@@ -1,17 +1,17 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import { useSimulatedState } from "@/lib/simulated-backend";
+import { useWorkspaceState as useSimulatedState } from "./LiveProvider";
 
 type YouthState = {
   saved: string[];
   applications: string[];
   completed: number[];
-  enrolled: number[];
+  enrolled: string[];
   toggleSaved: (id: string) => void;
   apply: (id: string) => void;
   toggleCompleted: (id: number) => void;
-  toggleEnrolled: (id: number) => void;
+  toggleEnrolled: (id: string) => void;
 };
 const Context = createContext<YouthState | null>(null);
 export default function YouthProvider({ children }: { children: ReactNode }) {
@@ -24,7 +24,7 @@ export default function YouthProvider({ children }: { children: ReactNode }) {
     "neet.completed",
     [0],
   );
-  const [enrolled, setEnrolled] = useSimulatedState<number[]>(
+  const [enrolled, setEnrolled] = useSimulatedState<string[]>(
     "neet.enrolled",
     [],
   );

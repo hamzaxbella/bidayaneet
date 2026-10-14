@@ -1,3 +1,6 @@
+"use client";
+
+import Translated from "@/components/Translated";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, Inbox } from "lucide-react";
@@ -16,9 +19,17 @@ export function PageIntro({
   return (
     <div className="page-intro">
       <div>
-        {eyebrow && <div className="eyebrow">{eyebrow}</div>}
-        <h1>{title}</h1>
-        <p>{description}</p>
+        {eyebrow && (
+          <div className="eyebrow">
+            <Translated value={eyebrow} />
+          </div>
+        )}
+        <h1>
+          <Translated value={title} />
+        </h1>
+        <p>
+          <Translated value={description} />
+        </p>
       </div>
       {action}
     </div>
@@ -42,12 +53,19 @@ export function Panel({
       {title && (
         <div className="panel-heading">
           <div>
-            <h2>{title}</h2>
-            {note && <p>{note}</p>}
+            <h2>
+              <Translated value={title} />
+            </h2>
+            {note && (
+              <p>
+                <Translated value={note} />
+              </p>
+            )}
           </div>
           {href && (
             <Link href={href} className="text-link">
-              Tout voir <ArrowRight size={15} />
+              <Translated value="Tout voir" />
+              <ArrowRight size={15} />
             </Link>
           )}
         </div>
@@ -63,7 +81,15 @@ export function Tag({
   children: ReactNode;
   tone?: "teal" | "orange" | "blue" | "muted" | "purple";
 }) {
-  return <span className={`tag tag-${tone}`}>{children}</span>;
+  return (
+    <span className={`tag tag-${tone}`}>
+      {typeof children === "string" ? (
+        <Translated value={children} />
+      ) : (
+        children
+      )}
+    </span>
+  );
 }
 export function EmptyState({
   title,
@@ -75,8 +101,12 @@ export function EmptyState({
   return (
     <div className="empty-state">
       <Inbox size={32} />
-      <h3>{title}</h3>
-      <p>{description}</p>
+      <h3>
+        <Translated value={title} />
+      </h3>
+      <p>
+        <Translated value={description} />
+      </p>
     </div>
   );
 }
@@ -94,11 +124,15 @@ export function Metric({
   return (
     <div className="metric">
       <div className="metric-top">
-        <span>{label}</span>
+        <span>
+          <Translated value={label} />
+        </span>
         <span className="metric-icon">{icon}</span>
       </div>
       <strong>{value}</strong>
-      <small>{note}</small>
+      <small>
+        <Translated value={note} />
+      </small>
     </div>
   );
 }

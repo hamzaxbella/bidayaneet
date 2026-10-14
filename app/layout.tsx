@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { LanguageProvider } from "@/components/LanguageProvider";
 import type { Metadata } from "next";
 import "./globals.css";
 import "./production.css";
@@ -11,14 +13,15 @@ export const metadata: Metadata = {
     "Youth integration monitoring and field mediation platform for Souss-Massa",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale=(await cookies()).get("bidaya-language")?.value === "ar" ? "ar" : "fr";
   return (
-    <html lang="fr">
-      <body>{children}</body>
+    <html lang={locale} dir={locale==="ar"?"rtl":"ltr"}>
+      <body><LanguageProvider initialLocale={locale}>{children}</LanguageProvider></body>
     </html>
   );
 }

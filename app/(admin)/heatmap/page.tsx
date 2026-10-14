@@ -1,4 +1,7 @@
 "use client";
+import Translated from "@/components/Translated";
+
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import { Layers, MapPin } from "lucide-react";
 import MoroccoMap from "@/components/MoroccoMap";
@@ -15,117 +18,6 @@ type CommunePoint = {
   mediators: number;
   programs: number;
 };
-
-const communes: CommunePoint[] = [
-  {
-    name: "Agadir",
-    province: "Agadir-Ida-Ou-Tanane",
-    lat: 30.4278,
-    lng: -9.5981,
-    neets: 680,
-    mediators: 12,
-    programs: 4,
-  },
-  {
-    name: "Inezgane",
-    province: "Inezgane-Ait Melloul",
-    lat: 30.3563,
-    lng: -9.5364,
-    neets: 420,
-    mediators: 8,
-    programs: 3,
-  },
-  {
-    name: "Ait Melloul",
-    province: "Inezgane-Ait Melloul",
-    lat: 30.3342,
-    lng: -9.4979,
-    neets: 140,
-    mediators: 4,
-    programs: 2,
-  },
-  {
-    name: "Aourir",
-    province: "Agadir-Ida-Ou-Tanane",
-    lat: 30.4926,
-    lng: -9.6372,
-    neets: 118,
-    mediators: 3,
-    programs: 1,
-  },
-  {
-    name: "Oulad Teima",
-    province: "Taroudannt",
-    lat: 30.3947,
-    lng: -9.2089,
-    neets: 210,
-    mediators: 5,
-    programs: 2,
-  },
-  {
-    name: "Taroudant",
-    province: "Taroudannt",
-    lat: 30.4727,
-    lng: -8.8749,
-    neets: 280,
-    mediators: 6,
-    programs: 2,
-  },
-  {
-    name: "Biougra",
-    province: "Chtouka-Ait Baha",
-    lat: 30.2144,
-    lng: -9.3711,
-    neets: 87,
-    mediators: 3,
-    programs: 1,
-  },
-  {
-    name: "Massa",
-    province: "Chtouka-Ait Baha",
-    lat: 29.9457,
-    lng: -9.6334,
-    neets: 94,
-    mediators: 2,
-    programs: 1,
-  },
-  {
-    name: "Tiznit",
-    province: "Tiznit",
-    lat: 29.6974,
-    lng: -9.7316,
-    neets: 215,
-    mediators: 5,
-    programs: 2,
-  },
-  {
-    name: "Tafraout",
-    province: "Tiznit",
-    lat: 29.7244,
-    lng: -8.9747,
-    neets: 76,
-    mediators: 2,
-    programs: 1,
-  },
-  {
-    name: "Tata",
-    province: "Tata",
-    lat: 29.7441,
-    lng: -7.9736,
-    neets: 120,
-    mediators: 3,
-    programs: 1,
-  },
-  {
-    name: "Akka",
-    province: "Tata",
-    lat: 29.4071,
-    lng: -8.2521,
-    neets: 68,
-    mediators: 1,
-    programs: 1,
-  },
-];
 
 const layerConfig: Record<
   LayerKey,
@@ -154,17 +46,6 @@ const layerConfig: Record<
   },
 };
 
-const provinceTotals = communes.reduce<
-  Record<string, { neets: number; mediators: number; programs: number }>
->((acc, commune) => {
-  if (!acc[commune.province])
-    acc[commune.province] = { neets: 0, mediators: 0, programs: 0 };
-  acc[commune.province].neets += commune.neets;
-  acc[commune.province].mediators += commune.mediators;
-  acc[commune.province].programs += commune.programs;
-  return acc;
-}, {});
-
 function heatValue(point: CommunePoint, layer: LayerKey) {
   return point[layer];
 }
@@ -186,6 +67,8 @@ function HeatMapCanvas({
   onSelect: (name: string) => void;
   selected: string | null;
 }) {
+  const { communes } = useAdminData();
+
   return (
     <MoroccoMap
       height={490}
@@ -200,15 +83,19 @@ function HeatMapCanvas({
 }
 
 export default function HeatmapPage() {
-  const [selected, setSelected] = useState<string | null>("Agadir");
+  const { mediators, programs, communes, provinceTotals, metrics, data } =
+    useAdminData();
+
+  const [selected, setSelected] = useState<string | null>(null);
   const [activeLayer, setActiveLayer] = useState<LayerKey>("neets");
   const selectedCommune = communes.find((c) => c.name === selected);
   const selectedMetricMax = Math.max(
+    1,
     ...Object.values(provinceTotals).map((v) => v[activeLayer]),
   );
   const sortedCommunes = useMemo(
     () => [...communes].sort((a, b) => b[activeLayer] - a[activeLayer]),
-    [activeLayer],
+    [activeLayer, communes],
   );
   const selectCommune = useCallback((name: string) => setSelected(name), []);
 
@@ -235,11 +122,10 @@ export default function HeatmapPage() {
                 color: "#1A2B3C",
               }}
             >
-              Heatmap
+              <Translated value="Heatmap" />
             </h1>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Country-wide overview with sample youth, mediator, and program
-              coverage in Souss-Massa
+              <Translated value="Country-wide overview with sample youth, mediator, and program coverage in Souss-Massa" />
             </p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -279,13 +165,13 @@ export default function HeatmapPage() {
           >
             <div>
               <h2 className="section-title">
-                Souss-Massa Region - {layerConfig[activeLayer].label}
+                <Translated value="Souss-Massa Region -" />
+                {layerConfig[activeLayer].label}
               </h2>
               <p
                 style={{ marginTop: 4, color: "#7F8C9A", fontSize: "0.75rem" }}
               >
-                Explore the full-country overview, including Laâyoune and
-                Dakhla, or focus on Souss-Massa.
+                <Translated value="Explore the full-country overview, including Laâyoune and Dakhla, or focus on Souss-Massa." />
               </p>
             </div>
             <div
@@ -299,7 +185,8 @@ export default function HeatmapPage() {
               }}
             >
               <Layers size={14} color={layerConfig[activeLayer].color} />
-              {communes.length} mapped points
+              {communes.length}
+              <Translated value="mapped points" />
             </div>
           </div>
           <HeatMapCanvas
@@ -320,7 +207,7 @@ export default function HeatmapPage() {
         >
           <div className="card" style={{ padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 14 }}>
-              Province Rollup
+              <Translated value="Province Rollup" />
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
               {Object.entries(provinceTotals)
@@ -367,7 +254,7 @@ export default function HeatmapPage() {
 
           <div className="card" style={{ padding: 20, flex: 1 }}>
             <h2 className="section-title" style={{ marginBottom: 14 }}>
-              Mapped Communes
+              <Translated value="Mapped Communes" />
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {sortedCommunes.map((c) => {

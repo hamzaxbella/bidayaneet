@@ -1,4 +1,8 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import BusinessAction from "@/components/workspace/BusinessAction";
+import Translated from "@/components/Translated";
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -17,20 +21,19 @@ import {
 import WorkspaceShell from "@/components/workspace/WorkspaceShell";
 import PartnerLogo from "@/components/PartnerLogo";
 import Image from "next/image";
-import { useSimulatedState } from "@/lib/simulated-backend";
+import {
+  useWorkspaceState as useSimulatedState,
+  useWorkspace,
+} from "@/components/workspace/LiveProvider";
 
 type ReferralStatus =
-  | "New"
-  | "Shortlisted"
-  | "Interview"
-  | "Accepted"
-  | "Rejected";
+  "New" | "Shortlisted" | "Interview" | "Accepted" | "Rejected";
 type Priority = "High" | "Medium" | "Low";
 
 type Referral = {
-  id: number;
+  id: string;
   name: string;
-  age: number;
+  age: number | null;
   commune: string;
   program: string;
   match: number;
@@ -40,7 +43,7 @@ type Referral = {
 };
 
 type Opportunity = {
-  id: number;
+  id: string;
   title: string;
   type: string;
   commune: string;
@@ -51,92 +54,14 @@ type Opportunity = {
 };
 
 type Activity = {
-  id: number;
+  id: string;
   text: string;
   time: string;
   color: string;
 };
 
-const initialReferrals: Referral[] = [
-  {
-    id: 1,
-    name: "Yassine El Amrani",
-    age: 22,
-    commune: "Agadir",
-    program: "OFPPT Auto Mechanics",
-    match: 92,
-    status: "New",
-    priority: "High",
-    notes: "Needs transport support before orientation.",
-  },
-  {
-    id: 2,
-    name: "Fatima Zahra A.",
-    age: 19,
-    commune: "Inezgane",
-    program: "Digital Marketing Bootcamp",
-    match: 88,
-    status: "Shortlisted",
-    priority: "Medium",
-    notes: "Strong profile for morning cohort.",
-  },
-  {
-    id: 3,
-    name: "Omar T.",
-    age: 24,
-    commune: "Taroudant",
-    program: "Local Internship",
-    match: 81,
-    status: "Interview",
-    priority: "Medium",
-    notes: "Interview scheduled with local employer.",
-  },
-  {
-    id: 4,
-    name: "Saima E.",
-    age: 21,
-    commune: "Tiznit",
-    program: "INDH Entrepreneurship",
-    match: 76,
-    status: "New",
-    priority: "High",
-    notes: "Family approval pending.",
-  },
-];
-
-const initialOpportunities: Opportunity[] = [
-  {
-    id: 1,
-    title: "Auto Mechanics Cohort",
-    type: "Training",
-    commune: "Agadir",
-    capacity: 25,
-    filled: 18,
-    deadline: "Jun 15",
-    status: "Open",
-  },
-  {
-    id: 2,
-    title: "Welding Certification",
-    type: "Training",
-    commune: "Taroudant",
-    capacity: 18,
-    filled: 11,
-    deadline: "Jun 08",
-    status: "Open",
-  },
-  {
-    id: 3,
-    title: "Job Readiness Workshop",
-    type: "Workshop",
-    commune: "Tiznit",
-    capacity: 40,
-    filled: 40,
-    deadline: "May 30",
-    status: "Full",
-  },
-];
-
+const initialReferrals: Referral[] = [];
+const initialOpportunities: Opportunity[] = [];
 const statusFlow: ReferralStatus[] = [
   "New",
   "Shortlisted",
@@ -293,6 +218,9 @@ function SectionHeader({
 }
 
 export default function ProgramCollaboratorPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { data, command } = useWorkspace();
   const [referrals, setReferrals] = useSimulatedState(
     "partner.referrals",
     initialReferrals,
@@ -301,7 +229,7 @@ export default function ProgramCollaboratorPage() {
     "partner.opportunities",
     initialOpportunities,
   );
-  const [selectedId, setSelectedId] = useState(initialReferrals[0].id);
+  const [selectedId, setSelectedId] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | ReferralStatus>(
     "All",
   );
@@ -312,34 +240,27 @@ export default function ProgramCollaboratorPage() {
     type: "Training",
     commune: "Agadir",
     capacity: "20",
-    deadline: "Jun 30",
+    deadline: new Date(new Date().getTime() + 30 * 86400000)
+      .toISOString()
+      .slice(0, 10),
   });
   const [activity, setActivity] = useSimulatedState<Activity[]>(
     "partner.activity",
-    [
-      {
-        id: 1,
-        text: "Shortlisted Fatima for digital cohort",
-        time: "09:10",
-        color: "#00B8A9",
-      },
-      {
-        id: 2,
-        text: "Updated capacity for Auto Mechanics Cohort",
-        time: "Yesterday",
-        color: "#2E86C1",
-      },
-      {
-        id: 3,
-        text: "Example placement feedback for regional team",
-        time: "Yesterday",
-        color: "#27AE60",
-      },
-    ],
+    [],
   );
 
-  const selectedReferral =
-    referrals.find((item) => item.id === selectedId) ?? referrals[0];
+  const selectedReferral = referrals.find((item) => item.id === selectedId) ??
+    referrals[0] ?? {
+      id: "",
+      name: "Aucune orientation",
+      age: null,
+      commune: "",
+      program: "",
+      match: 0,
+      status: "New" as ReferralStatus,
+      priority: "Medium" as Priority,
+      notes: "",
+    };
   const filteredReferrals = referrals.filter(
     (item) => statusFilter === "All" || item.status === statusFilter,
   );
@@ -353,28 +274,29 @@ export default function ProgramCollaboratorPage() {
   const averageMatch = useMemo(
     () =>
       Math.round(
-        referrals.reduce((sum, item) => sum + item.match, 0) / referrals.length,
+        referrals.reduce((sum, item) => sum + item.match, 0) /
+          Math.max(1, referrals.length),
       ),
     [referrals],
   );
 
   function log(text: string, color = "#00B8A9") {
     setActivity((current) =>
-      [{ id: Date.now(), text, time: "Just now", color }, ...current].slice(
-        0,
-        7,
-      ),
+      [
+        { id: crypto.randomUUID(), text, time: "Just now", color },
+        ...current,
+      ].slice(0, 7),
     );
     setFeedback(text);
   }
 
-  function updateReferral(id: number, patch: Partial<Referral>) {
+  function updateReferral(id: string, patch: Partial<Referral>) {
     setReferrals((current) =>
       current.map((item) => (item.id === id ? { ...item, ...patch } : item)),
     );
   }
 
-  function advanceReferral(id: number) {
+  function advanceReferral(id: string) {
     const referral = referrals.find((item) => item.id === id);
     if (
       !referral ||
@@ -390,14 +312,14 @@ export default function ProgramCollaboratorPage() {
     );
   }
 
-  function rejectReferral(id: number) {
+  function rejectReferral(id: string) {
     const referral = referrals.find((item) => item.id === id);
     if (!referral) return;
     updateReferral(id, { status: "Rejected" });
     log(`${referral.name} rejected with feedback required`, "#E74C3C");
   }
 
-  function acceptReferral(id: number) {
+  function acceptReferral(id: string) {
     const referral = referrals.find((item) => item.id === id);
     if (!referral) return;
     updateReferral(id, { status: "Accepted" });
@@ -415,10 +337,7 @@ export default function ProgramCollaboratorPage() {
     if (!replyDraft.trim()) return;
     updateReferral(selectedReferral.id, { notes: replyDraft.trim() });
     setReplyDraft("");
-    log(
-      `Feedback recorded locally for ${selectedReferral.name}. Nothing was sent.`,
-      "#2E86C1",
-    );
+    log(`Retour transmis pour ${selectedReferral.name}.`, "#2E86C1");
   }
 
   function addOpportunity(event: React.FormEvent<HTMLFormElement>) {
@@ -428,7 +347,7 @@ export default function ProgramCollaboratorPage() {
       return;
     }
     const created: Opportunity = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       title: newOpportunity.title.trim(),
       type: newOpportunity.type,
       commune: newOpportunity.commune,
@@ -443,12 +362,14 @@ export default function ProgramCollaboratorPage() {
       type: "Training",
       commune: "Agadir",
       capacity: "20",
-      deadline: "Jun 30",
+      deadline: new Date(new Date().getTime() + 30 * 86400000)
+        .toISOString()
+        .slice(0, 10),
     });
     log(`Published opportunity: ${created.title}`, "#00B8A9");
   }
 
-  function increaseCapacity(id: number) {
+  function increaseCapacity(id: string) {
     setOpportunities((current) =>
       current.map((item) =>
         item.id === id
@@ -485,13 +406,13 @@ export default function ProgramCollaboratorPage() {
                   fontWeight: 800,
                 }}
               >
-                Program Collaborator Portal
+                <Translated value="Program Collaborator Portal" />
               </h1>
               <p
                 style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}
               >
-                OFPPT Souss-Massa - referrals, capacity, placements, and
-                feedback
+                {data.user.organization || data.user.name}
+                <Translated value="· orientations, places et retours" />
               </p>
             </div>
             <div
@@ -525,48 +446,60 @@ export default function ProgramCollaboratorPage() {
         >
           <section className="partner-showcase">
             <div className="partner-showcase-copy">
-              <span className="eyebrow">YOUR NEXT COHORT STARTS HERE</span>
+              <span className="eyebrow">
+                <Translated value="YOUR NEXT COHORT STARTS HERE" />
+              </span>
               <h2>
-                Open a place.
+                <Translated value="Open a place." />
                 <br />
-                Change a young person’s future.
+                <Translated value="Change a young person’s future." />
               </h2>
               <p>
-                Connect your programs with motivated candidates and bring their
-                next step within reach.
+                <Translated value="Connect your programs with motivated candidates and bring their next step within reach." />
               </p>
               <div className="partner-showcase-actions">
                 <a className="button button-primary" href="#referrals">
-                  Review referrals <Users size={16} />
+                  <Translated value="Review referrals" />
+                  <Users size={16} />
                 </a>
                 <a className="text-link" href="#programs">
-                  Manage programs <FilePlus2 size={15} />
+                  <Translated value="Manage programs" />
+                  <FilePlus2 size={15} />
                 </a>
               </div>
               <div className="partner-showcase-stats">
                 <div>
                   <strong>{openCapacity}</strong>
-                  <span>available seats</span>
+                  <span>
+                    <Translated value="available seats" />
+                  </span>
                 </div>
                 <div>
                   <strong>{acceptedCount}</strong>
-                  <span>placements confirmed</span>
+                  <span>
+                    <Translated value="placements confirmed" />
+                  </span>
                 </div>
                 <div>
                   <strong>{averageMatch}%</strong>
-                  <span>average match</span>
+                  <span>
+                    <Translated value="average match" />
+                  </span>
                 </div>
               </div>
             </div>
             <div className="partner-showcase-photo">
               <Image
                 src="/editorial/partner-training.webp"
-                alt="Vocational training with an instructor and young learners"
+                alt={uiText(
+                  "Vocational training with an instructor and young learners",
+                )}
                 fill
                 sizes="(max-width: 760px) 95vw, 40vw"
               />
               <span>
-                <CheckCircle2 size={14} /> Learning by doing. Growing together.
+                <CheckCircle2 size={14} />
+                <Translated value="Learning by doing. Growing together." />
               </span>
             </div>
           </section>
@@ -576,23 +509,23 @@ export default function ProgramCollaboratorPage() {
             style={{ display: "flex", gap: 16 }}
           >
             <StatCard
-              label="Incoming Referrals"
+              label={uiText("Incoming Referrals")}
               value={`${referrals.filter((item) => item.status !== "Accepted" && item.status !== "Rejected").length}`}
-              note="awaiting partner action"
+              note={uiText("awaiting partner action")}
               icon={<Users size={21} />}
               color="#2E86C1"
               bg="#EBF5FB"
             />
             <StatCard
-              label="Accepted Placements"
+              label={uiText("Accepted Placements")}
               value={`${acceptedCount}`}
-              note="confirmed by collaborator"
+              note={uiText("confirmed by collaborator")}
               icon={<UserCheck size={21} />}
               color="#27AE60"
               bg="#EAFAF1"
             />
             <StatCard
-              label="Published Offers"
+              label={uiText("Published Offers")}
               value={`${opportunities.length}`}
               note={`${openCapacity} seats available`}
               icon={<FilePlus2 size={21} />}
@@ -600,15 +533,76 @@ export default function ProgramCollaboratorPage() {
               bg="#E0F7F5"
             />
             <StatCard
-              label="Interviews"
+              label={uiText("Interviews")}
               value={`${referrals.filter((item) => item.status === "Interview").length}`}
-              note="scheduled this week"
+              note={uiText("scheduled this week")}
               icon={<CalendarClock size={21} />}
               color="#F5A623"
               bg="#FEF9E7"
             />
           </section>
 
+          <section className="card" style={{ padding: 24, marginBottom: 20 }}>
+            <h2 className="section-title">
+              <Translated value="Candidatures des jeunes" />
+            </h2>
+            {!data.applications.length && (
+              <p>
+                <Translated value="Aucune candidature reçue." />
+              </p>
+            )}
+            {data.applications.map((a) => (
+              <form
+                key={String(a.id)}
+                style={{
+                  display: "grid",
+                  gap: 10,
+                  borderTop: "1px solid #E8ECF0",
+                  padding: "16px 0",
+                }}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = new FormData(e.currentTarget);
+                  await command({
+                    action: "application-status",
+                    payload: {
+                      id: a.id,
+                      status: String(form.get("status")),
+                      feedback: String(form.get("feedback") || ""),
+                    },
+                  });
+                }}
+              >
+                <strong>
+                  {String(a.name || "Candidat")} ·{" "}
+                  {data.offers.find((o) => o.id === a.offer_id)?.data.title}
+                </strong>
+                <span>{String(a.commune || "")}</span>
+                <select name="status" defaultValue={String(a.status)}>
+                  {[
+                    ["submitted", "Reçue"],
+                    ["shortlisted", "Présélectionnée"],
+                    ["interview", "Entretien"],
+                    ["accepted", "Acceptée"],
+                    ["rejected", "Refusée"],
+                  ].map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <textarea
+                  name="feedback"
+                  maxLength={2000}
+                  defaultValue={String(a.feedback || "")}
+                  aria-label={uiText("Retour sur la candidature")}
+                />
+                <button className="btn-primary">
+                  <Translated value="Enregistrer le retour" />
+                </button>
+              </form>
+            ))}
+          </section>
           <section
             id="referrals"
             className="partner-referrals-section"
@@ -621,7 +615,7 @@ export default function ProgramCollaboratorPage() {
           >
             <div className="card" style={{ padding: 20, borderRadius: 8 }}>
               <SectionHeader
-                title="Referral Pipeline"
+                title={uiText("Referral Pipeline")}
                 subtitle="Act on candidates sent by mediators and the regional matching engine."
                 action={
                   <select
@@ -639,7 +633,9 @@ export default function ProgramCollaboratorPage() {
                       fontSize: "0.78rem",
                     }}
                   >
-                    <option>All</option>
+                    <option>
+                      <Translated value="All" />
+                    </option>
                     {(
                       [
                         "New",
@@ -719,7 +715,10 @@ export default function ProgramCollaboratorPage() {
                               <div
                                 style={{ color: "#7F8C9A", fontSize: "0.7rem" }}
                               >
-                                {item.age} years - {item.commune}
+                                {item.age === null
+                                  ? "Âge non partagé"
+                                  : `${item.age} ans`}{" "}
+                                · {item.commune}
                               </div>
                             </div>
                           </div>
@@ -768,7 +767,7 @@ export default function ProgramCollaboratorPage() {
                                 event.stopPropagation();
                                 advanceReferral(item.id);
                               }}
-                              title="Advance"
+                              title={uiText("Advance")}
                               style={{
                                 border: "1px solid #E8ECF0",
                                 background: "white",
@@ -786,7 +785,7 @@ export default function ProgramCollaboratorPage() {
                                 event.stopPropagation();
                                 acceptReferral(item.id);
                               }}
-                              title="Accept"
+                              title={uiText("Accept")}
                               style={{
                                 border: "1px solid #E8ECF0",
                                 background: "white",
@@ -804,7 +803,7 @@ export default function ProgramCollaboratorPage() {
                                 event.stopPropagation();
                                 rejectReferral(item.id);
                               }}
-                              title="Reject"
+                              title={uiText("Reject")}
                               style={{
                                 border: "1px solid #E8ECF0",
                                 background: "white",
@@ -827,8 +826,8 @@ export default function ProgramCollaboratorPage() {
 
             <div className="card" style={{ padding: 20, borderRadius: 8 }}>
               <SectionHeader
-                title="Selected Referral"
-                subtitle="Review notes and prepare feedback locally. Nothing is sent in this demo."
+                title={uiText("Selected Referral")}
+                subtitle="Review referral notes and save feedback to the shared case."
               />
               <div
                 style={{
@@ -850,7 +849,8 @@ export default function ProgramCollaboratorPage() {
                     {selectedReferral.name}
                   </div>
                   <div style={{ color: "#7F8C9A", fontSize: "0.72rem" }}>
-                    {selectedReferral.commune} - {selectedReferral.match}% match
+                    {selectedReferral.commune} - {selectedReferral.match}
+                    <Translated value="% match" />
                   </div>
                 </div>
               </div>
@@ -871,7 +871,9 @@ export default function ProgramCollaboratorPage() {
               <textarea
                 value={replyDraft}
                 onChange={(event) => setReplyDraft(event.target.value)}
-                placeholder="Write partner feedback, missing documents, or interview result"
+                placeholder={uiText(
+                  "Write partner feedback, missing documents, or interview result",
+                )}
                 style={{
                   width: "100%",
                   minHeight: 96,
@@ -897,7 +899,8 @@ export default function ProgramCollaboratorPage() {
                   className="btn-primary"
                   style={{ justifyContent: "center" }}
                 >
-                  <Send size={14} /> Record demo feedback
+                  <Send size={14} />
+                  <Translated value="Save feedback" />
                 </button>
                 <button
                   type="button"
@@ -905,12 +908,14 @@ export default function ProgramCollaboratorPage() {
                   className="btn-outline"
                   style={{ justifyContent: "center" }}
                 >
-                  <CalendarClock size={14} /> Schedule
+                  <CalendarClock size={14} />
+                  <Translated value="Schedule" />
                 </button>
               </div>
             </div>
           </section>
 
+          <section className="card" style={{padding:24,marginBottom:20}}><div style={{display:'flex',gap:12,justifyContent:'space-between',flexWrap:'wrap'}}><h2 className="section-title"><Translated value="Programmes de votre organisme"/></h2><BusinessAction kind="program"><Translated value="Ajouter un programme"/></BusinessAction></div>{data.programs.filter(p=>p.owner_id===data.user.id).map(p=><article key={String(p.id)} style={{padding:'16px 0',borderTop:'1px solid #E8ECF0'}}><strong>{String((p.data as Record<string,unknown>).title)}</strong><p><Translated value={p.published?'Publié':'Brouillon'}/> · {data.memberships.filter(m=>m.program_id===p.id&&m.status==='active').length} <Translated value="participants actifs"/></p><BusinessAction kind="program" id={String(p.id)} className="btn-secondary"><Translated value="Modifier"/></BusinessAction></article>)}</section>
           <section
             id="programs"
             className="partner-programs-section"
@@ -923,7 +928,7 @@ export default function ProgramCollaboratorPage() {
           >
             <div className="card" style={{ padding: 20, borderRadius: 8 }}>
               <SectionHeader
-                title="Opportunity Capacity"
+                title={uiText("Opportunity Capacity")}
                 subtitle="Maintain available seats and publish new opportunities."
               />
               <div
@@ -971,8 +976,8 @@ export default function ProgramCollaboratorPage() {
                               size={12}
                               style={{ display: "inline", marginRight: 4 }}
                             />
-                            {item.commune} - {item.type} - Deadline{" "}
-                            {item.deadline}
+                            {item.commune} - {item.type}
+                            <Translated value="- Deadline" /> {item.deadline}
                           </div>
                         </div>
                         <button
@@ -981,7 +986,7 @@ export default function ProgramCollaboratorPage() {
                           className="btn-outline"
                           style={{ padding: "6px 9px", fontSize: "0.72rem" }}
                         >
-                          +5 seats
+                          <Translated value="+5 seats" />
                         </button>
                       </div>
                       <div
@@ -1023,7 +1028,7 @@ export default function ProgramCollaboratorPage() {
 
             <div className="card" style={{ padding: 20, borderRadius: 8 }}>
               <SectionHeader
-                title="Publish Opportunity"
+                title={uiText("Publish Opportunity")}
                 subtitle="Create a training, workshop, internship, or hiring slot for NEET matching."
               />
               <form
@@ -1042,7 +1047,7 @@ export default function ProgramCollaboratorPage() {
                       title: event.target.value,
                     })
                   }
-                  placeholder="Opportunity title"
+                  placeholder={uiText("Opportunity title")}
                   style={{
                     gridColumn: "1 / -1",
                     border: "1px solid #E8ECF0",
@@ -1103,7 +1108,7 @@ export default function ProgramCollaboratorPage() {
                       capacity: event.target.value,
                     })
                   }
-                  placeholder="Capacity"
+                  placeholder={uiText("Capacity")}
                   style={{
                     border: "1px solid #E8ECF0",
                     borderRadius: 8,
@@ -1119,7 +1124,7 @@ export default function ProgramCollaboratorPage() {
                       deadline: event.target.value,
                     })
                   }
-                  placeholder="Deadline"
+                  placeholder={uiText("Deadline")}
                   style={{
                     border: "1px solid #E8ECF0",
                     borderRadius: 8,
@@ -1131,13 +1136,14 @@ export default function ProgramCollaboratorPage() {
                   className="btn-primary"
                   style={{ gridColumn: "1 / -1", justifyContent: "center" }}
                 >
-                  <FilePlus2 size={14} /> Publish opportunity
+                  <FilePlus2 size={14} />
+                  <Translated value="Publish opportunity" />
                 </button>
               </form>
               <div id="activity" style={{ marginTop: 16 }}>
                 <SectionHeader
-                  title="Activity Log"
-                  subtitle="Collaborator actions saved on this device in the simulated backend."
+                  title={uiText("Activity Log")}
+                  subtitle="Actions enregistrées par votre compte dans la base de données."
                 />
                 <div
                   style={{ display: "flex", flexDirection: "column", gap: 10 }}

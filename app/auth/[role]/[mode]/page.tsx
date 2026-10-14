@@ -22,9 +22,10 @@ export async function generateMetadata({
   };
 }
 export default async function Page({
-  params,
+  params,searchParams,
 }: {
   params: Promise<{ role: string; mode: string }>;
+  searchParams:Promise<{token?:string}>;
 }) {
   const { role, mode } = await params;
   if (
@@ -32,5 +33,5 @@ export default async function Page({
     !authModes.includes(mode as AuthMode)
   )
     notFound();
-  return <AuthPage role={role as AuthRole} mode={mode as AuthMode} />;
+  return <AuthPage role={role as AuthRole} mode={mode as AuthMode} token={(await searchParams).token} />;
 }

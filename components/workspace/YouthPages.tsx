@@ -1,4 +1,15 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import { journeyDescription, journeyLabels, journeyState } from "@/lib/journey";
+import { useWorkspace, useWorkspaceDatasets } from "./LiveProvider";
+import type {
+  AppointmentView,
+  OpportunityView,
+  FieldActionView,
+} from "@/lib/workspace-data";
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
@@ -16,20 +27,23 @@ import {
   MapPin,
   Search,
 } from "lucide-react";
-import { fieldActions, opportunities, profileFixtures } from "@/lib/demo-data";
 import { EmptyState, PageIntro, Panel, Tag } from "./UI";
 import OpportunityCard from "./OpportunityCard";
 import { useYouth } from "./YouthProvider";
 import { AppointmentCard, NextSteps } from "./YouthWidgets";
 import StoryReels from "./StoryReels";
 import MicroActionCard from "./MicroActionCard";
-import { useSimulatedState } from "@/lib/simulated-backend";
+import { useWorkspaceState as useSimulatedState } from "./LiveProvider";
 
 export function OpportunitiesPage({
   initialQuery = "",
 }: {
   initialQuery?: string;
 }) {
+  const { text: uiText } = useUiTranslation();
+
+  const { opportunities } = useWorkspaceDatasets();
+
   const [query, setQuery] = useState(initialQuery);
   const [type, setType] = useState("Toutes");
   const [location, setLocation] = useState("Tous les lieux");
@@ -48,22 +62,24 @@ export function OpportunitiesPage({
   return (
     <>
       <PageIntro
-        eyebrow="LE CHAMP DES POSSIBLES"
-        title="Trouve ta prochaine opportunité"
-        description="Une formation, un stage, un emploi. Choisis le début qui te ressemble."
+        eyebrow={uiText("LE CHAMP DES POSSIBLES")}
+        title={uiText("Trouve ta prochaine opportunité")}
+        description={uiText(
+          "Une formation, un stage, un emploi. Choisis le début qui te ressemble.",
+        )}
       />
       <div className="filter-bar">
         <div className="search-field">
           <Search size={16} />
           <input
-            aria-label="Rechercher une opportunité"
-            placeholder="Un métier, une compétence, un organisme…"
+            aria-label={uiText("Rechercher une opportunité")}
+            placeholder={uiText("Un métier, une compétence, un organisme…")}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
         <select
-          aria-label="Type d’opportunité"
+          aria-label={uiText("Type d’opportunité")}
           value={type}
           onChange={(event) => setType(event.target.value)}
         >
@@ -74,7 +90,7 @@ export function OpportunitiesPage({
           )}
         </select>
         <select
-          aria-label="Lieu"
+          aria-label={uiText("Lieu")}
           value={location}
           onChange={(event) => setLocation(event.target.value)}
         >
@@ -89,7 +105,7 @@ export function OpportunitiesPage({
         <div
           className="filter-tabs"
           role="group"
-          aria-label="Sélection d’opportunités"
+          aria-label={uiText("Sélection d’opportunités")}
         >
           {["Pour moi", "Mes favoris", "Mes candidatures"].map((value) => (
             <button
@@ -108,7 +124,9 @@ export function OpportunitiesPage({
           ))}
         </div>
         <span className="results-count" style={{ margin: 0 }}>
-          {filtered.length} résultat{filtered.length > 1 ? "s" : ""}
+          {filtered.length}
+          <Translated value="résultat" />
+          {filtered.length > 1 ? "s" : ""}
         </span>
       </div>
       {filtered.length ? (
@@ -119,7 +137,7 @@ export function OpportunitiesPage({
         </div>
       ) : (
         <EmptyState
-          title="Pas encore d’opportunité ici"
+          title={uiText("Pas encore d’opportunité ici")}
           description={
             tab === "Mes favoris"
               ? "Enregistre une opportunité avec le signet pour la retrouver ici."
@@ -130,14 +148,17 @@ export function OpportunitiesPage({
         />
       )}
       <p className="form-note">
-        Les offres sont présentées à titre d’exemple. Tes sélections restent sur
-        cet appareil dans la démonstration.
+        <Translated value="Tes favoris et candidatures sont enregistrés dans ton compte." />
       </p>
     </>
   );
 }
 
 export function OpportunityDetail({ id }: { id: string }) {
+  const { text: uiText } = useUiTranslation();
+
+  const { opportunities } = useWorkspaceDatasets();
+
   const opportunity = opportunities.find((item) => item.id === id)!;
   const { saved, toggleSaved, applications, apply } = useYouth();
   const applied = applications.includes(id);
@@ -145,7 +166,7 @@ export function OpportunityDetail({ id }: { id: string }) {
     <>
       <Link href="/neet/opportunities" className="back-link">
         <ArrowLeft size={15} />
-        Toutes les opportunités
+        <Translated value="Toutes les opportunités" />
       </Link>
       <PageIntro
         eyebrow={opportunity.type.toUpperCase()}
@@ -170,17 +191,21 @@ export function OpportunityDetail({ id }: { id: string }) {
           <div className="detail-cover">
             <Image
               src={opportunity.image}
-              alt=""
+              alt={uiText("")}
               fill
               sizes="(max-width: 1000px) 95vw, 55vw"
             />
           </div>
-          <Panel title="Et si c’était ton prochain pas ?">
+          <Panel title={uiText("Et si c’était ton prochain pas ?")}>
             <div className="detail-text">
               <p>{opportunity.description}</p>
-              <h3>Ce qui t’attend</h3>
+              <h3>
+                <Translated value="Ce qui t’attend" />
+              </h3>
               <p>{opportunity.details}</p>
-              <h3>Les compétences à développer</h3>
+              <h3>
+                <Translated value="Les compétences à développer" />
+              </h3>
               <div className="skill-list">
                 {opportunity.skills.map((skill) => (
                   <Tag key={skill} tone="muted">
@@ -188,17 +213,17 @@ export function OpportunityDetail({ id }: { id: string }) {
                   </Tag>
                 ))}
               </div>
-              <h3>Un accompagnement à chaque étape</h3>
+              <h3>
+                <Translated value="Un accompagnement à chaque étape" />
+              </h3>
               <p>
-                Ta médiatrice peut t’aider à comprendre les conditions, préparer
-                ton CV et organiser ton entretien. Prends le temps d’en discuter
-                avec elle.
+                <Translated value="Ta médiatrice peut t’aider à comprendre les conditions, préparer ton CV et organiser ton entretien. Prends le temps d’en discuter avec elle." />
               </p>
             </div>
           </Panel>
         </div>
         <div className="stack">
-          <Panel title="L’essentiel">
+          <Panel title={uiText("L’essentiel")}>
             <ul className="detail-list">
               <li>
                 <BriefcaseBusiness size={17} />
@@ -214,7 +239,8 @@ export function OpportunityDetail({ id }: { id: string }) {
               </li>
               <li>
                 <CalendarDays size={17} />
-                Avant le {opportunity.deadline}
+                <Translated value="Avant le" />
+                {opportunity.deadline}
               </li>
             </ul>
             <div className="inline-alert">
@@ -226,8 +252,8 @@ export function OpportunityDetail({ id }: { id: string }) {
                   marginRight: 6,
                 }}
               />
-              {opportunity.match}% de compatibilité avec le profil de
-              démonstration
+              {opportunity.match}
+              <Translated value="% de compatibilité selon les critères déclarés" />
             </div>
             <button
               className="button button-primary"
@@ -235,13 +261,12 @@ export function OpportunityDetail({ id }: { id: string }) {
               onClick={() => apply(id)}
               disabled={applied}
             >
-              {applied ? "Candidature préparée" : "Préparer ma candidature"}
+              {applied ? "Candidature enregistrée" : "Préparer ma candidature"}
               <ArrowRight size={16} />
             </button>
             {applied && (
               <p className="form-note" role="status">
-                Cette offre a été ajoutée à tes candidatures de démonstration.
-                Aucune candidature n’a été transmise à l’organisme.
+                <Translated value="Ta candidature est enregistrée et visible par l’organisme partenaire." />
               </p>
             )}
             <Link
@@ -249,7 +274,7 @@ export function OpportunityDetail({ id }: { id: string }) {
               className="text-link"
               style={{ marginTop: 18 }}
             >
-              En parler à Imane
+              <Translated value="En parler à mon médiateur" />
               <ArrowRight size={15} />
             </Link>
           </Panel>
@@ -261,58 +286,53 @@ export function OpportunityDetail({ id }: { id: string }) {
 }
 
 export function JourneyPage() {
-  const steps = [
-    {
-      title: "Une première rencontre",
-      text: "Tu as partagé ton parcours et tes envies avec Imane.",
-      date: "15 septembre 2026",
-      state: "done",
-    },
-    {
-      title: "Construire la confiance",
-      text: "Ton accompagnement a commencé. Tes besoins sont identifiés.",
-      date: "22 septembre 2026",
-      state: "done",
-    },
-    {
-      title: "Trouver ta direction",
-      text: "Explore les métiers et les formations qui te ressemblent.",
-      date: "En cours · Prochain entretien le 5 octobre",
-      state: "current",
-    },
-    {
-      title: "Passer à l’action",
-      text: "Prépare une candidature, rejoins une formation ou commence un stage.",
-      date: "À venir",
-      state: "",
-    },
-    {
-      title: "Installer ton nouveau départ",
-      text: "Ton médiateur continue à te suivre pendant tes premiers mois.",
-      date: "À venir",
-      state: "",
-    },
-  ];
+  const { text: uiText } = useUiTranslation();
+
+  const { data } = useWorkspace();
+  const events = data.journeys || [],
+    current = journeyState(events);
+  const steps = events.map((e) => ({
+    title: journeyLabels[e.step],
+    text: journeyDescription(e),
+    date: new Date(e.data.date + "T12:00:00Z").toLocaleDateString("fr-MA"),
+    state: "done",
+  }));
+  const completed = [
+    current.onboarding,
+    current.activation,
+    current.insertion,
+    current.stabilized,
+  ].filter(Boolean).length;
   return (
     <>
       <PageIntro
-        eyebrow="CHAQUE ÉTAPE COMPTE"
-        title="Ton parcours, à ton rythme"
-        description="Un chemin se construit pas à pas. Voici où tu en es et ce qui t’attend."
+        eyebrow={uiText("CHAQUE ÉTAPE COMPTE")}
+        title={uiText("Ton parcours, à ton rythme")}
+        description={uiText(
+          "Un chemin se construit pas à pas. Voici où tu en es et ce qui t’attend.",
+        )}
       />
       <div className="two-column">
         <Panel>
           <div className="journey-header">
-            <div className="progress-ring">2/5</div>
+            <div className="progress-ring">{completed}/4</div>
             <div>
-              <Tag>Orientation en cours</Tag>
+              <Tag>{current.label}</Tag>
               <h2 style={{ marginTop: 10 }}>
-                Tu avances dans la bonne direction.
+                <Translated value="Tu avances dans la bonne direction." />
               </h2>
-              <p>Deux étapes franchies. Une équipe à tes côtés.</p>
+              <p>
+                {completed}
+                <Translated value="étape(s) confirmée(s) dans ton dossier." />
+              </p>
             </div>
           </div>
           <div className="timeline">
+            {!steps.length && (
+              <p>
+                <Translated value="Aucune étape confirmée pour le moment. Ton médiateur prépare avec toi la prochaine étape." />
+              </p>
+            )}
             {steps.map((step, index) => (
               <div key={step.title} className={`timeline-item ${step.state}`}>
                 <div className="timeline-marker">
@@ -327,7 +347,7 @@ export function JourneyPage() {
             ))}
           </div>
           <Link href="/neet/opportunities" className="button button-primary">
-            Explorer mes possibilités
+            <Translated value="Explorer mes possibilités" />
             <ArrowRight size={16} />
           </Link>
         </Panel>
@@ -341,6 +361,10 @@ export function JourneyPage() {
 }
 
 export function MicroActionsPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { fieldActions } = useWorkspaceDatasets();
+
   const [filter, setFilter] = useState("Tous les petits pas");
   const { enrolled } = useYouth();
   const filtered = fieldActions.filter(
@@ -349,15 +373,17 @@ export function MicroActionsPage() {
   return (
     <>
       <PageIntro
-        eyebrow="PETITS PAS, GRANDES POSSIBILITÉS"
-        title="Un petit pas aujourd’hui"
-        description="Des actions simples pour prendre confiance, découvrir et te préparer."
+        eyebrow={uiText("PETITS PAS, GRANDES POSSIBILITÉS")}
+        title={uiText("Un petit pas aujourd’hui")}
+        description={uiText(
+          "Des actions simples pour prendre confiance, découvrir et te préparer.",
+        )}
       />
       <div
         className="filter-tabs"
         style={{ marginBottom: 22 }}
         role="group"
-        aria-label="Filtrer les actions"
+        aria-label={uiText("Filtrer les actions")}
       >
         {["Tous les petits pas", "Mes inscriptions"].map((value) => (
           <button
@@ -378,8 +404,10 @@ export function MicroActionsPage() {
         </div>
       ) : (
         <EmptyState
-          title="Ton premier petit pas t’attend"
-          description="Choisis un atelier ou une activité pour le retrouver dans tes inscriptions."
+          title={uiText("Ton premier petit pas t’attend")}
+          description={uiText(
+            "Choisis un atelier ou une activité pour le retrouver dans tes inscriptions.",
+          )}
         />
       )}
     </>
@@ -387,25 +415,35 @@ export function MicroActionsPage() {
 }
 
 export function StoriesPage() {
+  const { text: uiText } = useUiTranslation();
+
   return (
     <>
       <PageIntro
-        eyebrow="DES PARCOURS QUI DONNENT CONFIANCE"
-        title="Un déclic peut tout changer"
-        description="Des parcours de jeunes comme toi. Ouvre une histoire et découvre leur premier pas."
+        eyebrow={uiText("DES PARCOURS QUI DONNENT CONFIANCE")}
+        title={uiText("Un déclic peut tout changer")}
+        description={uiText(
+          "Des parcours de jeunes comme toi. Ouvre une histoire et découvre leur premier pas.",
+        )}
       />
       <StoryReels />
       <p className="form-note">
-        Récits et portraits de démonstration, créés pour illustrer les parcours
-        d’accompagnement.
+        <Translated value="Récits et portraits de démonstration, créés pour illustrer les parcours d’accompagnement." />
       </p>
     </>
   );
 }
 
 export function YouthProfilePage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { data: workspaceData } = useWorkspace();
+  const { profileFixtures } = useWorkspaceDatasets();
+
   const [status, setStatus] = useState("");
-  const [document, setDocument] = useState("");
+  const [document, setDocument] = useState(
+    workspaceData.document ? String(workspaceData.document.filename) : "",
+  );
   const [documentError, setDocumentError] = useState("");
   const [profile, setProfile] = useSimulatedState(
     "neet.profile",
@@ -423,24 +461,26 @@ export function YouthProfilePage() {
         ),
       ),
     }));
-    setStatus("Informations enregistrées sur cet appareil.");
+    setStatus("Enregistrement demandé.");
   }
   return (
     <>
       <PageIntro
-        eyebrow="UN PROFIL QUI TE RESSEMBLE"
-        title="Fais connaître tes envies"
-        description="Quelques informations pour mieux t’accompagner et trouver les bonnes opportunités."
+        eyebrow={uiText("UN PROFIL QUI TE RESSEMBLE")}
+        title={uiText("Fais connaître tes envies")}
+        description={uiText(
+          "Quelques informations pour mieux t’accompagner et trouver les bonnes opportunités.",
+        )}
       />
       <div className="two-column">
         <Panel
-          title="Mes informations"
-          note="Tu peux les modifier à tout moment."
+          title={uiText("Mes informations")}
+          note={uiText("Tu peux les modifier à tout moment.")}
         >
           <form onSubmit={save} key={JSON.stringify(profile)}>
             <div className="form-grid">
               <label className="form-field">
-                Prénom
+                <Translated value="Prénom" />
                 <input
                   className="field-input"
                   name="firstName"
@@ -451,7 +491,7 @@ export function YouthProfilePage() {
                 />
               </label>
               <label className="form-field">
-                Nom
+                <Translated value="Nom" />
                 <input
                   className="field-input"
                   name="lastName"
@@ -462,29 +502,30 @@ export function YouthProfilePage() {
                 />
               </label>
               <label className="form-field">
-                Adresse e-mail
+                <Translated value="Adresse e-mail" />
                 <input
                   className="field-input"
                   name="email"
                   type="email"
                   defaultValue={profile.email}
+                  readOnly
                   required
                   autoComplete="email"
                 />
               </label>
               <label className="form-field">
-                Téléphone
+                <Translated value="Téléphone" />
                 <input
                   className="field-input"
                   name="phone"
                   defaultValue={profile.phone}
                   type="tel"
-                  placeholder="+212 6 00 00 00 00"
+                  placeholder={uiText("+212 6 00 00 00 00")}
                   autoComplete="tel"
                 />
               </label>
               <label className="form-field">
-                Ville
+                <Translated value="Ville" />
                 <select
                   className="field-input"
                   name="city"
@@ -505,7 +546,7 @@ export function YouthProfilePage() {
                 </select>
               </label>
               <label className="form-field">
-                Mon objectif
+                <Translated value="Mon objectif" />
                 <select
                   className="field-input"
                   name="goal"
@@ -523,7 +564,7 @@ export function YouthProfilePage() {
                 </select>
               </label>
               <label className="form-field wide">
-                Mes compétences
+                <Translated value="Mes compétences" />
                 <textarea
                   className="field-input"
                   name="skills"
@@ -532,7 +573,7 @@ export function YouthProfilePage() {
                 />
               </label>
               <label className="form-field wide">
-                Ce que j’aimerais découvrir
+                <Translated value="Ce que j’aimerais découvrir" />
                 <textarea
                   className="field-input"
                   name="interests"
@@ -543,7 +584,7 @@ export function YouthProfilePage() {
             </div>
             <div className="form-actions">
               <button className="button button-primary" type="submit">
-                Enregistrer mes informations
+                <Translated value="Enregistrer mes informations" />
                 <Check size={15} />
               </button>
             </div>
@@ -553,7 +594,7 @@ export function YouthProfilePage() {
               </div>
             )}
             <p className="form-note">
-              Informations de démonstration enregistrées sur cet appareil.
+              <Translated value="Tes informations sont enregistrées dans ton compte." />
             </p>
           </form>
         </Panel>
@@ -561,18 +602,38 @@ export function YouthProfilePage() {
           <Panel className="profile-summary">
             <Image
               src="/editorial/story-khalid.webp"
-              alt=""
+              alt={uiText("")}
               width={90}
               height={90}
             />
             <h2>
               {profile.firstName} {profile.lastName}
             </h2>
-            <p>22 ans · Agadir</p>
-            <Tag>Accompagnement actif</Tag>
-            <progress value={document ? 90 : 78} max={100} />
+            <p>{profile.city || "Ville à renseigner"}</p>
+            <Tag>
+              <Translated value="Accompagnement actif" />
+            </Tag>
+            <progress
+              value={
+                [
+                  profile.phone,
+                  profile.city,
+                  profile.skills,
+                  profile.interests,
+                  document,
+                ].filter(Boolean).length * 20
+              }
+              max={100}
+            />
             <small>
-              {document ? 90 : 78}% du profil de démonstration complété
+              {[
+                profile.phone,
+                profile.city,
+                profile.skills,
+                profile.interests,
+                document,
+              ].filter(Boolean).length * 20}
+              <Translated value="% des informations renseignées" />
             </small>
             <div className="skill-list" style={{ justifyContent: "center" }}>
               {profile.skills
@@ -587,40 +648,57 @@ export function YouthProfilePage() {
             </div>
           </Panel>
           <Panel
-            title="Mes documents"
-            note="Prépare ton CV pour les prochaines étapes."
+            title={uiText("Mes documents")}
+            note={uiText("Prépare ton CV pour les prochaines étapes.")}
           >
             <div className="document-row">
               <FileText size={20} color="var(--teal)" />
               <div>
-                <b>{document || "Mon CV"}</b>
+                <b>{document || "Mon CV"}</b>{document&&<a href="/api/workspace/cv" download className="text-link"><Translated value="Télécharger mon CV"/></a>}
                 <small>
                   {document
-                    ? "Fichier sélectionné localement"
-                    : "À ajouter · PDF, 5 Mo maximum"}
+                    ? "PDF déposé dans ton espace privé"
+                    : "À ajouter · PDF, 4 Mo maximum"}
                 </small>
               </div>
               {document && <CheckCircle2 size={17} color="var(--teal)" />}
             </div>
             <label className="file-upload">
-              Choisir mon CV
+              <Translated value="Choisir mon CV" />
               <input
                 type="file"
                 accept="application/pdf,.pdf"
-                onChange={(event) => {
+                onChange={async (event) => {
                   const file = event.target.files?.[0];
                   if (!file) return;
                   if (
                     !file.name.toLowerCase().endsWith(".pdf") ||
                     (file.type && file.type !== "application/pdf") ||
-                    file.size > 5 * 1024 * 1024
+                    file.size > 4 * 1024 * 1024
                   ) {
-                    setDocumentError("Choisis un PDF de 5 Mo maximum.");
+                    setDocumentError("Choisis un PDF de 4 Mo maximum.");
                     event.target.value = "";
                     return;
                   }
-                  setDocument(file.name);
-                  setDocumentError("");
+                  try {
+                    const body = new FormData();
+                    body.set("file", file);
+                    const response = await fetch("/api/workspace/cv", {
+                      method: "POST",
+                      body,
+                    });
+                    const result = await response.json();
+                    if (!response.ok)
+                      throw Error(result.error || "Dépôt impossible.");
+                    setDocument(result.filename);
+                    setDocumentError("");
+                  } catch (error) {
+                    setDocumentError(
+                      error instanceof Error
+                        ? error.message
+                        : "Dépôt impossible.",
+                    );
+                  }
                 }}
               />
             </label>
@@ -630,8 +708,7 @@ export function YouthProfilePage() {
               </p>
             )}
             <p className="form-note">
-              Le fichier est vérifié sur ton appareil. Aucun document n’est
-              téléversé.
+              <Translated value="Le PDF est conservé dans ton espace privé." />
             </p>
           </Panel>
         </div>

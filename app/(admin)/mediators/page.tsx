@@ -1,4 +1,11 @@
 "use client";
+import { useTranslation as useUiTranslation } from "@/components/LanguageProvider";
+
+import Translated from "@/components/Translated";
+
+import Link from "next/link";
+import { downloadCsv } from "@/lib/export-csv";
+import { useAdminData } from "@/components/workspace/AdminData";
 
 import {
   Plus,
@@ -16,101 +23,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-
-const mediators = [
-  {
-    name: "Imane Rachidi",
-    avatar: "IR",
-    zone: "Agadir",
-    assoc: "AMAL Asso.",
-    active: 28,
-    visits: 42,
-    lastActive: "May 31, 2025",
-    status: "active",
-  },
-  {
-    name: "Khalid Benhima",
-    avatar: "KB",
-    zone: "Inezgane",
-    assoc: "Jeunes Maroc",
-    active: 24,
-    visits: 36,
-    lastActive: "May 30, 2025",
-    status: "active",
-  },
-  {
-    name: "Amina Karimi",
-    avatar: "AK",
-    zone: "Taroudant",
-    assoc: "INDH Part.",
-    active: 18,
-    visits: 28,
-    lastActive: "May 29, 2025",
-    status: "active",
-  },
-  {
-    name: "Youssef Malik",
-    avatar: "YM",
-    zone: "Tata",
-    assoc: "Bader ONG",
-    active: 14,
-    visits: 20,
-    lastActive: "May 27, 2025",
-    status: "active",
-  },
-  {
-    name: "Nadia Berrada",
-    avatar: "NB",
-    zone: "Tiznit",
-    assoc: "AMAL Asso.",
-    active: 9,
-    visits: 13,
-    lastActive: "May 24, 2025",
-    status: "inactive",
-  },
-  {
-    name: "Saad El Fassi",
-    avatar: "SF",
-    zone: "Chtouka",
-    assoc: "Volunteer",
-    active: 11,
-    visits: 17,
-    lastActive: "May 26, 2025",
-    status: "active",
-  },
-];
-
-const activityData = [
-  { month: "Jan", visits: 180, neetsAdded: 62 },
-  { month: "Feb", visits: 210, neetsAdded: 74 },
-  { month: "Mar", visits: 260, neetsAdded: 95 },
-  { month: "Apr", visits: 310, neetsAdded: 112 },
-  { month: "May", visits: 390, neetsAdded: 140 },
-];
-
-const topPerformers = [
-  {
-    name: "Imane Rachidi",
-    score: 98,
-    neetsHelped: 28,
-    avatar: "IR",
-    color: "#F5A623",
-  },
-  {
-    name: "Khalid Benhima",
-    score: 91,
-    neetsHelped: 24,
-    avatar: "KB",
-    color: "#C8C8C8",
-  },
-  {
-    name: "Amina Karimi",
-    score: 85,
-    neetsHelped: 18,
-    avatar: "AK",
-    color: "#CD7F32",
-  },
-];
 
 function Avatar({ initials, size = 32 }: { initials: string; size?: number }) {
   const colors = [
@@ -209,18 +121,28 @@ function KPISimple({
         </div>
       </div>
       <div className={up ? "badge-up" : "badge-down"}>
-        {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}{" "}
-        {up ? "+" : ""}
-        {change}%
-        <span style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}>
-          vs last month
-        </span>
+        {change !== 0 &&
+          (up ? <TrendingUp size={12} /> : <TrendingDown size={12} />)}{" "}
+        {change !== 0 && up ? "+" : ""}
+        {change !== 0 ? (
+          change + "%"
+        ) : (
+          <Translated value="Données enregistrées" />
+        )}
+        <span
+          style={{ color: "#7F8C9A", fontWeight: 400, marginLeft: 4 }}
+        ></span>
       </div>
     </div>
   );
 }
 
 export default function MediatorsPage() {
+  const { text: uiText } = useUiTranslation();
+
+  const { mediators, topPerformers, activityData, communes, metrics, data } =
+    useAdminData();
+
   return (
     <div
       style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
@@ -244,21 +166,37 @@ export default function MediatorsPage() {
                 color: "#1A2B3C",
               }}
             >
-              Mediators
+              <Translated value="Mediators" />
             </h1>
             <p style={{ fontSize: "0.78rem", color: "#7F8C9A", marginTop: 2 }}>
-              Manage field mediators and track their activity across communes
+              <Translated value="Manage field mediators and track their activity across communes" />
             </p>
           </div>
           <button
             className="btn-outline"
             style={{ fontSize: "0.78rem", padding: "7px 14px" }}
           >
-            <Download size={13} /> Export
+            <span
+              onClick={() =>
+                downloadCsv("bidayaneet-mediateurs.csv", [
+                  ["Nom", "Organisme", "Dossiers", "Diagnostics GPS"],
+                  ...mediators.map((m) => [
+                    m.name,
+                    m.assoc,
+                    m.active,
+                    m.visits,
+                  ]),
+                ])
+              }
+            >
+              <Download size={13} />
+              <Translated value="Export" />
+            </span>
           </button>
-          <button className="btn-primary">
-            <Plus size={15} /> Add Mediator
-          </button>
+          <Link className="btn-primary" href="/settings">
+            <Plus size={15} />
+            <Translated value="Add Mediator" />
+          </Link>
         </div>
       </div>
 
@@ -274,30 +212,36 @@ export default function MediatorsPage() {
         {/* KPIs */}
         <div style={{ display: "flex", gap: 16 }}>
           <KPISimple
-            title="Total Mediators"
-            value="46"
-            change={8.2}
+            title={uiText("Total Mediators")}
+            value={String(metrics.mediators)}
+            change={0}
             color="#00B8A9"
             bg="#E0F7F5"
           />
           <KPISimple
-            title="Active This Month"
-            value="36"
-            change={11.4}
+            title={uiText("Comptes actifs")}
+            value={String(
+              mediators.filter((m) => m.status === "active").length,
+            )}
+            change={0}
             color="#27AE60"
             bg="#EAFAF1"
           />
           <KPISimple
-            title="Total Field Visits"
-            value="756"
-            change={18.7}
+            title={uiText("Total Field Diagnostics GPS")}
+            value={String(mediators.reduce((n, m) => n + m.visits, 0))}
+            change={0}
             color="#2E86C1"
             bg="#EBF5FB"
           />
           <KPISimple
-            title="Avg NEETs / Mediator"
-            value="40"
-            change={5.3}
+            title={uiText("Avg NEETs / Mediator")}
+            value={String(
+              metrics.mediators
+                ? Math.round(metrics.identified / metrics.mediators)
+                : 0,
+            )}
+            change={0}
             color="#8E44AD"
             bg="#F5EEF8"
           />
@@ -313,7 +257,9 @@ export default function MediatorsPage() {
               marginBottom: 16,
             }}
           >
-            <h2 className="section-title">Mediator Directory</h2>
+            <h2 className="section-title">
+              <Translated value="Mediator Directory" />
+            </h2>
             <div style={{ display: "flex", gap: 8 }}>
               {["All Zones", "All Statuses"].map((f) => (
                 <button
@@ -344,7 +290,7 @@ export default function MediatorsPage() {
                   "Zone",
                   "Association",
                   "Active NEETs",
-                  "Visits This Month",
+                  "Diagnostics GPS This Month",
                   "Last Activity",
                   "Status",
                 ].map((h) => (
@@ -435,7 +381,7 @@ export default function MediatorsPage() {
           {/* Activity trend */}
           <div className="card" style={{ flex: 2, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 16 }}>
-              Monthly Activity
+              <Translated value="Monthly Activity" />
             </h2>
             <ResponsiveContainer
               width="100%"
@@ -469,7 +415,7 @@ export default function MediatorsPage() {
                   dataKey="visits"
                   fill="#00B8A9"
                   radius={[4, 4, 0, 0]}
-                  name="Field Visits"
+                  name="Field Diagnostics GPS"
                 />
                 <Bar
                   dataKey="neetsAdded"
@@ -483,7 +429,7 @@ export default function MediatorsPage() {
           {/* Top performers */}
           <div className="card" style={{ flex: 1, padding: 20 }}>
             <h2 className="section-title" style={{ marginBottom: 16 }}>
-              Top Performers
+              <Translated value="Top Performers" />
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {topPerformers.map((p, i) => (
@@ -506,7 +452,8 @@ export default function MediatorsPage() {
                       {p.name}
                     </div>
                     <div style={{ fontSize: "0.72rem", color: "#7F8C9A" }}>
-                      {p.neetsHelped} NEETs helped
+                      {p.neetsHelped}
+                      <Translated value="NEETs helped" />
                     </div>
                   </div>
                   <div style={{ textAlign: "right" }}>
@@ -520,7 +467,7 @@ export default function MediatorsPage() {
                       {p.score}
                     </div>
                     <div style={{ fontSize: "0.65rem", color: "#7F8C9A" }}>
-                      score
+                      <Translated value="score" />
                     </div>
                   </div>
                 </div>

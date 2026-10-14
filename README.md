@@ -1,52 +1,51 @@
-# BidayaNeet
+# BidayaNeet — Web platform
 
-A Next.js interface for youth integration, field mediation, regional administration, and program partners in Souss-Massa.
+Next.js 16 web platform for field mediation and youth integration in Souss-Massa. The revised design uses authenticated, role-scoped PostgreSQL data. Android intake is maintained in a separate repository.
 
 ## Run locally
 
-```bash
+Requires Node.js 24 and npm.
+
+```sh
 npm ci
+cp .env.example .env.local
 npm run dev
 ```
 
-Open the workspace directly by URL:
+Configure `DATABASE_URL` and `APP_ORIGIN` in `.env.local`. Without `DATABASE_URL`, a single local Node.js process uses PGlite in `.data/postgres`. Preserve this folder if it contains dossiers; never use local filesystem storage as a Vercel production database.
 
-- Youth: `http://localhost:3000/neet`
-- Mediator: `http://localhost:3000/mediator`
-- Regional admin: `http://localhost:3000/`
-- Partner: `http://localhost:3000/partner`
+For an empty local demonstration database only, set `DEMO_PASSWORD` (at least 12 characters) and run `npm run db:seed`. The seed creates fictional accounts and dossiers and refuses a database that already contains users. Do not seed the existing hosted database.
 
-There is no dashboard switcher on the logo. Each role has an auth entry at `/auth/<role>/sign-in`, with registration/access-request, forgot-password, and reset-password screens.
+## Workspaces
 
-## Integration status
+- Administration: `/` — dossiers, staff, programs, opportunities, activities, aggregate GPS map, alerts, reports and settings.
+- Mediator: `/mediator` — assigned dossiers, review, referrals, nominal journey, notes, appointments and follow-up.
+- Partner: `/partner` — owned offers/programs, referral decisions and application feedback.
+- Young person: `/neet` — linked profile, private CV, opportunities, applications, journey and messages.
 
-The frontend uses labeled demonstration data. The authentication provider was deferred; no real sessions, server-side role enforcement, application submissions, messages, uploads, or account creation are implemented. The user chose a simulated backend for now: favorites, enrollments, prepared applications, profiles, messages, follow-ups, appointments, referrals, and partner offers persist on the current device through `lib/simulated-backend.ts`. Clearing site storage resets this demo. Local interactions do not send data to anyone.
+New diagnoses are collected in the mediator Android app. The web platform manages the subsequent process. French/Arabic interfaces and RTL layouts are supported.
 
-## Google Maps
+## API and persistence
 
-The complete self-hosted coverage overview works without external services. To enable the optional Google Maps view, set this public, referrer-restricted browser key in `.env.local` before starting or building:
+`/api/workspace` exposes authenticated role-scoped reads and commands. Native intake uses bearer authentication at `/api/mobile/intake`. Existing native endpoints remain compatible. Server-side checks protect permissions, consent, capacity and retry identifiers.
 
-```dotenv
-NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY=your_restricted_maps_embed_key
-```
+Data persists in PostgreSQL, including appointments, notes, programs, memberships, messages, report exports and private CV PDFs (maximum 4 MiB). Password recovery uses administrator-issued, one-use links expiring after one hour. Optional GPS contributes approximate aggregate map cells rather than exposing precise dossier locations.
 
-Enable the Maps Embed API and restrict the key to your app's domains. Both maps use the shared component with `region=ma` and full-country/Souss-Massa views. No OpenStreetMap or Leaflet resources are loaded.
+## Validate and deploy
 
-## Validate
-
-```bash
+```sh
 npm run lint
-npx playwright install chromium
-npm run test:e2e
-```
-
-The browser suite builds the production app and tests desktop and mobile behavior. To run the production app separately:
-
-```bash
+npm run typecheck
 npm run build
 npm run start
 ```
 
-See [the UI refactor notes](docs/ui-refactor.md) for routes, the restored original design, map provenance, and the backend integration boundary. The requested refinements preserve the original Inter/system font stack and white/teal identity, adding floating collapsible navigation, portrait story cards, image-backed micro-actions, and distinct actor layouts. Eighteen new visuals were generated with the built-in imagegen tool; files are in `public/editorial/` and prompts in `output/design/refinement-prompts.json`. Original, restored, and refined screenshots are saved in `output/design/`. The earlier imagegen proposal remains as a historical reference.
+CI runs lint, type checking and the production build. Automated test files were removed from this delivery branch at the project owner's request; they are not part of the current checks.
 
-When production publishing is requested, validate, commit, and push through the configured GitHub delivery pipeline. Do not bypass that pipeline with a hosting-provider deployment.
+The current deployment is [bidayaneet.vercel.app](https://bidayaneet.vercel.app), on Vercel with Neon PostgreSQL. Set production environment variables in Vercel; never commit local environment files, database URLs or authentication secrets. See `docs/VERCEL_DEPLOYMENT.md` for deployment guidance.
+
+## Scope and local artifacts
+
+Institutional APIs, SMS and email delivery are not connected. A referral or enrollment is not proof of employment. Seeded stories and offers are demonstration examples. Real outcomes require independent verification.
+
+`output/` contains local presentation artifacts and is ignored. `.env*`, `.data/`, `.vercel/`, build output and dependencies remain local and are excluded from Git. No existing hosted dossiers are deleted by this repository cleanup.

@@ -1,3 +1,4 @@
+import { ProtectedWorkspace } from "@/components/workspace/ProtectedWorkspace";
 import WorkspaceShell from "@/components/workspace/WorkspaceShell";
 
 export const metadata = {
@@ -5,10 +6,14 @@ export const metadata = {
   description: "Regional youth integration workspace for Souss-Massa",
 };
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <WorkspaceShell role="admin">{children}</WorkspaceShell>;
+  return (
+    <ProtectedWorkspace role="admin">
+      <WorkspaceShell role="admin">{children}</WorkspaceShell>
+    </ProtectedWorkspace>
+  );
 }
